@@ -1,0 +1,7 @@
+<%= form_tag :action => 'try_login', :id => 'credentials' do %>
+  <%= label_tag(:username, "User:") %>
+  <%= text_field_tag(:username) %>
+  <%= label_tag(:password, "Password:") %>
+  <%= password_field_tag(:password) %>
+  <%= submit_tag("Log In") %>
+<% end %>

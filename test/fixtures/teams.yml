@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+test_utd:
+  name: Test Utd
+  formation_id: 1
+
+test_city:
+  name: Test City
+  formation_id: 2

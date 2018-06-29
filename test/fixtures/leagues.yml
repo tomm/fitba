@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+first_division:
+  rank: 1
+  name: First Division
+  isFinished: false
+
+second_division:
+  rank: 2
+  name: Second Division
+  isFinished: false

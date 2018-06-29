@@ -1,0 +1,78 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+t1p1:
+  formation_id: 1
+  player: amy
+  position_num: 1
+  position_x: 2
+  position_y: 6
+
+t1p2:
+  formation_id: 1
+  player: barbara
+  position_num: 2
+  position_x: 0
+  position_y: 5
+
+t1p3:
+  formation_id: 1
+  player: carla
+  position_num: 3
+  position_x: 1
+  position_y: 5
+
+t1p4:
+  formation_id: 1
+  player: denise
+  position_num: 4
+  position_x: 3
+  position_y: 5
+
+t1p5:
+  formation_id: 1
+  player: ellen
+  position_num: 5
+  position_x: 4
+  position_y: 5
+
+t1p6:
+  formation_id: 1
+  player: frances
+  position_num: 6
+  position_x: 0
+  position_y: 3
+
+t1p7:
+  formation_id: 1
+  player: gemma
+  position_num: 7
+  position_x: 1
+  position_y: 3
+
+t1p8:
+  formation_id: 1
+  player: hannah
+  position_num: 8
+  position_x: 3
+  position_y: 3
+
+t1p9:
+  formation_id: 1
+  player: inga
+  position_num: 9
+  position_x: 4
+  position_y: 3
+
+t1p10:
+  formation_id: 1
+  player: jennifer
+  position_num: 10
+  position_x: 1
+  position_y: 1
+
+t1p11:
+  formation_id: 1
+  player: katherine
+  position_num: 11
+  position_x: 3
+  position_y: 1

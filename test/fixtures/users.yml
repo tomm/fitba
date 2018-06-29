@@ -1,0 +1,6 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+user_tom:
+  name: Tom
+  team: test_utd
+  secret: MyString
