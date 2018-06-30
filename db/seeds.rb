@@ -8,4 +8,7 @@
 require 'digest/md5'
 
 t = Team.create(name: "Balls Utd.", formation_id: 1)
+l = League.create(rank: 1, name: "First Division", isFinished: false)
+TeamLeague.create(team_id: t.id, league_id: l.id)
+
 User.create(name: "tom", team: t, secret: Digest::MD5.hexdigest("password"))

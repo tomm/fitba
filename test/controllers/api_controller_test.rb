@@ -41,10 +41,29 @@ class ApiControllerTest < ActionController::TestCase
   end
 
   test "GET /tables" do
+    login
     get :league_tables, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal "First Division", body[0]["name"]
     assert_equal "Second Division", body[1]["name"]
+  end
+
+  test "GET /fixtures" do
+    login
+    get :fixtures, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 2, body.size
+
+    assert_equal "scheduled", body[0]["status"]
+    assert_equal "2018-06-26T12:00:00.000Z", body[0]["start"]
+    assert_equal "Test Utd", body[0]["homeName"]
+    assert_equal "Test City", body[0]["awayName"]
+
+    assert_equal "scheduled", body[1]["status"]
+    assert_equal "2018-06-27T12:00:00.000Z", body[1]["start"]
+    assert_equal "Test City", body[1]["homeName"]
+    assert_equal "Test Utd", body[1]["awayName"]
   end
 end

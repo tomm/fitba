@@ -7,3 +7,11 @@ test_utd:
 test_city:
   name: Test City
   formation_id: 2
+
+test_athletico:
+  name: Test Athletico
+  formation_id: 3
+
+test_team4:
+  name: Test Team4
+  formation_id: 4

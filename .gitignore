@@ -15,4 +15,5 @@ db/*.sqlite3-journal
 log/*
 !/log/.keep
 tmp
-.*.swp
+.*.sw?
+Gemfile.lock

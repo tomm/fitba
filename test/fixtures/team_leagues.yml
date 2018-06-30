@@ -6,4 +6,8 @@ one:
 
 two:
   team: test_city
+  league: first_division
+
+three:
+  team: test_athletico
   league: second_division

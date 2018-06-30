@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   get 'load_game' => 'api#load_game'
   get 'squad/:id' => 'api#view_team'
   get 'tables' => 'api#league_tables'
+  get 'fixtures' => 'api#fixtures'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

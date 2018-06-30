@@ -14,10 +14,9 @@ class LoginController < ApplicationController
       session_hash = Digest::MD5.hexdigest(pw + Time.new.to_s)
       cookies[:session] = session_hash
       Session.create(user_id: user.id, identifier: session_hash)
-      redirect_to '/app.html'
+      redirect_to '/'
     else
-      flash[:notice] = "Your username or password was wrong!"
-      redirect_to :back
+      redirect_to :back, notice: "Your username or password was wrong!"
     end
   end
 end
