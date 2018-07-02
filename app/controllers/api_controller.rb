@@ -35,7 +35,7 @@ class ApiController < ApplicationController
     end
   end
 
-  private def load_team_record(team)
+  @@load_team_record = lambda {|team|
     {
       teamId: team.id,
       name: team.name,
@@ -46,21 +46,19 @@ class ApiController < ApplicationController
       goalsFor: 0,
       goalsAgainst: 0
     }
-  end
+  }
 
-  private def load_league_record(league)
+  @@load_league_record = lambda {|league|
     teams = Team.joins(:team_leagues).where({team_leagues: {league_id: league.id}}).all
     {
       name: league.name,
-      record: teams.map {|t| load_team_record t}
+      record: teams.map(&@@load_team_record)
     }
-  end
+  }
 
   def league_tables
     if get_user then
-      render json: (League.order(:rank).all.map do |l|
-        load_league_record l
-      end)
+      render json: League.order(:rank).all.map(&@@load_league_record)
     else
       head 403
     end
