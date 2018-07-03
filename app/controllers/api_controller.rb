@@ -88,7 +88,9 @@ class ApiController < ApplicationController
           homeName: t1.name,
           awayName: t2.name,
           start: g.start,
-          status: g.status
+          status: g.status,
+          homeGoals: g.home_goals,
+          awayGoals: g.away_goals
         }
       end)
     else

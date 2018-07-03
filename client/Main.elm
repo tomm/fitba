@@ -116,7 +116,11 @@ jsonDecodeFixtures =
                 if val == "Scheduled" then
                     Json.succeed Scheduled
                 else
-                    Json.succeed <| Played { homeGoals=999, awayGoals=-999 }
+                    Json.map Played
+                        (Json.map2 FixtureStatusPlayed
+                            (Json.at ["homeGoals"] Json.int)
+                            (Json.at ["awayGoals"] Json.int)
+                        )
             ))
     )
 
@@ -231,7 +235,7 @@ leagueTableTab model league =
               , Html.td [] [record.lost |> toString |> text]
               , Html.td [] [record.goalsFor |> toString |> text]
               , Html.td [] [record.goalsAgainst |> toString |> text]
-              , Html.td [] [record.goalsFor + record.goalsAgainst |> toString |> text]
+              , Html.td [] [record.goalsFor - record.goalsAgainst |> toString |> text]
               , Html.td [] [calcPoints record |> toString |> text]
             ]
   in div [] [

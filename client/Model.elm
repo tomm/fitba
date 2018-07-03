@@ -50,5 +50,6 @@ type GameEventType = Boring | HomeGoal | AwayGoal | EndOfGame
 type alias GameEvent = { id: GameId, type_: GameEventType, timestamp: Time, message: String, ballPos: (Int, Int) }
 type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, events: List GameEvent }
 
-type FixtureStatus = Scheduled | Played { homeGoals: Int, awayGoals: Int }
+type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int }
+type FixtureStatus = Scheduled | Played FixtureStatusPlayed
 type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus }
