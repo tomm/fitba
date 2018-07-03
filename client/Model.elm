@@ -43,7 +43,7 @@ premierLeague = { name="Scottish Premier Division", record=[
 -}
 
 type alias PlayerId = Int
-type alias Player = { id: PlayerId, name: String, skill: Int }
+type alias Player = { id: PlayerId, name: String, shooting: Int, passing: Int, tackling: Int, handling: Int, speed: Int }
 
 type alias GameId = Int
 type GameEventType = Boring | HomeGoal | AwayGoal | EndOfGame

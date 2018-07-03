@@ -2,23 +2,45 @@
 
 one:
   league: first_division
+  season: 1
   home_team: test_utd
   away_team: test_city
-  status: 'scheduled'
+  status: 'played'
   start: 2018-06-26 12:00:00
-  home_goals: 0
+  home_goals: 1
   away_goals: 0
 
 two:
   league: first_division
+  season: 1
   home_team: test_city
   away_team: test_utd
-  status: 'scheduled'
+  status: 'played'
   start: 2018-06-27 12:00:00
-  home_goals: 0
-  away_goals: 0
+  home_goals: 3
+  away_goals: 1
 
 three:
+  league: first_division
+  season: 1
+  home_team: test_utd
+  away_team: test_team4
+  status: 'played'
+  start: 2018-06-28 12:00:00
+  home_goals: 1
+  away_goals: 1
+
+four:
+  league: first_division
+  season: 1
+  home_team: test_team4
+  away_team: test_city
+  status: 'played'
+  start: 2018-06-29 12:00:00
+  home_goals: 1
+  away_goals: 1
+
+five:
   league: second_division
   home_team: test_athletico
   away_team: test_team4

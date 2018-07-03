@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
   get 'login' => 'login#login'
   post 'try_login' => 'login#try_login'
+  post 'save_formation' => 'api#save_formation'
   get 'load_game' => 'api#load_game'
   get 'squad/:id' => 'api#view_team'
   get 'tables' => 'api#league_tables'

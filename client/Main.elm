@@ -77,10 +77,14 @@ jsonDecodeTeam =
 
 jsonDecodePlayer : Json.Decoder Player
 jsonDecodePlayer =
-    Json.map3 Player
+    Json.map7 Player
         (Json.at ["id"] Json.int)
         (Json.at ["name"] Json.string)
-        (Json.at ["skill"] Json.int)
+        (Json.at ["shooting"] Json.int)
+        (Json.at ["passing"] Json.int)
+        (Json.at ["tackling"] Json.int)
+        (Json.at ["handling"] Json.int)
+        (Json.at ["speed"] Json.int)
 
 jsonDecodePlayerPosition : Json.Decoder (Int, Int)
 jsonDecodePlayerPosition =

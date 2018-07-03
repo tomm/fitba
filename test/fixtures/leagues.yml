@@ -3,9 +3,9 @@
 first_division:
   rank: 1
   name: First Division
-  isFinished: false
+  is_finished: false
 
 second_division:
   rank: 2
   name: Second Division
-  isFinished: false
+  is_finished: false

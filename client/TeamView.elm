@@ -32,7 +32,11 @@ view model team =
         in Html.tr [if isActive i then activeTableRowStyle else Html.Attributes.style []] [
              Html.td [clickAction] [text <| toString <| i + 1 ]
            , Html.td [clickAction] [text <| p.name]
-           , Html.td [clickAction] [text <| toString <| p.skill]
+           , Html.td [clickAction] [text <| toString <| p.shooting]
+           , Html.td [clickAction] [text <| toString <| p.passing]
+           , Html.td [clickAction] [text <| toString <| p.tackling]
+           , Html.td [clickAction] [text <| toString <| p.handling]
+           , Html.td [clickAction] [text <| toString <| p.speed]
         ]
     in
         div [] [
@@ -42,7 +46,11 @@ view model team =
                 (
                     Html.tr [] [Html.th [] [text "Pos."],
                     Html.th [] [text "Name"],
-                    Html.th [] [text "Skill"]]
+                    Html.th [] [text "Shooting"],
+                    Html.th [] [text "Passing"],
+                    Html.th [] [text "Tackling"],
+                    Html.th [] [text "Handling"],
+                    Html.th [] [text "Speed"]]
                 ) ::
                 (List.indexedMap playerToDiv (Array.toList team.players)),
 
@@ -56,7 +64,7 @@ view model team =
                         []
                 ] ++
                 -- players
-                (Array.toList <| Array.indexedMap (\i (x,y) -> playerOnPitch model team i x y) team.formation)
+                (List.take 11 <| Array.toList <| Array.indexedMap (\i (x,y) -> playerOnPitch model team i x y) team.formation)
                 ++
                 -- pitch positions unused by our formation
                 case model.tabTeamSelectedPlayer of
@@ -66,7 +74,7 @@ view model team =
                         List.map
                             (\(x, y) ->
                                     -- XXX why doesn't Array.member exist!
-                                    if List.member (x, y) <| Array.toList team.formation
+                                    if List.member (x, y) <| List.take 11 <| Array.toList team.formation
                                     then Svg.text ""
                                     else emptyPitchPosition (x, y)
                             )

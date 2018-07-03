@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180629220439) do
+ActiveRecord::Schema.define(version: 20180702161150) do
 
   create_table "formation_pos", force: :cascade do |t|
     t.integer  "formation_id"
@@ -54,6 +54,7 @@ ActiveRecord::Schema.define(version: 20180629220439) do
     t.integer  "away_goals"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+    t.integer  "season"
   end
 
   add_index "games", ["away_team_id"], name: "index_games_on_away_team_id"
@@ -62,10 +63,10 @@ ActiveRecord::Schema.define(version: 20180629220439) do
 
   create_table "leagues", force: :cascade do |t|
     t.string   "name"
-    t.boolean  "isFinished"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
     t.integer  "rank"
+    t.boolean  "is_finished"
   end
 
   create_table "players", force: :cascade do |t|
@@ -74,9 +75,10 @@ ActiveRecord::Schema.define(version: 20180629220439) do
     t.integer  "shooting"
     t.integer  "passing"
     t.integer  "tackling"
-    t.integer  "goalkeeping"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer  "handling"
+    t.integer  "speed"
   end
 
   add_index "players", ["team_id"], name: "index_players_on_team_id"
@@ -95,6 +97,7 @@ ActiveRecord::Schema.define(version: 20180629220439) do
     t.integer  "league_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "season"
   end
 
   add_index "team_leagues", ["league_id"], name: "index_team_leagues_on_league_id"

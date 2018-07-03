@@ -3,11 +3,19 @@
 one:
   team: test_utd
   league: first_division
+  season: 1
 
 two:
   team: test_city
   league: first_division
+  season: 1
 
 three:
   team: test_athletico
   league: second_division
+  season: 1
+
+four:
+  team: test_team4
+  league: first_division
+  season: 1
