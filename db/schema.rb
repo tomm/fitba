@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180702161150) do
+ActiveRecord::Schema.define(version: 20180703151210) do
 
   create_table "formation_pos", force: :cascade do |t|
     t.integer  "formation_id"
@@ -33,13 +33,14 @@ ActiveRecord::Schema.define(version: 20180702161150) do
 
   create_table "game_events", force: :cascade do |t|
     t.integer  "game_id"
-    t.string   "type"
     t.datetime "time"
     t.text     "message"
     t.integer  "ball_pos_x"
     t.integer  "ball_pos_y"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string   "kind"
+    t.integer  "side"
   end
 
   add_index "game_events", ["game_id"], name: "index_game_events_on_game_id"

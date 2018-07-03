@@ -22,7 +22,7 @@ module DbHelper
   class LeagueHelper
     def self.league_table(league_id, season)
       teams = TeamHelper.all_in_league_season(league_id, season)
-      games = Game.where(league_id: league_id, season: season, status: "played").all
+      games = Game.where(league_id: league_id, season: season, status: "Played").all
       record = (teams.map do |t|
         [ t.id,
           { teamId: t.id, name: t.name,

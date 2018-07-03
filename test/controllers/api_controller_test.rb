@@ -32,15 +32,14 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal team.id, body['id']
     assert_equal "Test Utd", body['name']
     # should return formation ordered positions 1-11
-    assert_equal [2,6], body['formation'][0]
-    assert_equal [3,1], body['formation'][10]
+    assert_equal FORMATION_442, body['formation']
     # should return players ordered 1-11, then reserves
     assert_equal "Amy", body['players'][0]['name'] # GK
-    assert_equal 5, body['players'][0]['shooting']
-    assert_equal 4, body['players'][0]['passing']
-    assert_equal 3, body['players'][0]['tackling']
-    assert_equal 2, body['players'][0]['handling']
-    assert_equal 1, body['players'][0]['speed']
+    assert_equal 2, body['players'][0]['shooting']
+    assert_equal 3, body['players'][0]['passing']
+    assert_equal 4, body['players'][0]['tackling']
+    assert_equal 5, body['players'][0]['handling']
+    assert_equal 6, body['players'][0]['speed']
     assert_equal "Katherine", body['players'][10]['name']  # CF
     assert_equal "Lena", body['players'][11]['name']  # reserve
   end
@@ -56,8 +55,8 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal "First Division", body[0]["name"]
     assert_equal "Second Division", body[1]["name"]
     assert_equal 3, body[0]["record"].size  # 3 teams in this league
-    assert_equal test_city.id, body[0]["record"][0]["teamId"]
     assert_equal "Test City", body[0]["record"][0]["name"]
+    assert_equal test_city.id, body[0]["record"][0]["teamId"]
     assert_equal 1, body[0]["record"][0]["won"]
     assert_equal 1, body[0]["record"][0]["drawn"]
     assert_equal 1, body[0]["record"][0]["lost"]
@@ -84,17 +83,19 @@ class ApiControllerTest < ActionController::TestCase
     get :fixtures, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 4, body.size
+    assert_equal 5, body.size
 
-    assert_equal "played", body[0]["status"]
+    assert_equal "Played", body[0]["status"]
     assert_equal "2018-06-26T12:00:00.000Z", body[0]["start"]
     assert_equal "Test Utd", body[0]["homeName"]
     assert_equal "Test City", body[0]["awayName"]
 
-    assert_equal "played", body[1]["status"]
+    assert_equal "Played", body[1]["status"]
     assert_equal "2018-06-27T12:00:00.000Z", body[1]["start"]
     assert_equal "Test City", body[1]["homeName"]
     assert_equal "Test Utd", body[1]["awayName"]
+
+    assert_equal "Scheduled", body[4]["status"]
   end
 
   test "POST /save_formation" do

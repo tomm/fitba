@@ -2,16 +2,16 @@
 
 test_utd:
   name: Test Utd
-  formation_id: 1
+  formation: one
 
 test_city:
   name: Test City
-  formation_id: 2
+  formation: two
 
 test_athletico:
   name: Test Athletico
-  formation_id: 3
+  formation: three
 
 test_team4:
   name: Test Team4
-  formation_id: 4
+  formation: four

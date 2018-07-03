@@ -1,78 +1,156 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 t1p1:
-  formation_id: 1
+  formation: one
   player: amy
   position_num: 1
   position_x: 2
   position_y: 6
 
 t1p2:
-  formation_id: 1
+  formation: one
   player: barbara
   position_num: 2
   position_x: 0
   position_y: 5
 
 t1p3:
-  formation_id: 1
+  formation: one
   player: carla
   position_num: 3
   position_x: 1
   position_y: 5
 
 t1p4:
-  formation_id: 1
+  formation: one
   player: denise
   position_num: 4
   position_x: 3
   position_y: 5
 
 t1p5:
-  formation_id: 1
+  formation: one
   player: ellen
   position_num: 5
   position_x: 4
   position_y: 5
 
 t1p6:
-  formation_id: 1
+  formation: one
   player: frances
   position_num: 6
   position_x: 0
   position_y: 3
 
 t1p7:
-  formation_id: 1
+  formation: one
   player: gemma
   position_num: 7
   position_x: 1
   position_y: 3
 
 t1p8:
-  formation_id: 1
+  formation: one
   player: hannah
   position_num: 8
   position_x: 3
   position_y: 3
 
 t1p9:
-  formation_id: 1
+  formation: one
   player: inga
   position_num: 9
   position_x: 4
   position_y: 3
 
 t1p10:
-  formation_id: 1
+  formation: one
   player: jennifer
   position_num: 10
   position_x: 1
   position_y: 1
 
 t1p11:
-  formation_id: 1
+  formation: one
   player: katherine
   position_num: 11
   position_x: 3
   position_y: 1
+
+t2p1:
+  formation: two
+  player: nancy
+  position_num: 1
+  position_x: 2
+  position_y: 6
+
+t2p2:
+  formation: two
+  player: olena
+  position_num: 2
+  position_x: 0
+  position_y: 5
+
+t2p3:
+  formation: two
+  player: paula
+  position_num: 3
+  position_x: 1
+  position_y: 5
+
+t2p4:
+  formation: two
+  player: quaternion
+  position_num: 4
+  position_x: 3
+  position_y: 5
+
+t2p5:
+  formation: two
+  player: rosie
+  position_num: 5
+  position_x: 4
+  position_y: 5
+
+t2p6:
+  formation: two
+  player: sandra
+  position_num: 6
+  position_x: 0
+  position_y: 3
+
+t2p7:
+  formation: two
+  player: tanya
+  position_num: 7
+  position_x: 1
+  position_y: 3
+
+t2p8:
+  formation: two
+  player: ursula
+  position_num: 8
+  position_x: 3
+  position_y: 3
+
+t2p9:
+  formation: two
+  player: victoria
+  position_num: 9
+  position_x: 4
+  position_y: 3
+
+t2p10:
+  formation: two
+  player: wendy
+  position_num: 10
+  position_x: 1
+  position_y: 1
+
+t2p11:
+  formation: two
+  player: xena
+  position_num: 11
+  position_x: 3
+  position_y: 1
+
