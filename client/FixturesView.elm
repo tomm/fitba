@@ -28,9 +28,7 @@ view model maybeWatchingGame =
             ]
             Just watching -> [
                 h2 [] [text "Match Video"],
-                case watching.game of
-                    Nothing -> div [] [text "Game loading..."]
-                    Just game -> matchView game watching
+                matchView watching.game watching
             ]
     )
 
@@ -160,7 +158,11 @@ fixturesTable model =
 update : Msg -> Model -> (Model, Cmd RootMsg.Msg)
 update msg model =
     case msg of
+        Watch gameId ->
+            (model, Cmd.batch [ClientServer.loadGame gameId])
+        {-
         Watch gameId -> (
             { model | tab = TabFixtures (Just { gameId=gameId, timePoint=0.0, game=Nothing }) },
             Cmd.batch [ClientServer.loadGame gameId]
         )
+        -}

@@ -60,11 +60,9 @@ subscriptions model = Sub.batch [
 update : Msg -> RootModel -> (RootModel, Cmd Msg)
 update msg model =
     let updateState newState = ({ model | state = GameData newState}, Cmd.none)
-        updateWatchingGame watchingGame newEvents = case watchingGame.game of
-            Nothing -> watchingGame
-            Just game -> {watchingGame |
-                game = Just {game | events = List.append game.events newEvents}
-            }
+        updateWatchingGame watchingGame newEvents =
+            let game = watchingGame.game
+            in {watchingGame | game = {game | events = List.append game.events newEvents} }
         handleLoadingStateMsgs =
             case msg of
                 GotStartGameData result -> case result of
@@ -95,11 +93,7 @@ update msg model =
                     Ok fixtures -> updateState { m | fixtures = fixtures }
                     Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
                 LoadGame result -> case result of
-                    Ok game -> case m.tab of
-                        TabFixtures (Just watchingGame) -> updateState {
-                            m | tab=TabFixtures (Just {watchingGame | game = Just game })
-                        }
-                        _ -> (model, Cmd.none)
+                    Ok game -> updateState { m | tab = TabFixtures (Just { game=game, timePoint=0.0}) }
                     Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
                 UpdateGame result -> case result of
                     Ok events -> case m.tab of

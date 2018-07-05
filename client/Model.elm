@@ -7,7 +7,7 @@ import Time exposing (Time)
 
 -- MODEL
 
-type alias WatchingGame = { gameId: GameId, timePoint: Time, game: Maybe Game }
+type alias WatchingGame = { timePoint: Time, game: Game }
 
 type UiTab = TabTeam | TabLeagueTables | TabFixtures (Maybe WatchingGame) | TabFinances
 
