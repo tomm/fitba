@@ -138,6 +138,9 @@ class ApiController < ApplicationController
         homeTeam: get_team_json(game.home_team_id),
         awayTeam: get_team_json(game.away_team_id),
         start: game.start,
+        status: game.status,
+        homeGoals: game.home_goals,
+        awayGoals: game.away_goals,
         events: game_events.map {|e| game_event_to_json(e)}
       }
     else

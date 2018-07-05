@@ -27,8 +27,12 @@ view model maybeWatchingGame =
                 fixturesTable model
             ]
             Just watching -> [
-                h2 [] [text "Match Video"],
-                matchView watching.game watching
+                h2 [] [text <| case watching.game.status of
+                    Scheduled -> "Live match"
+                    InProgress -> "Live match"
+                    Played _ -> "Match replay"
+                ],
+                matchView watching
             ]
     )
 
@@ -40,9 +44,10 @@ eventsUpToTimepoint game time =
 latestGameEventAtTimepoint : Game -> Time -> Maybe GameEvent
 latestGameEventAtTimepoint game time = eventsUpToTimepoint game time |> List.head
 
-matchView : Game -> WatchingGame -> Html Msg
-matchView game watching =
-    let maybeEv = latestGameEventAtTimepoint game (game.start + watching.timePoint)
+matchView : WatchingGame -> Html Msg
+matchView watching =
+    let game = watching.game
+        maybeEv = latestGameEventAtTimepoint game (game.start + watching.timePoint)
         matchMinute = round <| case maybeEv of
             Nothing -> 90.0 * watching.timePoint / match_length_seconds / Time.second
             Just ev -> 90.0 * (ev.timestamp - game.start) / match_length_seconds / Time.second
@@ -62,8 +67,11 @@ matchView game watching =
     in
         div []
             [
-                Html.h3 [] [text (game.homeTeam.name ++ " " ++ (toString <| Tuple.first goals) ++ " - " ++
-                                  (toString <| Tuple.second goals) ++ " " ++ game.awayTeam.name)],
+                Html.h3 [] [text (
+                    game.homeTeam.name
+                    ++ " (" ++ (toString <| Tuple.first goals) ++ " : " ++ (toString <| Tuple.second goals) ++ ") "
+                    ++ game.awayTeam.name 
+                )],
                 matchTimeDisplay,
                 (case latestGameEventAtTimepoint game (game.start + watching.timePoint) of
                     Nothing -> div [] [

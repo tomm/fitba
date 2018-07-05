@@ -49,7 +49,7 @@ type alias GameEventId = Int
 type GameEventKind = KickOff | Goal | Boring | Shot | EndOfGame
 type GameEventSide = Home | Away
 type alias GameEvent = { id: GameEventId, gameId: GameId, kind: GameEventKind, side: GameEventSide, timestamp: Time, message: String, ballPos: (Int, Int) }
-type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, events: List GameEvent }
+type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, events: List GameEvent, status: FixtureStatus }
 
 type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int }
 type FixtureStatus = Scheduled | InProgress | Played FixtureStatusPlayed

@@ -92,7 +92,18 @@ update msg model =
                     Ok fixtures -> updateState { m | fixtures = fixtures }
                     Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
                 LoadGame result -> case result of
-                    Ok game -> updateState { m | tab = TabFixtures (Just { game=game, timePoint=0.0}) }
+                    Ok game -> 
+                        if game.status == InProgress then
+                            -- start InProgress games from latest event
+                            let timeElapsed = List.length game.events -- XXX TODO hack. will only work
+                                                                      -- assuming match simulated takes 1 second per event
+                            in updateState { m | tab = TabFixtures (Just {
+                                game=game,
+                                timePoint=Time.second * (toFloat timeElapsed)
+                            })}
+                        else
+                            -- start Played and Scheduled games from beginning
+                            updateState { m | tab = TabFixtures (Just { game=game, timePoint=0.0}) }
                     Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
                 UpdateGame result -> case result of
                     Ok events -> case m.tab of

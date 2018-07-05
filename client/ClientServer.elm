@@ -36,12 +36,23 @@ getLeagueTables =
 
 jsonDecodeGame : Json.Decoder Game
 jsonDecodeGame =
-    Json.map5 Game
+    Json.map6 Game
         (Json.field "id" Json.int)
         (Json.field "homeTeam" jsonDecodeTeam)
         (Json.field "awayTeam" jsonDecodeTeam)
         (Json.field "start" jsonDecodeTime)
         (Json.field "events" <| Json.list jsonDecodeGameEvent)
+        (Json.at ["status"] Json.string |> Json.andThen (\val ->
+            case val of
+                "Scheduled" -> Json.succeed Scheduled
+                "InProgress" -> Json.succeed InProgress
+                "Played" -> Json.map Played
+                    (Json.map2 FixtureStatusPlayed
+                        (Json.at ["homeGoals"] Json.int)
+                        (Json.at ["awayGoals"] Json.int)
+                    )
+                _ -> Json.fail <| "Unexpected fixture status: " ++ val
+        ))
 
 jsonDecodeGameEvent : Json.Decoder GameEvent
 jsonDecodeGameEvent =
