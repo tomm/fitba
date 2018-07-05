@@ -1,4 +1,4 @@
-module ClientServer exposing (loadGame, getStartGameData, getFixtures, getLeagueTables)
+module ClientServer exposing (loadGame, pollGameEvents, getStartGameData, getFixtures, getLeagueTables)
 
 import Array exposing (Array)
 import Date
@@ -15,8 +15,16 @@ loadGame gameId =
     let url = "/game_events/" ++ toString gameId
     in Http.send LoadGame (Http.get url jsonDecodeGame)
 
+pollGameEvents : GameId -> Maybe GameEventId -> Cmd Msg
+pollGameEvents gameId lastEventId =
+    let url = "/game_events_since/" ++ toString gameId ++ "/" ++
+        case lastEventId of
+            Just eventId -> toString eventId
+            Nothing -> ""
+    in Http.send UpdateGame (Http.get url <| Json.list jsonDecodeGameEvent)
+
 getStartGameData : Cmd Msg
-getStartGameData = Http.send GotStartGameData (Http.get "/load_game" jsonDecodeTeam)
+getStartGameData = Http.send GotStartGameData (Http.get "/load_world" jsonDecodeTeam)
 
 getFixtures : Cmd Msg
 getFixtures =
@@ -37,7 +45,8 @@ jsonDecodeGame =
 
 jsonDecodeGameEvent : Json.Decoder GameEvent
 jsonDecodeGameEvent =
-    Json.map6 GameEvent
+    Json.map7 GameEvent
+        (Json.field "id" Json.int)
         (Json.field "gameId" Json.int)
         (Json.field "kind" jsonDecodeGameEventKind)
         (Json.field "side" jsonDecodeGameEventSide)

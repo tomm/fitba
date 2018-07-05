@@ -3,9 +3,10 @@ Rails.application.routes.draw do
   get 'login' => 'login#login'
   post 'try_login' => 'login#try_login'
   post 'save_formation' => 'api#save_formation'
-  get 'load_game' => 'api#load_game'
+  get 'load_world' => 'api#load_world'
   get 'squad/:id' => 'api#view_team'
   get 'game_events/:id' => 'api#game_events'
+  get 'game_events_since/:id/:event_id' => 'api#game_events_since'
   get 'tables' => 'api#league_tables'
   get 'fixtures' => 'api#fixtures'
   # The priority is based upon order of creation: first created -> highest priority.

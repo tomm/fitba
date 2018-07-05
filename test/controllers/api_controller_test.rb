@@ -3,14 +3,14 @@ require 'test_helper'
 
 class ApiControllerTest < ActionController::TestCase
 
-  test "/load_game needs login" do
-    get :load_game, :format => "json"
+  test "/load_world needs login" do
+    get :load_world, :format => "json"
     assert_response 403
   end
 
-  test "GET /load_game" do
+  test "GET /load_world" do
     user = login
-    get :load_game, :format => "json"
+    get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal user.team_id, body['id']
@@ -117,6 +117,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal game.away_team_id, body['awayTeam']['id']
     assert_equal 4, body['events'].size
     assert_equal ({
+      'id' => game_events(:one).id,
       'gameId' => game.id,
       'kind' => 'KickOff',
       'side' => 0,
@@ -129,6 +130,30 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal game.start + 3, body['events'][3]['timestamp']
   end
 
+  test "GET api#game_events_since" do
+    game = games(:in_progress_game)
+    assert_equal "InProgress", game.status
+
+    login
+
+    get :game_events_since, { 'id' => game.id, 'event_id' => '' }, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 4, body.size
+    assert_equal game_events(:one).id, body[0]['id']
+    assert_equal game_events(:two).id, body[1]['id']
+    assert_equal game_events(:three).id, body[2]['id']
+    assert_equal game_events(:four).id, body[3]['id']
+
+    get :game_events_since, { 'id' => game.id, 'event_id' => body[0]['id'] }, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 3, body.size
+    assert_equal game_events(:two).id, body[0]['id']
+    assert_equal game_events(:three).id, body[1]['id']
+    assert_equal game_events(:four).id, body[2]['id']
+  end
+
   test "POST /save_formation" do
     amy = players(:amy)
     barbara = players(:barbara)
@@ -137,7 +162,7 @@ class ApiControllerTest < ActionController::TestCase
     login
 
     # no formation now
-    get :load_game, :format => "json"
+    get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal 0, body['formation'].size
@@ -146,7 +171,7 @@ class ApiControllerTest < ActionController::TestCase
     post :save_formation, [[amy.id, [1,2]], [barbara.id, [2,3]]].to_json, :format => "json"
     assert_response :success
 
-    get :load_game, :format => "json"
+    get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal 2, body['formation'].size
@@ -160,7 +185,7 @@ class ApiControllerTest < ActionController::TestCase
     post :save_formation, [[barbara.id, [4,1]], [amy.id, [3,2], [molly.id, [2,3]]]].to_json, :format => "json"
     assert_response :success
 
-    get :load_game, :format => "json"
+    get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal 2, body['formation'].size

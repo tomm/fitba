@@ -33,7 +33,7 @@ class ApiController < ApplicationController
     end
   end
 
-  def load_game
+  def load_world
     if user = get_user then
       view_team_id(user.team_id)
     else
@@ -114,6 +114,18 @@ class ApiController < ApplicationController
     end
   end
 
+  private def game_event_to_json(e)
+    {
+      id: e.id,
+      gameId: e.game_id,
+      kind: e.kind,
+      side: e.side,
+      timestamp: e.time,
+      message: e.message == nil ? '' : e.message,
+      ballPos: [e.ball_pos_x, e.ball_pos_y]
+    }
+  end
+
   def game_events
     if get_user then
       game = Game.find(params[:id])
@@ -126,17 +138,30 @@ class ApiController < ApplicationController
         homeTeam: get_team_json(game.home_team_id),
         awayTeam: get_team_json(game.away_team_id),
         start: game.start,
-        events: game_events.map do |e|
-          {
-            gameId: e.game_id,
-            kind: e.kind,
-            side: e.side,
-            timestamp: e.time,
-            message: e.message == nil ? '' : e.message,
-            ballPos: [e.ball_pos_x, e.ball_pos_y]
-          }
-        end
+        events: game_events.map {|e| game_event_to_json(e)}
       }
+    else
+      head 403
+    end
+  end
+
+  def game_events_since
+    if get_user then
+      game = Game.find(params[:id])
+      if params[:event_id] == ''
+        # get all game events
+        game_events = GameEvent.where(game_id: game.id)
+                               .order(:time)
+                               .all
+      else
+        # get game events since the given event
+        game_event = GameEvent.find(params[:event_id])
+        game_events = GameEvent.where(game_id: game.id)
+                               .where('time > ?', game_event.time)
+                               .order(:time)
+                               .all
+      end
+      render json: game_events.map {|e| game_event_to_json(e)}
     else
       head 403
     end
