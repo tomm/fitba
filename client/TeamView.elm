@@ -42,7 +42,7 @@ view model team =
         div [] [
             Html.h2 [] [team.name |> text],
             Html.table
-                [tableStyle] <|
+                [Html.Attributes.class "squad-list"] <|
                 (
                     Html.tr [] [Html.th [] [text "Pos."],
                     Html.th [] [text "Name"],
@@ -124,10 +124,10 @@ playerOnPitch model team playerIdx x y =
                     , Svg.text_
                         [ Svg.Events.onClick (SelectPlayer (Just playerIdx)),
                           Svg.Attributes.textAnchor "middle", fill color,
-                          Svg.Attributes.x (toString xpos), Svg.Attributes.y (toString ypos), Svg.Attributes.fontSize "30" ]
+                          Svg.Attributes.x (toString xpos), Svg.Attributes.y (toString ypos), Svg.Attributes.fontSize "26" ]
                         [
-                            Svg.tspan [Svg.Attributes.x <|toString xpos, dy "0"] [Svg.text <| toString (playerIdx+1) ],
-                            Svg.tspan [Svg.Attributes.x <|toString xpos, dy "40"] [Svg.text str ]
+                            Svg.tspan [Svg.Attributes.x <|toString xpos, dy "-10"] [Svg.text <| toString (playerIdx+1) ],
+                            Svg.tspan [Svg.Attributes.x <|toString xpos, dy "30"] [Svg.text str ]
                         ]
                     ]
     in

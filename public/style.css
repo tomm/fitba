@@ -2,15 +2,22 @@ body {
 	-webkit-user-select: none;
 	padding: 0; margin: 0;
 	font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
-	font-size: 80%;
+	font-size: 75%;
 	background-image: url('/background.jpg');
 	background-attachment: fixed;
 	background-size: 100%;
+	overflow-x: hidden;
 }
 
 table {
 	white-space: nowrap;
+	width: 100%;
+	border-collapse: collapse;
+	overflow-x: hidden;
+	margin-bottom: 1em;
 }
+
+.squad-list tr:nth-child(12) { border-bottom: 3px solid black; }
 
 h1,h2,h3 {
 	text-align: center;
@@ -28,4 +35,8 @@ tr {
 td, th {
 	padding: 0.5em 0.2em;
 	text-align: left;
+}
+
+th {
+	background-color: rgba(150, 150, 255, 0.5);
 }
