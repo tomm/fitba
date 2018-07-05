@@ -1,4 +1,6 @@
 require 'digest/md5'
+require 'readline'
+require "./app/name_gen.rb"
 
 FORMATION_442 = [
     [2, 6], # gk
@@ -7,8 +9,37 @@ FORMATION_442 = [
     [1, 1], [3, 1]
 ]
 
+TEAM_NAMES = [
+  "Barcelona",
+  "Real Madrid",
+  "Chelsea",
+  "Zenit St Petersburg",
+  "AEK Athens",
+  "Celtic F.C",
+  "Hamburg",
+  "S.S. Lazio",
+  "Rangers F.C",
+  "Paris St-Germain",
+  "Red Star Belgrade",
+  "Bologna F.C. 1909",
+
+  "Sporting Toulon",
+  "St Pauli",
+  "U.C. Sampdoria",
+  "Partizan",
+  "A.S. Livorno Calcio",
+  "Besiktas",
+  "FC Twente",
+  "Athletic Bilbao",
+  "Millwall",
+  "Portland Timbers",
+  "Vag of the South",
+  "Cock of the North",
+]
+
 module PopulateDbHelper
   class Populate
+
     def self.go
 
       puts "Creating leagues..."
@@ -18,7 +49,13 @@ module PopulateDbHelper
       populate_league(l1)
       populate_league(l2)
 
-      User.create(name: "tom", team: Team.first, secret: Digest::MD5.hexdigest("password"))
+      create_user_for_team("tom", Team.find_by(name: "Cock of the North"))
+      create_user_for_team("john", Team.find_by(name: "Vag of the South"))
+    end
+
+    def self.create_user_for_team(username, team)
+      password = Readline.readline("Enter password for user #{username}: ")
+      User.create(name: username, team: team, secret: Digest::MD5.hexdigest(password))
     end
 
     def self.create_fixtures_for_league_season(league_id, season)
@@ -81,7 +118,7 @@ module PopulateDbHelper
     def self.make_player(team_id)
       Player.create(
         team_id: team_id,
-        name: "Player " + (0..99).to_a.sample.to_s,
+        name: NameGen.pick,
         shooting: (0..9).to_a.sample,
         passing: (0..9).to_a.sample,
         tackling: (0..9).to_a.sample,
@@ -94,7 +131,11 @@ module PopulateDbHelper
 
       formation = Formation.create()
       team = Team.create(formation_id: formation.id)
-      team.update(name: "Team #{team.id}")
+      if nice_name = TEAM_NAMES[team.id-1] then
+        team.update(name: nice_name)
+      else
+        team.update(name: "Team #{team.id}")
+      end
       puts "Creating team " + team.name
       (0..16).to_a.map do |i|
         player = make_player(team.id)
