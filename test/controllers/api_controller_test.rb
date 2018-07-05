@@ -83,7 +83,7 @@ class ApiControllerTest < ActionController::TestCase
     get :fixtures, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 5, body.size
+    assert_equal 6, body.size
 
     assert_equal "Played", body[0]["status"]
     assert_equal "2018-06-26T12:00:00.000Z", body[0]["start"]
@@ -95,7 +95,38 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal "Test City", body[1]["homeName"]
     assert_equal "Test Utd", body[1]["awayName"]
 
-    assert_equal "Scheduled", body[4]["status"]
+    assert_equal "Played", body[2]["status"]
+    assert_equal "Played", body[3]["status"]
+    assert_equal "InProgress", body[4]["status"]
+    assert_equal "Scheduled", body[5]["status"]
+  end
+
+  test "GET api#game_events" do
+    game = games(:in_progress_game)
+    assert_equal "InProgress", game.status
+
+    login
+    get :game_events, { 'id' => game.id }, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+
+    assert_equal game.id, body['id']
+    assert_equal game.start, body['start']
+    # XXX could test whole team structure here...
+    assert_equal game.home_team_id, body['homeTeam']['id']
+    assert_equal game.away_team_id, body['awayTeam']['id']
+    assert_equal 4, body['events'].size
+    assert_equal ({
+      'gameId' => game.id,
+      'kind' => 'KickOff',
+      'side' => 0,
+      'timestamp' => game.start.to_json.tr('"',''),
+      'message' => 'Kick off!',
+      'ballPos' => [2,3]
+    }), body['events'][0]
+    assert_equal game.start + 1, body['events'][1]['timestamp']
+    assert_equal game.start + 2, body['events'][2]['timestamp']
+    assert_equal game.start + 3, body['events'][3]['timestamp']
   end
 
   test "POST /save_formation" do

@@ -49,12 +49,22 @@ five:
   home_goals: 0
   away_goals: 0
 
-six:
+in_progress_game:
+  league: first_division
+  season: 1
+  home_team: test_utd
+  away_team: test_city
+  status: 'InProgress'
+  start: 2018-07-02 12:00:00
+  home_goals: 0
+  away_goals: 0
+
+seven:
   league: first_division
   season: 1
   home_team: test_utd
   away_team: test_city
   status: 'Scheduled'
-  start: 2018-07-02 12:00:00
+  start: 2018-07-03 12:00:00
   home_goals: 0
   away_goals: 0

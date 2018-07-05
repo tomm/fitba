@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   post 'save_formation' => 'api#save_formation'
   get 'load_game' => 'api#load_game'
   get 'squad/:id' => 'api#view_team'
+  get 'game_events/:id' => 'api#game_events'
   get 'tables' => 'api#league_tables'
   get 'fixtures' => 'api#fixtures'
   # The priority is based upon order of creation: first created -> highest priority.

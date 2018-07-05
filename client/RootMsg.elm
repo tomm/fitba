@@ -12,5 +12,6 @@ type Msg
   | MsgFixturesView FixturesViewMsg.Msg
   | UpdateFixtures (Result Http.Error (List Fixture))
   | UpdateLeagueTables (Result Http.Error (List LeagueTable))
+  | LoadGame (Result Http.Error Game)
   | GotStartGameData (Result Http.Error Team)
   | SavedFormation (Result Http.Error String)

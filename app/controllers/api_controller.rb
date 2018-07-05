@@ -6,16 +6,20 @@ class ApiController < ApplicationController
     User.joins(:sessions).where(sessions: {identifier: cookies[:session]}).first
   end
 
+  private def get_team_json(id)
+    team = Team.find(id)
+    squad = team.squad
+    {
+      id: team.id,
+      name: team.name,
+      players: squad[:players],
+      formation: squad[:formation]
+    }
+  end
+
   private def view_team_id(id)
     begin
-      team = Team.find(id)
-      squad = team.squad
-      render json: {
-        id: team.id,
-        name: team.name,
-        players: squad[:players],
-        formation: squad[:formation]
-      }
+      render json: get_team_json(id)
     rescue ActiveRecord::RecordNotFound
       head 403
     end
@@ -105,6 +109,34 @@ class ApiController < ApplicationController
       team = Team.find(user.team_id)
       team.update_player_positions(data)
       render json: {status: 'SUCCESS'}
+    else
+      head 403
+    end
+  end
+
+  def game_events
+    if get_user then
+      game = Game.find(params[:id])
+      game_events = GameEvent.where(game_id: game.id)
+                             .order(:time)
+                             .all
+                             #.where('time >= ?', params[:from_time])
+      render json: {
+        id: game.id,
+        homeTeam: get_team_json(game.home_team_id),
+        awayTeam: get_team_json(game.away_team_id),
+        start: game.start,
+        events: game_events.map do |e|
+          {
+            gameId: e.game_id,
+            kind: e.kind,
+            side: e.side,
+            timestamp: e.time,
+            message: e.message == nil ? '' : e.message,
+            ballPos: [e.ball_pos_x, e.ball_pos_y]
+          }
+        end
+      }
     else
       head 403
     end

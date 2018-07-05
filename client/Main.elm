@@ -20,6 +20,7 @@ import Model exposing (..)
 import RootMsg exposing (..)
 import Styles exposing (..)
 import TeamView
+import ClientServer exposing (..)
 
 
 main =
@@ -54,96 +55,6 @@ subscriptions model = Sub.batch [
     ]
 
 
--- HTTP
-
-getStartGameData : Cmd Msg
-getStartGameData = Http.send GotStartGameData (Http.get "/load_game" jsonDecodeTeam)
-
-getFixtures : Cmd Msg
-getFixtures =
-    Http.send UpdateFixtures (Http.get "/fixtures" jsonDecodeFixtures)
-
-getLeagueTables : Cmd Msg
-getLeagueTables =
-    Http.send UpdateLeagueTables (Http.get "/tables" jsonDecodeLeagueTables)
-
-jsonDecodeTeam : Json.Decoder Team
-jsonDecodeTeam =
-    Json.map4 Team
-        (Json.at ["id"] Json.int)
-        (Json.at ["name"] Json.string)
-        (Json.at ["players"] (Json.array jsonDecodePlayer))
-        (Json.at ["formation"] (Json.array jsonDecodePlayerPosition))
-
-jsonDecodePlayer : Json.Decoder Player
-jsonDecodePlayer =
-    Json.map7 Player
-        (Json.at ["id"] Json.int)
-        (Json.at ["name"] Json.string)
-        (Json.at ["shooting"] Json.int)
-        (Json.at ["passing"] Json.int)
-        (Json.at ["tackling"] Json.int)
-        (Json.at ["handling"] Json.int)
-        (Json.at ["speed"] Json.int)
-
-jsonDecodePlayerPosition : Json.Decoder (Int, Int)
-jsonDecodePlayerPosition =
-    (Json.array Json.int) |> Json.andThen (\val ->
-        let mx = Array.get 0 val 
-            my = Array.get 1 val
-        in case (mx,my) of
-            (Just x, Just y) -> Json.succeed (x, y)
-            _ -> Json.fail "Expected Int,Int"
-    )
-
-jsonDecodeTime : Json.Decoder Time.Time
-jsonDecodeTime =
-  Json.string
-    |> Json.andThen (\val ->
-        case Date.fromString val of
-          Err err -> Json.fail err
-          Ok d -> Json.succeed <| Date.toTime d)
-
-jsonDecodeFixtures : Json.Decoder (List Fixture)
-jsonDecodeFixtures =
-    Json.list (
-        Json.map5 Fixture
-            (Json.at ["gameId"] Json.int)
-            (Json.at ["homeName"] Json.string)
-            (Json.at ["awayName"] Json.string)
-            (Json.at ["start"] jsonDecodeTime)
-            (Json.at ["status"] Json.string |> Json.andThen (\val ->
-                if val == "Scheduled" then
-                    Json.succeed Scheduled
-                else
-                    Json.map Played
-                        (Json.map2 FixtureStatusPlayed
-                            (Json.at ["homeGoals"] Json.int)
-                            (Json.at ["awayGoals"] Json.int)
-                        )
-            ))
-    )
-
-jsonDecodeLeagueTables : Json.Decoder (List LeagueTable)
-jsonDecodeLeagueTables =
-    Json.list (
-        Json.map2 LeagueTable
-            (Json.at ["name"] Json.string)
-            (Json.at ["record"] <| Json.list (
-                Json.map8 SeasonRecord
-                    (Json.at ["teamId"] Json.int)
-                    (Json.at ["name"] Json.string)
-                    (Json.at ["played"] Json.int)
-                    (Json.at ["won"] Json.int)
-                    (Json.at ["drawn"] Json.int)
-                    (Json.at ["lost"] Json.int)
-                    (Json.at ["goalsFor"] Json.int)
-                    (Json.at ["goalsAgainst"] Json.int)
-            ))
-    )
-
---type alias Fixture = { id: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus }
-
 -- UPDATE
 
 update : Msg -> RootModel -> (RootModel, Cmd Msg)
@@ -157,8 +68,7 @@ update msg model =
                                  tab = TabTeam,
                                  ourTeam = team,
                                  fixtures = [],
-                                 leagueTables = [],
-                                 games = Dict.fromList []
+                                 leagueTables = []
                                 }}, Cmd.batch [getFixtures, getLeagueTables])
                     Err error -> ({ model | errorMsg = Just <| toString error}, Cmd.none)
                 _ -> ({model | errorMsg = Just "Unexpected message while loading ..."}, Cmd.none)
@@ -173,9 +83,18 @@ update msg model =
                 MsgTeamView msg ->
                     let (state, cmd) = TeamView.update msg m
                     in ({ model | state = GameData state}, cmd)
-                MsgFixturesView msg -> updateState (FixturesView.update msg m)
+                MsgFixturesView msg ->
+                    let (state, cmd) = FixturesView.update msg m
+                    in ({ model | state = GameData state}, cmd)
                 UpdateFixtures result -> case result of
                     Ok fixtures -> updateState { m | fixtures = fixtures }
+                    Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
+                LoadGame result -> case result of
+                    Ok game -> case m.tab of
+                        TabFixtures (Just watchingGame) -> updateState {
+                            m | tab=TabFixtures (Just {watchingGame | game = Just game })
+                        }
+                        _ -> (model, Cmd.none)
                     Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
                 UpdateLeagueTables result -> case result of
                     Ok tables -> updateState { m | leagueTables = tables }

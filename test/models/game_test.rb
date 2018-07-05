@@ -2,7 +2,7 @@ require 'test_helper'
 
 class GameTest < ActiveSupport::TestCase
   test "simulate" do
-    game = games(:six)
+    game = games(:seven)
     assert_equal "Scheduled", game.status
     game.simulate(game.start - 10)
     assert_equal "Scheduled", game.status

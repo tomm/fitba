@@ -7,7 +7,7 @@ import Time exposing (Time)
 
 -- MODEL
 
-type alias WatchingGame = { gameId: GameId, timePoint: Time }
+type alias WatchingGame = { gameId: GameId, timePoint: Time, game: Maybe Game }
 
 type UiTab = TabTeam | TabLeagueTables | TabFixtures (Maybe WatchingGame) | TabFinances
 
@@ -24,8 +24,7 @@ type alias Model = {
     tab: UiTab,
     ourTeam : Team,
     fixtures: List Fixture,
-    leagueTables : List LeagueTable,
-    games: Dict GameId Game
+    leagueTables : List LeagueTable
 }
 
 type alias TeamId = Int
@@ -46,8 +45,9 @@ type alias PlayerId = Int
 type alias Player = { id: PlayerId, name: String, shooting: Int, passing: Int, tackling: Int, handling: Int, speed: Int }
 
 type alias GameId = Int
-type GameEventType = Boring | HomeGoal | AwayGoal | EndOfGame
-type alias GameEvent = { id: GameId, type_: GameEventType, timestamp: Time, message: String, ballPos: (Int, Int) }
+type GameEventKind = KickOff | Goal | Boring | Shot | EndOfGame
+type GameEventSide = Home | Away
+type alias GameEvent = { gameId: GameId, kind: GameEventKind, side: GameEventSide, timestamp: Time, message: String, ballPos: (Int, Int) }
 type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, events: List GameEvent }
 
 type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int }

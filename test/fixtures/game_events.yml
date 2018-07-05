@@ -1,17 +1,37 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  game_id: 
-  kind: 
-  time: 2018-06-26 16:10:20
-  message: MyText
-  ball_pos_x: 1
-  ball_pos_y: 1
+  game: in_progress_game
+  kind: 'KickOff'
+  side: 0
+  time: 2018-07-02 12:00:00
+  message: 'Kick off!'
+  ball_pos_x: 2
+  ball_pos_y: 3
 
 two:
-  game_id: 
-  kind: 
-  time: 2018-06-26 16:10:20
-  message: MyText
-  ball_pos_x: 1
+  game: in_progress_game
+  kind: 'Boring'
+  side: 0
+  time: 2018-07-02 12:00:01
+  message: 'Someone hoofs it up field'
+  ball_pos_x: 2
+  ball_pos_y: 1
+
+three:
+  game: in_progress_game
+  kind: 'Shot'
+  side: 0
+  time: 2018-07-02 12:00:02
+  message: 'Someone takes a shot!'
+  ball_pos_x: 2
+  ball_pos_y: 1
+
+four:
+  game: in_progress_game
+  kind: 'Goal'
+  side: 0
+  time: 2018-07-02 12:00:03
+  message: 'Goal!'
+  ball_pos_x: 2
   ball_pos_y: 1
