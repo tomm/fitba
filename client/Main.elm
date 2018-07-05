@@ -1,19 +1,20 @@
 module Main exposing (..)
 
 import Array exposing (Array)
+import Date
 import Debug
 import Dict exposing (Dict)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Html exposing (Html, Attribute, div, input, text, ul, li, button)
-import Maybe exposing (withDefault)
-import Svg
-import Time
-import Date
-import Task
 import Http
 import Json.Decode as Json
 import Json.Encode as JsonEncode
+import Maybe exposing (withDefault)
+import Navigation
+import Svg
+import Task
+import Time
 
 import FixturesView
 import FixturesViewMsg
@@ -58,6 +59,16 @@ subscriptions model = Sub.batch [
 
 -- UPDATE
 
+handleHttpError : Http.Error -> RootModel -> (RootModel, Cmd Msg)
+handleHttpError error model =
+    case error of
+        Http.BadStatus response -> 
+            if response.status.code == 403 then
+                ({model | errorMsg = Just <| toString error}, Navigation.load "/login")
+            else
+                ({model | errorMsg = Just <| toString response}, Cmd.none)
+        _ -> ({model | errorMsg = Just <| toString error}, Cmd.none)
+
 update : Msg -> RootModel -> (RootModel, Cmd Msg)
 update msg model =
     let updateState newState = ({ model | state = GameData newState}, Cmd.none)
@@ -74,7 +85,7 @@ update msg model =
                                  fixtures = [],
                                  leagueTables = []
                                 }}, Cmd.batch [getFixtures, getLeagueTables])
-                    Err error -> ({ model | errorMsg = Just <| toString error}, Cmd.none)
+                    Err error -> handleHttpError error model
                 _ -> ({model | errorMsg = Just "Unexpected message while loading ..."}, Cmd.none)
         handleActiveStateMsgs m =
             case msg of
@@ -90,7 +101,7 @@ update msg model =
                     in ({ model | state = GameData state}, cmd)
                 UpdateFixtures result -> case result of
                     Ok fixtures -> updateState { m | fixtures = fixtures }
-                    Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
+                    Err error -> handleHttpError error model
                 LoadGame result -> case result of
                     Ok game -> 
                         if game.status == InProgress then
@@ -104,17 +115,17 @@ update msg model =
                         else
                             -- start Played and Scheduled games from beginning
                             updateState { m | tab = TabFixtures (Just { game=game, timePoint=0.0}) }
-                    Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
+                    Err error -> handleHttpError error model
                 UpdateGame result -> case result of
                     Ok events -> case m.tab of
                         TabFixtures (Just watchingGame) -> updateState {
                             m | tab=TabFixtures (Just <| updateWatchingGame watchingGame events)
                         }
                         _ -> (model, Cmd.none)
-                    Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
+                    Err error -> handleHttpError error model
                 UpdateLeagueTables result -> case result of
                     Ok tables -> updateState { m | leagueTables = tables }
-                    Err error -> ({model | errorMsg = Just <| toString error}, Cmd.none)
+                    Err error -> handleHttpError error model
                 GotStartGameData _ -> ({model | errorMsg = Just "Unexpected message"}, Cmd.none)
                 SavedFormation _ -> (model, Cmd.none) -- don't give a fuck
 
