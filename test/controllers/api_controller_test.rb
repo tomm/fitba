@@ -136,7 +136,7 @@ class ApiControllerTest < ActionController::TestCase
 
     login
 
-    get :game_events_since, { 'id' => game.id, 'event_id' => '' }, :format => "json"
+    get :game_events_since, { 'id' => game.id, }, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal 4, body.size

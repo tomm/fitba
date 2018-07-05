@@ -62,7 +62,7 @@ jsonDecodeGameEventKind =
             "Goal" -> Json.succeed Goal
             "Boring" -> Json.succeed Boring
             "Shot" -> Json.succeed Shot
-            "EndGame" -> Json.succeed EndOfGame
+            "EndOfGame" -> Json.succeed EndOfGame
             _ -> Json.fail ("Invalid GameEvent kind: " ++ val)
         )
 
@@ -121,14 +121,15 @@ jsonDecodeFixtures =
             (Json.at ["awayName"] Json.string)
             (Json.at ["start"] jsonDecodeTime)
             (Json.at ["status"] Json.string |> Json.andThen (\val ->
-                if val == "Scheduled" then
-                    Json.succeed Scheduled
-                else
-                    Json.map Played
+                case val of
+                    "Scheduled" -> Json.succeed Scheduled
+                    "InProgress" -> Json.succeed InProgress
+                    "Played" -> Json.map Played
                         (Json.map2 FixtureStatusPlayed
                             (Json.at ["homeGoals"] Json.int)
                             (Json.at ["awayGoals"] Json.int)
                         )
+                    _ -> Json.fail <| "Unexpected fixture status: " ++ val
             ))
     )
 

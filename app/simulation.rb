@@ -104,6 +104,15 @@ class GameSimulator
 
     if @last_event.time >= @game.start + MATCH_LENGTH_SECONDS
       @game.status = 'Played'
+      @last_event = GameEvent.create(
+        game_id: @game.id,
+        kind: 'EndOfGame',
+        side: dice(1,2) - 1,
+        time: @last_event.time + 1,
+        message: 'Full time!',
+        ball_pos_x: @last_event.ball_pos_x,
+        ball_pos_y: @last_event.ball_pos_y
+      )
     else
       @game.status = 'InProgress'
     end

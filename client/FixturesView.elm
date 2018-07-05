@@ -12,7 +12,7 @@ import Model exposing (..)
 import Utils
 import Dict
 import RootMsg
-import FixturesViewMsg exposing (Msg, Msg(Watch))
+import FixturesViewMsg exposing (Msg, Msg(..))
 import ClientServer
 
 match_length_seconds : Float
@@ -141,6 +141,7 @@ fixturesTable model =
         resultText fixture =
             case fixture.status of
                 Scheduled -> text "Scheduled"
+                InProgress -> text "In Progress!"
                 Played result -> text (toString result.homeGoals ++ " : " ++ toString result.awayGoals)
     in
         table
@@ -157,12 +158,28 @@ fixturesTable model =
 
 update : Msg -> Model -> (Model, Cmd RootMsg.Msg)
 update msg model =
-    case msg of
-        Watch gameId ->
-            (model, Cmd.batch [ClientServer.loadGame gameId])
-        {-
-        Watch gameId -> (
-            { model | tab = TabFixtures (Just { gameId=gameId, timePoint=0.0, game=Nothing }) },
-            Cmd.batch [ClientServer.loadGame gameId]
-        )
-        -}
+    let
+        latestEventId game = case List.head <| List.reverse game.events of
+            Nothing -> Nothing
+            Just event -> Just event.id
+    in
+        case msg of
+            Watch gameId ->
+                (model, Cmd.batch [ClientServer.loadGame gameId])
+            GameTick -> case model.tab of
+                TabFixtures (Just watchingGame) ->
+                    let cmds = case List.head <| List.reverse watchingGame.game.events of
+                        -- No game events yet. poll
+                        Nothing -> Cmd.batch [ClientServer.pollGameEvents watchingGame.game.id Nothing]
+                        Just e -> 
+                            if e.kind == EndOfGame then
+                                -- game ended. stop polling
+                                Cmd.none
+                            else
+                                -- game in progress. get new game events
+                                Cmd.batch [ClientServer.pollGameEvents watchingGame.game.id (Just e.id)]
+                    in (
+                        { model | tab = TabFixtures (Just { watchingGame | timePoint = watchingGame.timePoint + 1*Time.second})},
+                        cmds
+                    )
+                _ -> (model, Cmd.none)

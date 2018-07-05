@@ -52,5 +52,5 @@ type alias GameEvent = { id: GameEventId, gameId: GameId, kind: GameEventKind, s
 type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, events: List GameEvent }
 
 type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int }
-type FixtureStatus = Scheduled | Played FixtureStatusPlayed
+type FixtureStatus = Scheduled | InProgress | Played FixtureStatusPlayed
 type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus }

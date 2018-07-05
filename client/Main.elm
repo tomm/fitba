@@ -16,6 +16,7 @@ import Json.Decode as Json
 import Json.Encode as JsonEncode
 
 import FixturesView
+import FixturesViewMsg
 import Model exposing (..)
 import RootMsg exposing (..)
 import Styles exposing (..)
@@ -78,11 +79,9 @@ update msg model =
         handleActiveStateMsgs m =
             case msg of
                 ChangeTab tab -> updateState { m | tab = tab }
-                ClockTick t -> case m.tab of
-                    -- keep incrementing match viewing timePoint
-                    TabFixtures (Just watchingGame) -> updateState { m | tab=TabFixtures (Just {watchingGame |
-                        timePoint = watchingGame.timePoint + 1 * Time.second})}
-                    _ -> (model, Cmd.none)
+                ClockTick t ->
+                    let (state, cmd) = FixturesView.update FixturesViewMsg.GameTick m
+                    in ({ model | state = GameData state}, cmd)
                 MsgTeamView msg ->
                     let (state, cmd) = TeamView.update msg m
                     in ({ model | state = GameData state}, cmd)

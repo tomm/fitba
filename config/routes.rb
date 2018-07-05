@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   get 'squad/:id' => 'api#view_team'
   get 'game_events/:id' => 'api#game_events'
   get 'game_events_since/:id/:event_id' => 'api#game_events_since'
+  get 'game_events_since/:id/' => 'api#game_events_since'
   get 'tables' => 'api#league_tables'
   get 'fixtures' => 'api#fixtures'
   # The priority is based upon order of creation: first created -> highest priority.

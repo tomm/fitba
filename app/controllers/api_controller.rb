@@ -148,7 +148,7 @@ class ApiController < ApplicationController
   def game_events_since
     if get_user then
       game = Game.find(params[:id])
-      if params[:event_id] == ''
+      if params[:event_id] == nil
         # get all game events
         game_events = GameEvent.where(game_id: game.id)
                                .order(:time)
