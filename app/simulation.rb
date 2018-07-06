@@ -7,6 +7,8 @@ ALL_POS = [
     [0, 2], [1, 2], [2, 2], [3, 2], [4, 2],
     [0, 1], [1, 1], [2, 1], [3, 1], [4, 1], # a
 ]
+# added to skill rolls
+BASE_SKILL = 5
 
 MATCH_LENGTH_SECONDS = 270
 
@@ -129,7 +131,7 @@ class GameSimulator
       home_skill = get_skill_near(pos, 0)
       away_skill = get_skill_near(pos, 1)
 
-      diff = dice(1, home_skill) - dice(1, away_skill)
+      diff = dice(1, home_skill + BASE_SKILL) - dice(1, away_skill + BASE_SKILL)
       if diff > 0
         # home team advances
         advance(0)
@@ -170,7 +172,7 @@ class GameSimulator
       ball_pos_y: @last_event.ball_pos_y
     )
 
-    if dice(1, striker.skill) > dice(2, goalkeeper.skill) 
+    if dice(1, striker.skill + BASE_SKILL) > dice(2, goalkeeper.skill + BASE_SKILL) 
       @last_event = GameEvent.create(
         game_id: @game.id,
         kind: 'Goal',

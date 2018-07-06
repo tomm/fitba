@@ -11,11 +11,13 @@ class GameTest < ActiveSupport::TestCase
     game.simulate(game.start + 300)
     assert_equal "Played", game.status
 
+=begin
     events = GameEvent.where(game_id: game.id).order(:time).all
     puts "GAME ======================+"
     events.each do |e|
       puts "#{game.event_minutes e} #{e.kind} Home?#{e.side} #{e.ball_pos_x},#{e.ball_pos_y} #{e.message}"
     end
     puts "Final score: #{game.home_goals}:#{game.away_goals}"
+=end
   end
 end

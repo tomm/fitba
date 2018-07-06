@@ -191,7 +191,7 @@ leagueTableTab model league =
             ]
   in div [] [
       Html.h2 [] [text <| league.name],
-      Html.table [] (
+      Html.table [class "league-table"] (
       (Html.tr [] [
         Html.th [] [text "Team"]
       , Html.th [] [text "Played"]

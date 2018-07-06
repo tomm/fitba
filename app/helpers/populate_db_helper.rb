@@ -9,6 +9,8 @@ FORMATION_442 = [
     [1, 1], [3, 1]
 ]
 
+TEAMS_PER_LEAGUE = 12
+
 TEAM_NAMES = [
   "Barcelona",
   "Real Madrid",
@@ -60,8 +62,10 @@ module PopulateDbHelper
 
     def self.create_fixtures_for_league_season(league_id, season)
       teams = DbHelper::TeamHelper.all_in_league_season(league_id, season)
+      raise "No teams in league!" unless teams.size > 0
 
       now = Time.now
+      # create fixtures starting tomorrow
       season_start = Time.new(now.year, now.month, now.day) + 24*3600
       next_start = season_start
       time_slots = [10*3600, 12*3600, 14*3600,
@@ -70,7 +74,7 @@ module PopulateDbHelper
       to_play = teams.permutation(2).to_a.shuffle
 
       # this won't terminate if time_slots.size > teams.size/2
-      raise "Too many time slots for number of teams!" unless time_slots.size <= teams.size/2
+      #raise "Too many time slots for number of teams!" unless time_slots.size <= teams.size/2
       # find time_slots.size number of games per 'day', that only include each team once
       days = []
       while to_play.size > 0 do
@@ -105,7 +109,7 @@ module PopulateDbHelper
 
     def self.populate_league(league)
       puts "Populating league: " + league.name
-      (1..12).to_a.map do |i|
+      (1..TEAMS_PER_LEAGUE).to_a.map do |i|
         team = make_team()
         TeamLeague.create(team_id: team.id, league_id: league.id, season: 1)
         team

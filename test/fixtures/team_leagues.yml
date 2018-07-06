@@ -12,10 +12,30 @@ two:
 
 three:
   team: test_athletico
-  league: second_division
+  league: first_division
   season: 1
 
 four:
   team: test_team4
   league: first_division
+  season: 1
+
+five:
+  team: test_team5
+  league: second_division
+  season: 1
+
+six:
+  team: test_team6
+  league: second_division
+  season: 1
+
+seven:
+  team: test_team7
+  league: second_division
+  season: 1
+
+eight:
+  team: test_team8
+  league: second_division
   season: 1

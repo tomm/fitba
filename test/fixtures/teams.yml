@@ -15,3 +15,19 @@ test_athletico:
 test_team4:
   name: Test Team4
   formation: four
+
+test_team5:
+  name: Test Team5
+  formation: five
+
+test_team6:
+  name: Test Team6
+  formation: six
+
+test_team7:
+  name: Test Team7
+  formation: seven
+
+test_team8:
+  name: Test Team8
+  formation: eight

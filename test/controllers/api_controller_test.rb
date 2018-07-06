@@ -48,13 +48,15 @@ class ApiControllerTest < ActionController::TestCase
     test_utd = teams(:test_utd)
     test_city = teams(:test_city)
     test_team4 = teams(:test_team4)
+    test_athletico = teams(:test_athletico)
     login
     get :league_tables, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal "First Division", body[0]["name"]
     assert_equal "Second Division", body[1]["name"]
-    assert_equal 3, body[0]["record"].size  # 3 teams in this league
+    assert_equal 4, body[0]["record"].size  # 4 teams in this league
+    assert_equal 4, body[1]["record"].size  # 4 teams in this league
     assert_equal "Test City", body[0]["record"][0]["name"]
     assert_equal test_city.id, body[0]["record"][0]["teamId"]
     assert_equal 1, body[0]["record"][0]["won"]
@@ -76,6 +78,13 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 0, body[0]["record"][2]["lost"]
     assert_equal 2, body[0]["record"][2]["goalsFor"]
     assert_equal 2, body[0]["record"][2]["goalsAgainst"]
+    assert_equal test_athletico.id, body[0]["record"][3]["teamId"]
+    assert_equal "Test Athletico", body[0]["record"][3]["name"]
+    assert_equal 0, body[0]["record"][3]["won"]
+    assert_equal 0, body[0]["record"][3]["drawn"]
+    assert_equal 0, body[0]["record"][3]["lost"]
+    assert_equal 0, body[0]["record"][3]["goalsFor"]
+    assert_equal 0, body[0]["record"][3]["goalsAgainst"]
   end
 
   test "GET /fixtures" do
