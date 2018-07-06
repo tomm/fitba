@@ -17,3 +17,4 @@ type Msg
   | GotStartGameData (Result Http.Error Team)
   | SavedFormation (Result Http.Error String)
   | NoOp
+  | ViewTeam TeamId | ViewTeamLoaded (Result Http.Error Team)

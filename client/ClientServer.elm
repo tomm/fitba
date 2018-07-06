@@ -1,4 +1,4 @@
-module ClientServer exposing (loadGame, pollGameEvents, getStartGameData, getFixtures, getLeagueTables)
+module ClientServer exposing (loadGame, loadTeam, pollGameEvents, getStartGameData, getFixtures, getLeagueTables)
 
 import Array exposing (Array)
 import Date
@@ -14,6 +14,11 @@ loadGame : GameId -> Cmd Msg
 loadGame gameId =
     let url = "/game_events/" ++ toString gameId
     in Http.send LoadGame (Http.get url jsonDecodeGame)
+
+loadTeam : TeamId -> Cmd Msg
+loadTeam teamId =
+    let url = "/squad/" ++ toString teamId
+    in Http.send ViewTeamLoaded (Http.get url jsonDecodeTeam)
 
 pollGameEvents : GameId -> Maybe GameEventId -> Cmd Msg
 pollGameEvents gameId lastEventId =

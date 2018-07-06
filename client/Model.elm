@@ -10,7 +10,8 @@ import Time exposing (Time)
 type alias WatchingGame = { timePoint: Time, game: Game }
 type alias TeamTabState = { selectedPlayer: Maybe Int }
 
-type UiTab = TabTeam TeamTabState | TabLeagueTables | TabFixtures (Maybe WatchingGame) | TabFinances
+type UiTab = TabTeam TeamTabState | TabLeagueTables | TabFixtures (Maybe WatchingGame) |
+             TabFinances | TabViewOtherTeam (TeamTabState, Team)
 
 type alias RootModel = {
     errorMsg: Maybe String,

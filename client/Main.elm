@@ -89,6 +89,10 @@ update msg model =
         handleActiveStateMsgs m =
             case msg of
                 ChangeTab tab -> updateState { m | tab = tab }
+                ViewTeam teamId -> (model, ClientServer.loadTeam teamId)
+                ViewTeamLoaded result -> case result of
+                    Ok team -> updateState { m | tab = TabViewOtherTeam ( { selectedPlayer = Nothing }, team) }
+                    Err error -> handleHttpError error model
                 ClockTick t ->
                     let (state, cmd) = FixturesView.update FixturesViewMsg.GameTick m
                     in ({ model | state = GameData state}, cmd)
@@ -160,7 +164,7 @@ view model =
                     div [style [("clear", "both"), ("margin", "4em 0 0 0")]] [
                         text <| Maybe.withDefault "" model.errorMsg,
                         case m.tab of
-                            --TabTeam -> Html.map (\_ -> NoOp) {-MsgTeamView-} <| TeamView.view m m.ourTeam
+                            TabViewOtherTeam (state, team) -> Html.map (\_ -> NoOp {- can't edit -}) <| TeamView.view state team
                             TabTeam state -> Html.map MsgTeamView <| TeamView.view state m.ourTeam
                             TabLeagueTables -> div [] (List.map (leagueTableTab m) m.leagueTables)
                             TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
@@ -173,7 +177,7 @@ leagueTableTab : Model -> LeagueTable -> Html Msg
 leagueTableTab model league =
     let recordToTableLine record =
         Html.tr
-            [] 
+            [onClick (ViewTeam record.teamId)] 
             [
                 Html.td [] [text record.name]
               , Html.td [] [record.won + record.drawn + record.lost |> toString |> text]
