@@ -8,8 +8,9 @@ import Time exposing (Time)
 -- MODEL
 
 type alias WatchingGame = { timePoint: Time, game: Game }
+type alias TeamTabState = { selectedPlayer: Maybe Int }
 
-type UiTab = TabTeam | TabLeagueTables | TabFixtures (Maybe WatchingGame) | TabFinances
+type UiTab = TabTeam TeamTabState | TabLeagueTables | TabFixtures (Maybe WatchingGame) | TabFinances
 
 type alias RootModel = {
     errorMsg: Maybe String,
@@ -20,7 +21,6 @@ type RootState = Loading | GameData Model
 
 type alias Model = {
     ourTeamId: TeamId,
-    tabTeamSelectedPlayer: Maybe Int,
     tab: UiTab,
     ourTeam : Team,
     fixtures: List Fixture,

@@ -153,7 +153,7 @@ fixturesTable model =
                 Played result -> text (toString result.homeGoals ++ " : " ++ toString result.awayGoals)
     in
         table
-            [Styles.tableStyle]
+            []
             ([
                 tr [] [
                     th [] [text "Game"],

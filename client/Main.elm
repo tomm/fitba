@@ -79,8 +79,7 @@ update msg model =
             case msg of
                 GotStartGameData result -> case result of
                     Ok team -> ({model | state=GameData {ourTeamId = team.id,
-                                 tabTeamSelectedPlayer = Nothing,
-                                 tab = TabTeam,
+                                 tab = TabTeam { selectedPlayer = Nothing },
                                  ourTeam = team,
                                  fixtures = [],
                                  leagueTables = []
@@ -128,6 +127,7 @@ update msg model =
                     Err error -> handleHttpError error model
                 GotStartGameData _ -> ({model | errorMsg = Just "Unexpected message"}, Cmd.none)
                 SavedFormation _ -> (model, Cmd.none) -- don't give a fuck
+                NoOp -> (model, Cmd.none)
 
     in
         case model.state of
@@ -141,7 +141,7 @@ tabs : Model -> Html Msg
 tabs model =
   let liStyle = style[("display", "block"), ("float", "left"), ("width", "25%"), ("border", "0")]
       tabStyle tab = if model.tab == tab then activeTabStyle else inactiveTabStyle
-      tabLabels = [(TabTeam, "Team"), (TabLeagueTables, "Tables"), (TabFixtures Nothing, "Fixtures"), (TabFinances, "Finances")]
+      tabLabels = [(TabTeam { selectedPlayer = Nothing }, "Team"), (TabLeagueTables, "Tables"), (TabFixtures Nothing, "Fixtures"), (TabFinances, "Finances")]
 
   in ul [style [("opacity", "0.9"), ("listStyleType", "none"), ("width", "100%"), ("padding", "0 0 1em 0"), ("top", "0"), ("left", "0"), ("margin", "0"), ("position", "fixed")]]
       (List.map (\(tab, label) ->
@@ -160,7 +160,8 @@ view model =
                     div [style [("clear", "both"), ("margin", "4em 0 0 0")]] [
                         text <| Maybe.withDefault "" model.errorMsg,
                         case m.tab of
-                            TabTeam -> Html.map MsgTeamView <| TeamView.view m m.ourTeam
+                            --TabTeam -> Html.map (\_ -> NoOp) {-MsgTeamView-} <| TeamView.view m m.ourTeam
+                            TabTeam state -> Html.map MsgTeamView <| TeamView.view state m.ourTeam
                             TabLeagueTables -> div [] (List.map (leagueTableTab m) m.leagueTables)
                             TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
                             TabFinances -> text ""
@@ -186,7 +187,7 @@ leagueTableTab model league =
             ]
   in div [] [
       Html.h2 [] [text <| league.name],
-      Html.table [tableStyle] (
+      Html.table [] (
       (Html.tr [] [
         Html.th [] [text "Team"]
       , Html.th [] [text "Played"]

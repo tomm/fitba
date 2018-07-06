@@ -22,9 +22,9 @@ pitchY = 1280
 movablePitchPositions : List (Int, Int)
 movablePitchPositions = List.concat <| List.map (\x -> List.map (\y -> (x,y)) [1,2,3,4,5]) [0,1,2,3,4]
 
-view : Model -> Team -> Html Msg
-view model team =
-  let isActive i = case model.tabTeamSelectedPlayer of
+view : TeamTabState -> Team -> Html Msg
+view state team =
+  let isActive i = case state.selectedPlayer of
           Just j -> j == i
           Nothing -> False
       playerToDiv i p =
@@ -64,10 +64,10 @@ view model team =
                         []
                 ] ++
                 -- players
-                (List.take 11 <| Array.toList <| Array.indexedMap (\i (x,y) -> playerOnPitch model team i x y) team.formation)
+                (List.take 11 <| Array.toList <| Array.indexedMap (\i (x,y) -> playerOnPitch state team i x y) team.formation)
                 ++
                 -- pitch positions unused by our formation
-                case model.tabTeamSelectedPlayer of
+                case state.selectedPlayer of
                     Nothing -> []
                     Just 0 -> [] -- can't move goalkeeper
                     Just _ ->
@@ -102,13 +102,13 @@ emptyPitchPosition (x, y) =
         Svg.circle [ Svg.Events.onClick (MovePosition (x, y)),
                      cx (toString xpos), cy (toString ypos), r <| toString positionCircleRadius, fill "black", fillOpacity "0.1" ] []
 
-playerOnPitch : Model -> Team -> Int -> Int -> Int -> Svg.Svg Msg
-playerOnPitch model team playerIdx x y =
+playerOnPitch : TeamTabState -> Team -> Int -> Int -> Int -> Svg.Svg Msg
+playerOnPitch state team playerIdx x y =
     let maybePlayer = Array.get playerIdx team.players
         label =
             case maybePlayer of
                 Nothing -> ("Empty!", "red")
-                Just player -> (player.name, if model.tabTeamSelectedPlayer == Just playerIdx then "#8080ff" else "white")
+                Just player -> (player.name, if state.selectedPlayer == Just playerIdx then "#8080ff" else "white")
 
         textAtPlayerPos : (String, String) -> Int -> Int -> Svg.Svg Msg
         textAtPlayerPos (str, color) x y =
@@ -140,17 +140,20 @@ update msg model =
         SelectPlayer (Just p) ->
             let (newModel, changed) = applySelectPlayer model p
             in (newModel, if changed then Cmds.saveFormation <| newModel.ourTeam else Cmd.none)
-        SelectPlayer Nothing -> ({ model | tabTeamSelectedPlayer = Nothing }, Cmd.none)
+        SelectPlayer Nothing -> ({ model | tab = TabTeam { selectedPlayer = Nothing }}, Cmd.none)
         -- move selected player to new position
         MovePosition pos ->
-            case model.tabTeamSelectedPlayer of
-                Nothing -> (model, Cmd.none)
-                Just playerIdx ->
-                    let newTeam = movePlayerPosition model.ourTeam playerIdx pos
-                    in if newTeam /= model.ourTeam then
-                        ({model | ourTeam = newTeam, tabTeamSelectedPlayer = Nothing},
-                         Cmds.saveFormation <| newTeam)
-                       else ({model | tabTeamSelectedPlayer = Nothing}, Cmd.none)
+            case model.tab of
+                TabTeam state -> case state.selectedPlayer of
+                    Nothing -> (model, Cmd.none)
+                    Just playerIdx ->
+                        let newTeam = movePlayerPosition model.ourTeam playerIdx pos
+                        in if newTeam /= model.ourTeam then
+                            ({model | ourTeam = newTeam,
+                                      tab = TabTeam { selectedPlayer = Nothing} },
+                             Cmds.saveFormation <| newTeam)
+                           else ({model | tab = TabTeam { selectedPlayer = Nothing }}, Cmd.none)
+                _ -> (model, Cmd.none)
 
 movePlayerPosition : Team -> Int -> (Int, Int) -> Team
 movePlayerPosition team playerIdx pos =
@@ -162,14 +165,16 @@ movePlayerPosition team playerIdx pos =
 
 applySelectPlayer : Model -> Int -> (Model, Bool)
 applySelectPlayer model p =
-  case model.tabTeamSelectedPlayer of
-    Nothing -> ({ model | tabTeamSelectedPlayer = Just p }, False)
-    Just q -> if p == q then
-        ({ model | tabTeamSelectedPlayer = Nothing }, False)
-      else
-        ({ model | tabTeamSelectedPlayer = Nothing,
-                   ourTeam = swapPlayerPositions (model.ourTeam) p q
-        }, True)
+    case model.tab of
+        TabTeam state -> case state.selectedPlayer of
+            Nothing -> ({ model | tab = TabTeam { selectedPlayer = Just p }}, False)
+            Just q ->
+                if p == q then
+                    ({ model | tab = TabTeam { selectedPlayer = Nothing }}, False)
+                  else
+                    ({ model | tab = TabTeam { selectedPlayer = Nothing},
+                               ourTeam = swapPlayerPositions (model.ourTeam) p q }, True)
+        _ -> (model, False)
 
 arrayDirtyGet : Int -> Array a -> a
 arrayDirtyGet i arr = case Array.get i arr of

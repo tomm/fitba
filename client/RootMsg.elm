@@ -16,3 +16,4 @@ type Msg
   | UpdateGame (Result Http.Error (List GameEvent))
   | GotStartGameData (Result Http.Error Team)
   | SavedFormation (Result Http.Error String)
+  | NoOp
