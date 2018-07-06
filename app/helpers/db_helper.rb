@@ -70,7 +70,7 @@ module DbHelper
           1
         else
           # shit. they are equal. what other deciding factor can there be?
-          0
+          a[:name] > b[:name] ? -1 : 1
         end
       end
     end
