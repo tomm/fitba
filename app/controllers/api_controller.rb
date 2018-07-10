@@ -1,5 +1,5 @@
 class ApiController < ApplicationController
-  skip_before_filter :verify_authenticity_token, :only => [:save_formation]
+  skip_before_filter :verify_authenticity_token, :only => [:save_formation, :transfer_bid]
 
   # () -> User | nil
   private def get_user
@@ -165,6 +165,47 @@ class ApiController < ApplicationController
                                .all
       end
       render json: game_events.map {|e| game_event_to_json(e)}
+    else
+      head 403
+    end
+  end
+
+  def transfer_listings
+    if user = get_user then
+      ts = TransferListing.order(:deadline).all
+      render json: (ts.map do |t|
+        your_bid = TransferBid.where(team_id: user.team_id, transfer_listing_id: t.id).first
+        {
+          id: t.id,
+          minPrice: t.min_price,
+          deadline: t.deadline,
+          status: 'OnSale',
+          youBid: your_bid == nil ? nil : your_bid.amount,
+          player: Player.find(t.player_id)
+        }
+      end)
+    else
+      head 403
+    end
+  end
+
+  def transfer_bid
+    if user = get_user then
+      data = JSON.parse(request.body.read())
+      tid = data["transfer_listing_id"]
+      if data["amount"] == nil then
+        TransferBid.where(team_id: user.team_id, transfer_listing_id: tid).destroy_all
+        render json: {status: 'SUCCESS'}
+      else
+        your_bid = TransferBid.where(team_id: user.team_id, transfer_listing_id: tid).first
+        if your_bid == nil then
+          TransferBid.create(transfer_listing_id: tid, team_id: user.team_id, amount: data["amount"])
+          render json: {status: 'SUCCESS'}
+        else
+          your_bid.update(amount: data["amount"])
+          render json: {status: 'SUCCESS'}
+        end
+      end
     else
       head 403
     end

@@ -17,6 +17,56 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal "Test Utd", body['name']
   end
 
+  test "transfer market" do
+    tid = transfer_listings(:one).id
+    login
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 2, body.size
+    assert_equal 123, body[0]["minPrice"]
+    assert_equal nil, body[0]["youBid"]
+    assert_equal 234, body[1]["minPrice"]
+    assert_equal nil, body[1]["youBid"]
+
+    post :transfer_bid, {amount: 200, transfer_listing_id: tid}.to_json, :format => "json"
+    assert_response :success
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 2, body.size
+    assert_equal 123, body[0]["minPrice"]
+    assert_equal 200, body[0]["youBid"]
+    assert_equal 234, body[1]["minPrice"]
+    assert_equal nil, body[1]["youBid"]
+    
+    post :transfer_bid, {amount: 300, transfer_listing_id: tid}.to_json, :format => "json"
+    assert_response :success
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 2, body.size
+    assert_equal 123, body[0]["minPrice"]
+    assert_equal 300, body[0]["youBid"]
+    assert_equal 234, body[1]["minPrice"]
+    assert_equal nil, body[1]["youBid"]
+    
+    post :transfer_bid, {amount: nil, transfer_listing_id: tid}.to_json, :format => "json"
+    assert_response :success
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 2, body.size
+    assert_equal 123, body[0]["minPrice"]
+    assert_equal nil, body[0]["youBid"]
+    assert_equal 234, body[1]["minPrice"]
+    assert_equal nil, body[1]["youBid"]
+  end
+
   test "/squad/:id needs login" do
     team = teams(:test_utd)
     get :view_team, { 'id' => team.id }, :format => "json"

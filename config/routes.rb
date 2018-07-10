@@ -10,6 +10,8 @@ Rails.application.routes.draw do
   get 'game_events_since/:id/' => 'api#game_events_since'
   get 'tables' => 'api#league_tables'
   get 'fixtures' => 'api#fixtures'
+  get 'transfer_listings' => 'api#transfer_listings'
+  post 'transfer_bid' => 'api#transfer_bid'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

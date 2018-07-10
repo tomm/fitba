@@ -1,6 +1,7 @@
 class Team < ActiveRecord::Base
   belongs_to :formation
   has_many :team_leagues
+  has_many :players
 
   def squad
     positions = FormationPo.where(formation_id: self.formation_id).order(:position_num).all
@@ -18,17 +19,7 @@ class Team < ActiveRecord::Base
 
     {
       formation: positions.map {|p| [p.position_x, p.position_y]},
-      players: squad.map do |p|
-        {
-          id: p.id,
-          name: p.name,
-          shooting: p.shooting,
-          passing: p.passing,
-          tackling: p.tackling,
-          handling: p.handling,
-          speed: p.speed
-        }
-      end
+      players: squad.map {|p| p.to_api }
     }
   end
 

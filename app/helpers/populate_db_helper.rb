@@ -11,39 +11,38 @@ FORMATION_442 = [
 
 TEAMS_PER_LEAGUE = 12
 
-TEAM_NAMES = [
-  "Barcelona",
-  "Real Madrid",
-  "Chelsea",
-  "AEK Athens",
-  "Celtic F.C",
-  "Hamburg",
-  "S.S. Lazio",
-  "Rangers F.C",
-  "Paris St-Germain",
-  "Red Star Belgrade",
-  "Bologna F.C. 1909",
-  "Athletic Bilbao",
+TEAM_PREDEF = [
+  {name: "Barcelona", player_spawn_skill: "3+1d6"},
+  {name: "Real Madrid", player_spawn_skill: "3+1d6"},
+  {name: "Chelsea", player_spawn_skill: "3+1d6"},
+  {name: "AEK Athens", player_spawn_skill: "2+1d7"},
+  {name: "Celtic F.C", player_spawn_skill: "2+1d7"},
+  {name: "Hamburg", player_spawn_skill: "2+1d7"},
+  {name: "S.S. Lazio", player_spawn_skill: "1+1d8"},
+  {name: "Rangers F.C", player_spawn_skill: "1+1d8"},
+  {name: "Paris St-Germain", player_spawn_skill: "1+1d8"},
+  {name: "Red Star Belgrade", player_spawn_skill: "0+1d9"},
+  {name: "Bologna F.C. 1909", player_spawn_skill: "0+1d9"},
+  {name: "Athletic Bilbao", player_spawn_skill: "0+1d9"},
 
-  "Sporting Toulon",
-  "St Pauli",
-  "U.C. Sampdoria",
-  "Partizan",
-  "Livorno Calcio",
-  "Besiktas",
-  "FC Twente",
-  "Luton Town",
-  "Millwall",
-  "Portland Timbers",
-  "Vag of the South",
-  "Cock of the North",
+  {name: "Sporting Toulon", player_spawn_skill: "0+1d8"},
+  {name: "St Pauli", player_spawn_skill: "0+1d8"},
+  {name: "U.C. Sampdoria", player_spawn_skill: "0+1d8"},
+  {name: "Partizan", player_spawn_skill: "0+1d7"},
+  {name: "Livorno Calcio", player_spawn_skill: "0+1d7"},
+  {name: "Besiktas", player_spawn_skill: "0+1d7"},
+  {name: "FC Twente", player_spawn_skill: "0+1d6"},
+  {name: "Luton Town", player_spawn_skill: "0+1d6"},
+  {name: "Millwall", player_spawn_skill: "0+1d6"},
+  {name: "Portland Timbers", player_spawn_skill: "0+1d5"},
+  {name: "Vag of the South", player_spawn_skill: "0+1d5"},
+  {name: "Cock of the North", player_spawn_skill: "0+1d5"},
 ]
 
 module PopulateDbHelper
   class Populate
 
     def self.go
-
       puts "Creating leagues..."
       l1 = League.create(rank: 1, name: "First Division", is_finished: false)
       l2 = League.create(rank: 2, name: "Second Division", is_finished: false)
@@ -119,35 +118,65 @@ module PopulateDbHelper
       create_fixtures_for_league_season(league.id, 1)
     end
 
-    def self.make_player(team_id)
-      Player.create(
+    def self.make_player(team_id, player_spawn_skill)
+      # player skill as '4+2d6' kinda thing
+      m = player_spawn_skill.match(/(\d+)\+(\d+)d(\d+)/)
+      dice = lambda {|n,s|
+        x=0
+        (1..n).each do |_|
+          x += 1 + (rand*s).to_i; 
+        end
+        x
+      }
+      rand_skill = lambda {
+        skill = m[1].to_i + dice.call(m[2].to_i, m[3].to_i)
+        skill >= 1 ? (skill <= 9 ? skill : 9) : 1
+      }
+      puts "Creating player using #{m[1]} + #{m[2]}d#{m[3]}"
+
+      player = Player.create(
         team_id: team_id,
         name: NameGen.pick,
-        shooting: (0..9).to_a.sample,
-        passing: (0..9).to_a.sample,
-        tackling: (0..9).to_a.sample,
-        handling: (0..9).to_a.sample,
-        speed: (0..9).to_a.sample
+        shooting: rand_skill.call(),
+        passing: rand_skill.call(),
+        tackling: rand_skill.call(),
+        handling: rand_skill.call(),
+        speed: rand_skill.call(),
       )
+
+      player.update(name: player.pick_position + " " + player.name)
+    end
+
+    def self.repopulate_team(team)
+      # XXX need to retire old players
+      num_players = Player.where(team_id: team.id).count
+
+      player_spawn_skill = TEAM_PREDEF[team.id - 1][:player_spawn_skill]
+
+      (num_players..18).each do |i|
+        make_player(team.id, player_spawn_skill)
+      end
+
+      pick_team_formation(team)
+    end
+
+    def self.pick_team_formation(team)
+      playerIds = Player.where(team_id: team.id).pluck(:id)
+      positions = playerIds.each_with_index.map do |playerId,idx|
+        [playerId, [idx<11 ? FORMATION_442[idx][0] : 0,
+                     idx<11 ? FORMATION_442[idx][1] : 0]]
+      end
+      team.update_player_positions positions
     end
 
     def self.make_team
-
       formation = Formation.create()
       team = Team.create(formation_id: formation.id)
-      if nice_name = TEAM_NAMES[team.id-1] then
-        team.update(name: nice_name)
-      else
-        team.update(name: "Team #{team.id}")
-      end
+      team_predef = TEAM_PREDEF[team.id-1]
+      team.update(name: team_predef[:name])
       puts "Creating team " + team.name
-      (0..16).to_a.map do |i|
-        player = make_player(team.id)
-        FormationPo.create(formation_id: formation.id, player_id: player.id,
-                           position_num: i,
-                           position_x: i<11 ? FORMATION_442[i][0] : 0,
-                           position_y: i<11 ? FORMATION_442[i][1] : 0)
-      end
+      repopulate_team(team)
+
       team
     end
   end
