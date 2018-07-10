@@ -16,6 +16,7 @@ import Svg
 import Task
 import Time
 
+import Uitk
 import TransferMarket
 import TransferMarketTypes
 import FixturesView
@@ -187,9 +188,8 @@ view model =
 
 financesTab : Model -> Html Msg
 financesTab model =
-    div [] [
-        Html.h2 [] [text "Finances"],
-        button [class "nav", onClick ViewTransferMarket] [text "Transfer market"]
+    Uitk.view Nothing "Finances" [
+        Uitk.actionButton ViewTransferMarket "Transfer Market"
     ]
 
 leagueTableTab : Model -> LeagueTable -> Html Msg
@@ -208,22 +208,23 @@ leagueTableTab model league =
               , Html.td [] [record.goalsFor - record.goalsAgainst |> toString |> text]
               , Html.td [] [calcPoints record |> toString |> text]
             ]
-  in div [] [
-      Html.h2 [] [text <| league.name],
-      Html.table [class "league-table"] (
-      (Html.tr [] [
-        Html.th [] [text "Team"]
-      , Html.th [] [text "Played"]
-      , Html.th [] [text "Won"]
-      , Html.th [] [text "Drawn"]
-      , Html.th [] [text "Lost"]
-      , Html.th [] [text "GF"]
-      , Html.th [] [text "GA"]
-      , Html.th [] [text "GD"]
-      , Html.th [] [text "Points"]
-      ]) ::
-      (List.map recordToTableLine (sortLeague league.record))
-    )]
+    in
+        Uitk.view Nothing league.name [
+            Html.table [class "league-table"] (
+                (Html.tr [] [
+                    Html.th [] [text "Team"]
+                  , Html.th [] [text "Played"]
+                  , Html.th [] [text "Won"]
+                  , Html.th [] [text "Drawn"]
+                  , Html.th [] [text "Lost"]
+                  , Html.th [] [text "GF"]
+                  , Html.th [] [text "GA"]
+                  , Html.th [] [text "GD"]
+                  , Html.th [] [text "Points"]
+                ]) ::
+                (List.map recordToTableLine (sortLeague league.record))
+            )
+        ]
 
 calcPoints : SeasonRecord -> Int
 calcPoints sr = sr.won*3 + sr.drawn*1

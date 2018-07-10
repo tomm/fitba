@@ -9,18 +9,17 @@ import TransferMarketTypes exposing (Msg, State, Msg(ViewListing, ViewAll, Updat
                                      View(ListView, PlayerView))
 import PlayerDetailedView
 import Styles
+import Uitk
 
 view : State -> Html Msg
 view state = case state.view of
     PlayerView pvstate ->
         let bidInput = div [] [
-                button [class "action", onClick MakeBid] [text "Make bid"],
+                Uitk.actionButton MakeBid "Make bid",
                 input [ type_ "number", step "10000", value <| toString pvstate.bidInputValue, onInput <| UpdateBidInput ] []
             ]
-            withdrawButton = div [] [button [class "action", onClick WithdrawBid] [text "Withdraw bid"]]
-        in
-            div [] [
-                h2 [] [text "Transfer Listing"],
+            withdrawButton = div [] [ Uitk.actionButton WithdrawBid "Withdraw bid" ]
+        in Uitk.view (Just <| Uitk.backButton ViewAll) "Transfer Listing" [
                 PlayerDetailedView.view pvstate.listing.player,
                 div [class "half-width"] [
                     div [Styles.defaultMargin] [
@@ -35,8 +34,7 @@ view state = case state.view of
                         YouWon -> div [] [text "You have signed this player."]
                         YouLost -> div [] [text "You were outbid by another team."]
                     ]
-                ],
-                button [class "nav", onClick ViewAll] [text "Back to listings"]
+                ]
             ]
 
     ListView ->
@@ -58,22 +56,22 @@ view state = case state.view of
                     Html.td [] [text <| toString <| listing.player.handling],
                     Html.td [] [text <| toString <| listing.player.speed]
                 ]
-        in div [] [
-          Html.h2 [] [text "Transfer Market"],
-          Html.table [class "transfer-listings"] (
-              (Html.tr [] [
-                Html.th [] [text "Name"]
-              , Html.th [] [text "Min Price"]
-              , Html.th [] [text "Status"]
-              , Html.th [] [text "Sh"]
-              , Html.th [] [text "Pa"]
-              , Html.th [] [text "Ta"]
-              , Html.th [] [text "Ha"]
-              , Html.th [] [text "Sp"]
-              ]) ::
-              (List.map listingToTr state.listings)
-          )
-        ]
+        in
+            Uitk.view Nothing "Transfer Market" [
+                Html.table [class "transfer-listings"] (
+                    (Html.tr [] [
+                        Html.th [] [text "Name"]
+                      , Html.th [] [text "Min Price"]
+                      , Html.th [] [text "Status"]
+                      , Html.th [] [text "Sh"]
+                      , Html.th [] [text "Pa"]
+                      , Html.th [] [text "Ta"]
+                      , Html.th [] [text "Ha"]
+                      , Html.th [] [text "Sp"]
+                    ]) :: 
+                    (List.map listingToTr state.listings)
+                )
+            ]
 
 makeBid : State -> Int -> TransferListing -> State
 makeBid state amount listing =

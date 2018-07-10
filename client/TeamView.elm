@@ -14,8 +14,9 @@ import Model exposing (..)
 import Types exposing (..)
 import RootMsg
 import Styles exposing (..)
-import TeamViewTypes exposing (State, Msg, Msg(ViewPlayer, ViewSquad, SelectPlayer, MovePosition),
+import TeamViewTypes exposing (State, Msg, Msg(SellPlayer, ViewPlayer, ViewSquad, SelectPlayer, MovePosition),
                                View(SquadView, PlayerView), SquadViewState)
+import Uitk
 import PlayerDetailedView
 
 pitchX = 812
@@ -29,10 +30,9 @@ view : State -> Html Msg
 view state =
     case state.view of
         PlayerView player ->
-            div [] [
-                Html.h2 [] [text player.name],
+            Uitk.view (Just <| Uitk.backButton ViewSquad) player.name [
                 PlayerDetailedView.view player,
-                button [Html.Attributes.class "nav", onClick ViewSquad] [text "Back to listings"]
+                Uitk.actionButton (SellPlayer player) "Sell this player"
             ]
         SquadView squadViewState -> 
             let isActive i =
@@ -53,18 +53,17 @@ view state =
                        , Html.td [infoAction, Html.Attributes.style [("padding", "0"), ("font-size", "200%")]] [text "ⓘ"]
                     ]
             in
-                div [] [
-                    Html.h2 [] [state.team.name |> text],
+                Uitk.view Nothing state.team.name [
                     Html.table
                         [Html.Attributes.class "squad-list"] <|
                         (Html.tr [] [
                             Html.th [] [text "Pos."],
                             Html.th [] [text "Name"],
-                            Html.th [] [text "Shooting"],
-                            Html.th [] [text "Passing"],
-                            Html.th [] [text "Tackling"],
-                            Html.th [] [text "Handling"],
-                            Html.th [] [text "Speed"],
+                            Html.th [] [text "Sh"],
+                            Html.th [] [text "Pa"],
+                            Html.th [] [text "Ta"],
+                            Html.th [] [text "Ha"],
+                            Html.th [] [text "Sp"],
                             Html.th [] []
                         ]) ::
                         (List.indexedMap playerToDiv (Array.toList state.team.players)),
@@ -156,6 +155,7 @@ update msg state =
     case msg of
         ViewSquad -> ({ state | view = SquadView { selectedPlayer = Nothing } }, Cmd.none)
         ViewPlayer player -> ({ state | view = PlayerView player }, Cmd.none)
+        SellPlayer player -> ({ state | team = setPlayerOnSale state.team player }, Cmd.none)
         SelectPlayer (Just p) ->
             let (newState, changed) = applySelectPlayer state p
             in (newState, if changed then Cmds.saveFormation <| newState.team else Cmd.none)
@@ -173,6 +173,9 @@ update msg state =
                              Cmds.saveFormation <| newTeam)
                            else ({state | view = SquadView { selectedPlayer = Nothing }}, Cmd.none)
                 _ -> (state, Cmd.none)
+
+setPlayerOnSale : Team -> Player -> Team
+setPlayerOnSale team player = Debug.crash "Not implemented"
 
 movePlayerPosition : Team -> Int -> (Int, Int) -> Team
 movePlayerPosition team playerIdx pos =

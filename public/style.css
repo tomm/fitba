@@ -25,17 +25,35 @@ table {
 .league-table tr:nth-child(3) { background-color: rgba(180, 255, 180, 0.5); }
 .league-table tr:nth-child(4) { background-color: rgba(180, 255, 180, 0.5); }
 
-button.nav {
-	background-color: rgba(150, 150, 255, 0.5);
-	padding: 10px;
-	font-weight: bold;
-	margin: 0 20px;
-}
+.login { font-size: 200%; }
+.login form { margin: 20px; }
+.login label { display: block; margin: 5px; }
+.login input { border: 0px;margin: 5px; padding: 5px; }
+.login input[type="submit"] { padding: 10px 40px; background-color: rgba(150, 150, 255, 0.5); }
 
 button.action {
 	background-color: rgba(150, 150, 255, 0.5);
 	padding: 10px;
+	font-weight: bold;
 	margin: 10px;
+}
+
+button {
+	outline: none;
+	border: 0;
+}
+
+button.circle-button {
+	width: 40px;
+	height: 40px;
+	border-radius: 20px;
+	text-align: center;
+	vertical-align: center;
+	padding: 0;
+	font-size: 200%;
+	background-color: rgba(150, 150, 255, 0.5);
+	margin: 0px 10px;
+	float: left;
 }
 
 div.half-width {
@@ -45,11 +63,6 @@ div.half-width {
 
 h1,h2,h3 {
 	text-align: center;
-}
-
-button {
-	outline: none;
-	border: 0;
 }
 
 tr {
@@ -63,4 +76,12 @@ td, th {
 
 th {
 	background-color: rgba(150, 150, 255, 0.5);
+}
+
+div.main-content {
+	clear: both;
+}
+
+div.view {
+	margin: 0;
 }

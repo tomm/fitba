@@ -2,7 +2,7 @@ module FixturesView exposing (view, update)
 
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
-import Html exposing (Html, Attribute, div, h2, input, table, tr, td, th, text, ul, li, button)
+import Html exposing (Html, Attribute, div, input, table, tr, td, th, text, ul, li, button)
 import Svg
 import Svg.Attributes exposing (..)
 import Time exposing (Time)
@@ -15,27 +15,21 @@ import RootMsg
 import FixturesViewMsg exposing (Msg, Msg(..))
 import ClientServer
 import Types exposing (..)
+import Uitk
 
 match_length_seconds : Float
 match_length_seconds = 270.0  -- make sure this matches app/simulation.rb:MATCH_LENGTH_SECONDS
 
 view : Model -> Maybe WatchingGame -> Html Msg
 view model maybeWatchingGame =
-    div [] (
-        case maybeWatchingGame of
-            Nothing -> [
-                h2 [] [text "Fixtures"],
-                fixturesTable model
-            ]
-            Just watching -> [
-                h2 [] [text <| case watching.game.status of
-                    Scheduled -> "Live match"
-                    InProgress -> "Live match"
-                    Played _ -> "Match replay"
-                ],
-                matchView watching
-            ]
-    )
+    case maybeWatchingGame of
+        Nothing -> Uitk.view Nothing "Fixtures" [ fixturesTable model ]
+        Just watching ->
+            let status = case watching.game.status of
+                Scheduled -> "Live match"
+                InProgress -> "Live match"
+                Played _ -> "Match replay"
+            in Uitk.view Nothing status [matchView watching]
 
 eventsUpToTimepoint : Game -> Time -> List GameEvent
 eventsUpToTimepoint game time =
