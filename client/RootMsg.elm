@@ -4,13 +4,13 @@ import Http
 import Time
 
 import Model exposing (..)
-import TeamViewMsg
+import TeamViewTypes
 import FixturesViewMsg
 import TransferMarketTypes
 import Types exposing (..)
 
 type Msg
-  = ChangeTab UiTab | MsgTeamView TeamViewMsg.Msg | ClockTick Time.Time
+  = ChangeTab UiTab | MsgTeamView TeamViewTypes.Msg | ClockTick Time.Time
   | MsgFixturesView FixturesViewMsg.Msg
   | MsgTransferMarket TransferMarketTypes.Msg
   | UpdateFixtures (Result Http.Error (List Fixture))

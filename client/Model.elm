@@ -6,19 +6,19 @@ import Time exposing (Time)
 
 import Types exposing (..)
 import TransferMarketTypes
+import TeamViewTypes
 
 -- MODEL
 
 type alias WatchingGame = { timePoint: Time, game: Game }
-type alias TeamTabState = { selectedPlayer: Maybe Int }
 type alias TabTransferMarketState = { listings: List Player }
 
-type UiTab = TabTeam TeamTabState |
+type UiTab = TabTeam TeamViewTypes.State |
              TabLeagueTables |
              TabFixtures (Maybe WatchingGame) |
              TabFinances |
              TabTransferMarket TransferMarketTypes.State |
-             TabViewOtherTeam (TeamTabState, Team)
+             TabViewOtherTeam TeamViewTypes.State
 
 type alias RootModel = {
     errorMsg: Maybe String,

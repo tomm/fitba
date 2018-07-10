@@ -20,6 +20,7 @@ import TransferMarket
 import TransferMarketTypes
 import FixturesView
 import FixturesViewMsg
+import TeamViewTypes
 import Model exposing (..)
 import Types exposing (..)
 import RootMsg exposing (..)
@@ -70,7 +71,7 @@ update msg model =
             case msg of
                 GotStartGameData result -> case result of
                     Ok team -> ({model | state=GameData {ourTeamId = team.id,
-                                 tab = TabTeam { selectedPlayer = Nothing },
+                                 tab = TabTeam { team = team, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } },
                                  ourTeam = team,
                                  fixtures = [],
                                  leagueTables = []
@@ -87,14 +88,20 @@ update msg model =
                     ] } }
                 ViewTeam teamId -> (model, ClientServer.loadTeam teamId)
                 ViewTeamLoaded result -> case result of
-                    Ok team -> updateState { m | tab = TabViewOtherTeam ( { selectedPlayer = Nothing }, team) }
+                    Ok team -> updateState { m | tab = TabViewOtherTeam {
+                        team = team,
+                        view = TeamViewTypes.SquadView { selectedPlayer = Nothing }
+                    } }
                     Err error -> handleHttpError error model
                 ClockTick t ->
                     let (state, cmd) = FixturesView.update FixturesViewMsg.GameTick m
                     in ({ model | state = GameData state}, cmd)
-                MsgTeamView msg ->
-                    let (state, cmd) = TeamView.update msg m
-                    in ({ model | state = GameData state}, cmd)
+                MsgTeamView msg -> case m.tab of
+                    TabTeam state ->
+                        let (newState, cmd) = TeamView.update msg state
+                        in updateStateCmd { m | tab = TabTeam newState,
+                                                ourTeam = newState.team } cmd
+                    _ -> (model, Cmd.none)
                 MsgFixturesView msg ->
                     let (state, cmd) = FixturesView.update msg m
                     in ({ model | state = GameData state}, cmd)
@@ -146,7 +153,10 @@ tabs : Model -> Html Msg
 tabs model =
   let liStyle = style[("display", "block"), ("float", "left"), ("width", "25%"), ("border", "0")]
       tabStyle tab = if model.tab == tab then activeTabStyle else inactiveTabStyle
-      tabLabels = [(TabTeam { selectedPlayer = Nothing }, "Team"), (TabLeagueTables, "Tables"), (TabFixtures Nothing, "Fixtures"), (TabFinances, "Finances")]
+      tabLabels = [(TabTeam { team = model.ourTeam, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } }, "Team"),
+                   (TabLeagueTables, "Tables"),
+                   (TabFixtures Nothing, "Fixtures"),
+                   (TabFinances, "Finances")]
 
   in ul [style [("opacity", "0.9"), ("listStyleType", "none"), ("width", "100%"), ("padding", "0 0 1em 0"), ("top", "0"), ("left", "0"), ("margin", "0"), ("position", "fixed")]]
       (List.map (\(tab, label) ->
@@ -165,8 +175,8 @@ view model =
                     div [style [("clear", "both"), ("margin", "4em 0 0 0")]] [
                         text <| Maybe.withDefault "" model.errorMsg,
                         case m.tab of
-                            TabViewOtherTeam (state, team) -> Html.map (\_ -> NoOp {- can't edit -}) <| TeamView.view state team
-                            TabTeam state -> Html.map MsgTeamView <| TeamView.view state m.ourTeam
+                            TabViewOtherTeam state -> Html.map (\_ -> NoOp {- can't edit -}) <| TeamView.view state
+                            TabTeam state -> Html.map MsgTeamView <| TeamView.view state
                             TabLeagueTables -> div [] (List.map (leagueTableTab m) m.leagueTables)
                             TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
                             TabFinances -> financesTab m

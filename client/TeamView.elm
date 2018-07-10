@@ -14,7 +14,9 @@ import Model exposing (..)
 import Types exposing (..)
 import RootMsg
 import Styles exposing (..)
-import TeamViewMsg exposing (Msg, Msg(SelectPlayer, MovePosition))
+import TeamViewTypes exposing (State, Msg, Msg(ViewPlayer, ViewSquad, SelectPlayer, MovePosition),
+                               View(SquadView, PlayerView), SquadViewState)
+import PlayerDetailedView
 
 pitchX = 812
 pitchY = 1280
@@ -23,64 +25,79 @@ pitchY = 1280
 movablePitchPositions : List (Int, Int)
 movablePitchPositions = List.concat <| List.map (\x -> List.map (\y -> (x,y)) [1,2,3,4,5]) [0,1,2,3,4]
 
-view : TeamTabState -> Team -> Html Msg
-view state team =
-  let isActive i = case state.selectedPlayer of
-          Just j -> j == i
-          Nothing -> False
-      playerToDiv i p =
-        let clickAction = onClick (SelectPlayer <| Just i)
-        in Html.tr [if isActive i then activeTableRowStyle else Html.Attributes.style []] [
-             Html.td [clickAction] [text <| toString <| i + 1 ]
-           , Html.td [clickAction] [text <| p.name]
-           , Html.td [clickAction] [text <| toString <| p.shooting]
-           , Html.td [clickAction] [text <| toString <| p.passing]
-           , Html.td [clickAction] [text <| toString <| p.tackling]
-           , Html.td [clickAction] [text <| toString <| p.handling]
-           , Html.td [clickAction] [text <| toString <| p.speed]
-        ]
-    in
-        div [] [
-            Html.h2 [] [team.name |> text],
-            Html.table
-                [Html.Attributes.class "squad-list"] <|
-                (
-                    Html.tr [] [Html.th [] [text "Pos."],
-                    Html.th [] [text "Name"],
-                    Html.th [] [text "Shooting"],
-                    Html.th [] [text "Passing"],
-                    Html.th [] [text "Tackling"],
-                    Html.th [] [text "Handling"],
-                    Html.th [] [text "Speed"]]
-                ) ::
-                (List.indexedMap playerToDiv (Array.toList team.players)),
+view : State -> Html Msg
+view state =
+    case state.view of
+        PlayerView player ->
+            div [] [
+                Html.h2 [] [text player.name],
+                PlayerDetailedView.view player,
+                button [Html.Attributes.class "nav", onClick ViewSquad] [text "Back to listings"]
+            ]
+        SquadView squadViewState -> 
+            let isActive i =
+                    case squadViewState.selectedPlayer of
+                        Just j -> j == i
+                        Nothing -> False
+                playerToDiv i p =
+                    let selectAction = onClick (SelectPlayer <| Just i)
+                        infoAction = onClick (ViewPlayer p)
+                    in Html.tr [if isActive i then activeTableRowStyle else Html.Attributes.style []] [
+                         Html.td [selectAction] [text <| toString <| i + 1 ]
+                       , Html.td [selectAction] [text <| p.name]
+                       , Html.td [selectAction] [text <| toString <| p.shooting]
+                       , Html.td [selectAction] [text <| toString <| p.passing]
+                       , Html.td [selectAction] [text <| toString <| p.tackling]
+                       , Html.td [selectAction] [text <| toString <| p.handling]
+                       , Html.td [selectAction] [text <| toString <| p.speed]
+                       , Html.td [infoAction, Html.Attributes.style [("padding", "0"), ("font-size", "200%")]] [text "ⓘ"]
+                    ]
+            in
+                div [] [
+                    Html.h2 [] [state.team.name |> text],
+                    Html.table
+                        [Html.Attributes.class "squad-list"] <|
+                        (Html.tr [] [
+                            Html.th [] [text "Pos."],
+                            Html.th [] [text "Name"],
+                            Html.th [] [text "Shooting"],
+                            Html.th [] [text "Passing"],
+                            Html.th [] [text "Tackling"],
+                            Html.th [] [text "Handling"],
+                            Html.th [] [text "Speed"],
+                            Html.th [] []
+                        ]) ::
+                        (List.indexedMap playerToDiv (Array.toList state.team.players)),
 
-            Svg.svg
-                [Svg.Attributes.width "100%", Svg.Attributes.height "100%", viewBox "0 0 812 1280" ]
-                ([ 
-                    Svg.image
-                        [ Svg.Events.onClick <| SelectPlayer Nothing,
-                          Svg.Attributes.width "100%", Svg.Attributes.height "100%", Svg.Attributes.xlinkHref "/pitch.png" ]
-                        []
-                ] ++
-                -- players
-                (List.take 11 <| Array.toList <| Array.indexedMap (\i (x,y) -> playerOnPitch state team i x y) team.formation)
-                ++
-                -- pitch positions unused by our formation
-                case state.selectedPlayer of
-                    Nothing -> []
-                    Just 0 -> [] -- can't move goalkeeper
-                    Just _ ->
-                        List.map
-                            (\(x, y) ->
-                                    -- XXX why doesn't Array.member exist!
-                                    if List.member (x, y) <| List.take 11 <| Array.toList team.formation
-                                    then Svg.text ""
-                                    else emptyPitchPosition (x, y)
-                            )
-                            movablePitchPositions
-                        )
-        ]
+                    Svg.svg
+                        [Svg.Attributes.width "100%", Svg.Attributes.height "100%", viewBox "0 0 812 1280" ]
+                        ([ 
+                            Svg.image
+                                [ Svg.Events.onClick <| SelectPlayer Nothing,
+                                  Svg.Attributes.width "100%", Svg.Attributes.height "100%", Svg.Attributes.xlinkHref "/pitch.png" ]
+                                []
+                        ] ++
+                        -- players
+                        (List.take 11
+                            <| Array.toList
+                            <| Array.indexedMap (
+                                \i (x,y) -> playerOnPitch state.team squadViewState i x y) state.team.formation)
+                        ++
+                        -- pitch positions unused by our formation
+                        case squadViewState.selectedPlayer of
+                            Nothing -> []
+                            Just 0 -> [] -- can't move goalkeeper
+                            Just _ ->
+                                List.map
+                                    (\(x, y) ->
+                                            -- XXX why doesn't Array.member exist!
+                                            if List.member (x, y) <| List.take 11 <| Array.toList state.team.formation
+                                            then Svg.text ""
+                                            else emptyPitchPosition (x, y)
+                                    )
+                                    movablePitchPositions
+                                )
+                ]
 
 positionCircleRadius = 75
 
@@ -102,13 +119,13 @@ emptyPitchPosition (x, y) =
         Svg.circle [ Svg.Events.onClick (MovePosition (x, y)),
                      cx (toString xpos), cy (toString ypos), r <| toString positionCircleRadius, fill "black", fillOpacity "0.1" ] []
 
-playerOnPitch : TeamTabState -> Team -> Int -> Int -> Int -> Svg.Svg Msg
-playerOnPitch state team playerIdx x y =
+playerOnPitch : Team -> SquadViewState -> Int -> Int -> Int -> Svg.Svg Msg
+playerOnPitch team squadViewState playerIdx x y =
     let maybePlayer = Array.get playerIdx team.players
         label =
             case maybePlayer of
                 Nothing -> ("Empty!", "red")
-                Just player -> (player.name, if state.selectedPlayer == Just playerIdx then "#8080ff" else "white")
+                Just player -> (player.name, if squadViewState.selectedPlayer == Just playerIdx then "#8080ff" else "white")
 
         textAtPlayerPos : (String, String) -> Int -> Int -> Svg.Svg Msg
         textAtPlayerPos (str, color) x y =
@@ -134,26 +151,28 @@ playerOnPitch state team playerIdx x y =
         textAtPlayerPos label x y
 
 
-update : Msg -> Model -> (Model, Cmd RootMsg.Msg)
-update msg model =
+update : Msg -> State -> (State, Cmd RootMsg.Msg)
+update msg state =
     case msg of
+        ViewSquad -> ({ state | view = SquadView { selectedPlayer = Nothing } }, Cmd.none)
+        ViewPlayer player -> ({ state | view = PlayerView player }, Cmd.none)
         SelectPlayer (Just p) ->
-            let (newModel, changed) = applySelectPlayer model p
-            in (newModel, if changed then Cmds.saveFormation <| newModel.ourTeam else Cmd.none)
-        SelectPlayer Nothing -> ({ model | tab = TabTeam { selectedPlayer = Nothing }}, Cmd.none)
+            let (newState, changed) = applySelectPlayer state p
+            in (newState, if changed then Cmds.saveFormation <| newState.team else Cmd.none)
+        SelectPlayer Nothing -> ({ state | view = SquadView { selectedPlayer = Nothing }}, Cmd.none)
         -- move selected player to new position
         MovePosition pos ->
-            case model.tab of
-                TabTeam state -> case state.selectedPlayer of
-                    Nothing -> (model, Cmd.none)
+            case state.view of
+                SquadView squadView -> case squadView.selectedPlayer of
+                    Nothing -> (state, Cmd.none)
                     Just playerIdx ->
-                        let newTeam = movePlayerPosition model.ourTeam playerIdx pos
-                        in if newTeam /= model.ourTeam then
-                            ({model | ourTeam = newTeam,
-                                      tab = TabTeam { selectedPlayer = Nothing} },
+                        let newTeam = movePlayerPosition state.team playerIdx pos
+                        in if newTeam /= state.team then
+                            ({state | team = newTeam,
+                                      view = SquadView { selectedPlayer = Nothing} },
                              Cmds.saveFormation <| newTeam)
-                           else ({model | tab = TabTeam { selectedPlayer = Nothing }}, Cmd.none)
-                _ -> (model, Cmd.none)
+                           else ({state | view = SquadView { selectedPlayer = Nothing }}, Cmd.none)
+                _ -> (state, Cmd.none)
 
 movePlayerPosition : Team -> Int -> (Int, Int) -> Team
 movePlayerPosition team playerIdx pos =
@@ -163,18 +182,18 @@ movePlayerPosition team playerIdx pos =
     else
         { team | formation = Array.set playerIdx pos team.formation }
 
-applySelectPlayer : Model -> Int -> (Model, Bool)
-applySelectPlayer model p =
-    case model.tab of
-        TabTeam state -> case state.selectedPlayer of
-            Nothing -> ({ model | tab = TabTeam { selectedPlayer = Just p }}, False)
+applySelectPlayer : State -> Int -> (State, Bool)
+applySelectPlayer state p =
+    case state.view of
+        SquadView squadView -> case squadView.selectedPlayer of
+            Nothing -> ({ state | view = SquadView { selectedPlayer = Just p }}, False)
             Just q ->
                 if p == q then
-                    ({ model | tab = TabTeam { selectedPlayer = Nothing }}, False)
+                    ({ state | view = SquadView { selectedPlayer = Nothing }}, False)
                   else
-                    ({ model | tab = TabTeam { selectedPlayer = Nothing},
-                               ourTeam = swapPlayerPositions (model.ourTeam) p q }, True)
-        _ -> (model, False)
+                    ({ state | view = SquadView { selectedPlayer = Nothing},
+                               team = swapPlayerPositions (state.team) p q }, True)
+        _ -> (state, False)
 
 arrayDirtyGet : Int -> Array a -> a
 arrayDirtyGet i arr = case Array.get i arr of
