@@ -5,8 +5,8 @@ import Json.Decode
 import Json.Encode
 import Http
 
-import Model exposing (Team)
 import RootMsg exposing (Msg(SavedFormation))
+import Types exposing (Team)
 
 saveFormation : Team -> Cmd Msg
 saveFormation team = 

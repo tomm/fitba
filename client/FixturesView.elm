@@ -14,6 +14,7 @@ import Dict
 import RootMsg
 import FixturesViewMsg exposing (Msg, Msg(..))
 import ClientServer
+import Types exposing (..)
 
 match_length_seconds : Float
 match_length_seconds = 270.0  -- make sure this matches app/simulation.rb:MATCH_LENGTH_SECONDS

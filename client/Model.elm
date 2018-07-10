@@ -1,17 +1,24 @@
 module Model exposing (..)
 import Array exposing (Array)
-import Dict exposing (Dict)
 import Date exposing (Date)
 import Debug
 import Time exposing (Time)
+
+import Types exposing (..)
+import TransferMarketTypes
 
 -- MODEL
 
 type alias WatchingGame = { timePoint: Time, game: Game }
 type alias TeamTabState = { selectedPlayer: Maybe Int }
+type alias TabTransferMarketState = { listings: List Player }
 
-type UiTab = TabTeam TeamTabState | TabLeagueTables | TabFixtures (Maybe WatchingGame) |
-             TabFinances | TabViewOtherTeam (TeamTabState, Team)
+type UiTab = TabTeam TeamTabState |
+             TabLeagueTables |
+             TabFixtures (Maybe WatchingGame) |
+             TabFinances |
+             TabTransferMarket TransferMarketTypes.State |
+             TabViewOtherTeam (TeamTabState, Team)
 
 type alias RootModel = {
     errorMsg: Maybe String,
@@ -27,31 +34,3 @@ type alias Model = {
     fixtures: List Fixture,
     leagueTables : List LeagueTable
 }
-
-type alias TeamId = Int
-type alias Team = { id: TeamId, name: String, players: Array Player, formation: Array (Int, Int) }
-
-type alias SeasonRecord = { teamId: TeamId, name: String, played: Int, won: Int, drawn: Int, lost: Int, goalsFor: Int, goalsAgainst: Int }
-type alias LeagueTable = { name: String, record: List SeasonRecord }
-
-{-
-premierLeague : LeagueTable
-premierLeague = { name="Scottish Premier Division", record=[
-  { teamId=1, name="Rangers", played=1, won=0, drawn=0, lost=1, goalsFor=0, goalsAgainst=2 },
-  { teamId=2, name="Celtic", played=1, won=1, drawn=0, lost=0, goalsFor=2, goalsAgainst=0 }
-  ]}
--}
-
-type alias PlayerId = Int
-type alias Player = { id: PlayerId, name: String, shooting: Int, passing: Int, tackling: Int, handling: Int, speed: Int }
-
-type alias GameId = Int
-type alias GameEventId = Int
-type GameEventKind = KickOff | Goal | Boring | Shot | EndOfGame
-type GameEventSide = Home | Away
-type alias GameEvent = { id: GameEventId, gameId: GameId, kind: GameEventKind, side: GameEventSide, timestamp: Time, message: String, ballPos: (Int, Int) }
-type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, events: List GameEvent, status: FixtureStatus }
-
-type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int }
-type FixtureStatus = Scheduled | InProgress | Played FixtureStatusPlayed
-type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus }

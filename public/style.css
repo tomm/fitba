@@ -25,6 +25,24 @@ table {
 .league-table tr:nth-child(3) { background-color: rgba(180, 255, 180, 0.5); }
 .league-table tr:nth-child(4) { background-color: rgba(180, 255, 180, 0.5); }
 
+button.nav {
+	background-color: rgba(150, 150, 255, 0.5);
+	padding: 10px;
+	font-weight: bold;
+	margin: 0 20px;
+}
+
+button.action {
+	background-color: rgba(150, 150, 255, 0.5);
+	padding: 10px;
+	margin: 10px;
+}
+
+div.half-width {
+	width: 49%;
+	float: left;
+}
+
 h1,h2,h3 {
 	text-align: center;
 }

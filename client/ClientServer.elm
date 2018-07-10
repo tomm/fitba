@@ -9,6 +9,7 @@ import Time
 
 import Model exposing (..)
 import RootMsg exposing (Msg, Msg(..))
+import Types exposing (..)
 
 loadGame : GameId -> Cmd Msg
 loadGame gameId =

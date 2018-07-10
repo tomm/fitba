@@ -16,9 +16,12 @@ import Svg
 import Task
 import Time
 
+import TransferMarket
+import TransferMarketTypes
 import FixturesView
 import FixturesViewMsg
 import Model exposing (..)
+import Types exposing (..)
 import RootMsg exposing (..)
 import Styles exposing (..)
 import TeamView
@@ -35,19 +38,6 @@ main =
 
 init : (RootModel, Cmd Msg)
 init = ({ errorMsg=Nothing, state=Loading}, Cmd.batch [getStartGameData])
-    {-
-    games = Dict.fromList [
-        (2, {
-                id=2, homeTeam=team1, awayTeam=team2, start=1492174154 * Time.second, events=[
-                    { id=2, type_=Boring, timestamp=1492174154 * Time.second, message="Kick off!", ballPos=(2,2) },
-                    { id=2, type_=Boring, timestamp=1492174156 * Time.second, message="Shit happened!", ballPos=(2,3) },
-                    { id=2, type_=Boring, timestamp=1492174158 * Time.second, message="And again", ballPos=(4,3) },
-                    { id=2, type_=Boring, timestamp=1492174160 * Time.second, message="The final whistle has been blown!", ballPos=(4,2) }
-                ]
-            }
-        )
-    ]
-    -}
 
 -- SUBSCRIPTIONS
 
@@ -72,6 +62,7 @@ handleHttpError error model =
 update : Msg -> RootModel -> (RootModel, Cmd Msg)
 update msg model =
     let updateState newState = ({ model | state = GameData newState}, Cmd.none)
+        updateStateCmd newState cmd = ({ model | state = GameData newState}, cmd)
         updateWatchingGame watchingGame newEvents =
             let game = watchingGame.game
             in {watchingGame | game = {game | events = List.append game.events newEvents} }
@@ -89,6 +80,11 @@ update msg model =
         handleActiveStateMsgs m =
             case msg of
                 ChangeTab tab -> updateState { m | tab = tab }
+                ViewTransferMarket -> updateState { m | tab = TabTransferMarket { view=TransferMarketTypes.ListView, listings=[
+                        TransferListing 1 3400000 0.0 ForSale <| Player 1 "Bobson" 1 2 3 4 5,
+                        TransferListing 2 7900000 0.0 ForSale <| Player 2 "Jones" 2 4 3 4 7,
+                        TransferListing 3 640000 0.0 ForSale <| Player 3 "Blobby" 7 6 9 4 5
+                    ] } }
                 ViewTeam teamId -> (model, ClientServer.loadTeam teamId)
                 ViewTeamLoaded result -> case result of
                     Ok team -> updateState { m | tab = TabViewOtherTeam ( { selectedPlayer = Nothing }, team) }
@@ -102,6 +98,11 @@ update msg model =
                 MsgFixturesView msg ->
                     let (state, cmd) = FixturesView.update msg m
                     in ({ model | state = GameData state}, cmd)
+                MsgTransferMarket msg -> case m.tab of
+                    TabTransferMarket state -> 
+                        let (newState, cmd) = TransferMarket.update msg state
+                        in updateStateCmd { m | tab = TabTransferMarket newState } cmd
+                    _ -> (model, Cmd.none)
                 UpdateFixtures result -> case result of
                     Ok fixtures -> updateState { m | fixtures = fixtures }
                     Err error -> handleHttpError error model
@@ -168,9 +169,17 @@ view model =
                             TabTeam state -> Html.map MsgTeamView <| TeamView.view state m.ourTeam
                             TabLeagueTables -> div [] (List.map (leagueTableTab m) m.leagueTables)
                             TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
-                            TabFinances -> text ""
+                            TabFinances -> financesTab m
+                            TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view state
                         ]
                 ]
+    ]
+
+financesTab : Model -> Html Msg
+financesTab model =
+    div [] [
+        Html.h2 [] [text "Finances"],
+        button [class "nav", onClick ViewTransferMarket] [text "Transfer market"]
     ]
 
 leagueTableTab : Model -> LeagueTable -> Html Msg

@@ -11,6 +11,7 @@ import Svg.Attributes exposing (..)
 
 import Cmds
 import Model exposing (..)
+import Types exposing (..)
 import RootMsg
 import Styles exposing (..)
 import TeamViewMsg exposing (Msg, Msg(SelectPlayer, MovePosition))
@@ -57,7 +58,6 @@ view state team =
             Svg.svg
                 [Svg.Attributes.width "100%", Svg.Attributes.height "100%", viewBox "0 0 812 1280" ]
                 ([ 
-                    -- Svg.rect [ x "10", y "10", Svg.Attributes.width "100", Svg.Attributes.height "100", rx "15", ry "15" ] [],
                     Svg.image
                         [ Svg.Events.onClick <| SelectPlayer Nothing,
                           Svg.Attributes.width "100%", Svg.Attributes.height "100%", Svg.Attributes.xlinkHref "/pitch.png" ]
