@@ -1,4 +1,4 @@
-module ClientServer exposing (loadGame, loadTeam, saveFormation, pollGameEvents, getStartGameData, getFixtures, getLeagueTables,
+module ClientServer exposing (loadGame, loadTeam, saveFormation, sellPlayer, pollGameEvents, getStartGameData, getFixtures, getLeagueTables,
     loadTransferListings, makeTransferBid)
 
 import Array exposing (Array)
@@ -16,6 +16,11 @@ loadGame : GameId -> Cmd Msg
 loadGame gameId =
     let url = "/game_events/" ++ toString gameId
     in Http.send LoadGame (Http.get url jsonDecodeGame)
+
+sellPlayer : PlayerId -> Cmd Msg
+sellPlayer playerId =
+    let body = Http.jsonBody <| Json.Encode.object [("player_id", Json.Encode.int playerId)]
+    in Http.send SellPlayerResponse (Http.post "/sell_player" body Json.string)
 
 saveFormation : Team -> Cmd Msg
 saveFormation team = 
@@ -70,16 +75,20 @@ getLeagueTables =
 jsonDecodeTransferListings : Json.Decoder (List TransferListing)
 jsonDecodeTransferListings =
     Json.list (
-        Json.map6 TransferListing
+        Json.map7 TransferListing
             (Json.field "id" Json.int)
             (Json.field "minPrice" Json.int)
             (Json.field "deadline" jsonDecodeTime)
+            (Json.field "sellerTeamId" Json.int)
             (Json.field "player" jsonDecodePlayer)
             (Json.field "youBid" Json.int |> Json.maybe)
             (Json.field "status" Json.string |> Json.andThen
                 (\val ->
                     case val of
                         "OnSale" -> Json.succeed OnSale
+                        "YouWon" -> Json.succeed YouWon
+                        "YouLost" -> Json.succeed YouLost
+                        "BiddingEnded" -> Json.succeed BiddingEnded
                         _ -> Json.fail <| "Unexpected TransferListing status: " ++ val
                 )
             )

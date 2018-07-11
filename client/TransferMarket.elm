@@ -13,49 +13,60 @@ import Uitk
 import Utils
 import ClientServer
 
-view : State -> Html Msg
-view state = case state.view of
+view : TeamId -> State -> Html Msg
+view ownTeamId state = case state.view of
     PlayerView pvstate ->
         let bidInput = div [] [
                 Uitk.actionButton MakeBid "Make bid",
-                input [ type_ "number", step "10000", value <| toString pvstate.bidInputValue, onInput <| UpdateBidInput ] []
+                input [ type_ "number", step "10000", value <| toString pvstate.bidInputValue, onInput <| UpdateBidInput ] [],
+                Uitk.actionButton (UpdateBidInput <| toString <| pvstate.bidInputValue + 10000) "+",
+                Uitk.actionButton (UpdateBidInput <| toString <| pvstate.bidInputValue - 10000) "-"
             ]
             withdrawButton = div [] [ Uitk.actionButton WithdrawBid "Withdraw bid" ]
         in Uitk.view (Just <| Uitk.backButton ViewAll) "Transfer Listing" [
                 PlayerDetailedView.view pvstate.listing.player,
-                div [class "half-width"] ([
+                div [class "half-width"] [
                     div [Styles.defaultMargin] [
                         case pvstate.listing.status of
-                        OnSale -> div [] [
-                            text <| "Accepting offers over " ++ Utils.moneyFormat pvstate.listing.minPrice,
-                            bidInput
-                        ]
+                        OnSale -> div [] ([
+                                text <| "Accepting offers over " ++ Utils.moneyFormat pvstate.listing.minPrice,
+                                bidInput
+                            ] ++
+                            case pvstate.listing.youBid of
+                                Nothing -> []
+                                Just amount -> [div [] [
+                                    text <| "Your current bid is " ++ Utils.moneyFormat amount,
+                                    withdrawButton
+                                ] ]
+                        )
                         YouWon -> div [] [text "You have signed this player."]
                         YouLost -> div [] [text "You were outbid by another team."]
+                        BiddingEnded -> div [] [text "Bidding has ended."]
                     ]
-                ] ++
-                    case pvstate.listing.youBid of
-                        Nothing -> []
-                        Just amount -> [div [] [
-                            text <| "Your current bid is " ++ Utils.moneyFormat amount,
-                            withdrawButton
-                        ]]
-                )
+                ]
             ]
 
     ListView ->
         let
             listingToTr : TransferListing -> Html Msg
             listingToTr listing =
-                Html.tr [onClick <| ViewListing listing] [
+                let clickAction = if listing.sellerTeamId == ownTeamId then [] else [onClick <| ViewListing listing]
+
+                in Html.tr clickAction [
                     Html.td [] [text <| listing.player.name],
                     Html.td [] [text <| Utils.moneyFormat listing.minPrice],
                     Html.td [] [text <| case listing.status of
-                        OnSale -> case listing.youBid of
-                            Just amount -> "You bid " ++ Utils.moneyFormat amount
-                            Nothing -> "On sale"
+                        OnSale -> Utils.timeFormatShort listing.deadline
                         YouWon -> "You won!"
-                        YouLost -> "You lost."
+                        YouLost -> "You lost"
+                        BiddingEnded -> "Ended"
+                    ],
+                    Html.td [] [text <|
+                        if listing.sellerTeamId == ownTeamId then
+                            "You are seller"
+                        else case listing.youBid of
+                            Just amount -> Utils.moneyFormat amount
+                            Nothing -> ""
                     ],
                     Html.td [] [text <| toString <| listing.player.shooting],
                     Html.td [] [text <| toString <| listing.player.passing],
@@ -69,7 +80,8 @@ view state = case state.view of
                     (Html.tr [] [
                         Html.th [] [text "Name"]
                       , Html.th [] [text "Min Price"]
-                      , Html.th [] [text "Status"]
+                      , Html.th [] [text "Deadline"]
+                      , Html.th [] [text "Your bid"]
                       , Html.th [] [text "Sh"]
                       , Html.th [] [text "Pa"]
                       , Html.th [] [text "Ta"]

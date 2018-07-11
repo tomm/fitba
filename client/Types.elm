@@ -9,8 +9,8 @@ type alias LeagueTable = { name: String, record: List SeasonRecord }
 type alias PlayerId = Int
 type alias Player = { id: PlayerId, name: String, shooting: Int, passing: Int, tackling: Int, handling: Int, speed: Int }
 type alias TransferListingId = Int
-type TransferStatus = OnSale | YouWon | YouLost
-type alias TransferListing = { id: TransferListingId, minPrice: Int, deadline: Time,
+type TransferStatus = OnSale | YouWon | YouLost | BiddingEnded
+type alias TransferListing = { id: TransferListingId, minPrice: Int, deadline: Time, sellerTeamId: TeamId,
                                player: Player, youBid: Maybe Int, status: TransferStatus }
 type alias GameId = Int
 type alias GameEventId = Int

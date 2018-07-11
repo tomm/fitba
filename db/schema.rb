@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180710124504) do
+ActiveRecord::Schema.define(version: 20180711123733) do
 
   create_table "formation_pos", force: :cascade do |t|
     t.integer  "formation_id"
@@ -127,13 +127,16 @@ ActiveRecord::Schema.define(version: 20180710124504) do
   create_table "transfer_listings", force: :cascade do |t|
     t.integer  "player_id"
     t.integer  "min_price"
-    t.date     "deadline"
-    t.string   "status"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "deadline"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
+    t.integer  "winning_bid_id"
+    t.integer  "team_id"
   end
 
   add_index "transfer_listings", ["player_id"], name: "index_transfer_listings_on_player_id"
+  add_index "transfer_listings", ["team_id"], name: "index_transfer_listings_on_team_id"
+  add_index "transfer_listings", ["winning_bid_id"], name: "index_transfer_listings_on_winning_bid_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "name"

@@ -57,7 +57,7 @@ handleHttpError error model =
     case error of
         Http.BadStatus response -> 
             if response.status.code == 403 then
-                ({model | errorMsg = Just <| toString error}, Navigation.load "/login")
+                (model , Navigation.load "/login")
             else
                 ({model | errorMsg = Just <| toString response}, Cmd.none)
         _ -> ({model | errorMsg = Just <| toString error}, Cmd.none)
@@ -142,6 +142,7 @@ update msg model =
                 GotStartGameData _ -> ({model | errorMsg = Just "Unexpected message"}, Cmd.none)
                 SavedFormation _ -> (model, Cmd.none) -- don't give a fuck
                 SavedBid _ -> (model, Cmd.none) -- don't give a fuck
+                SellPlayerResponse _ -> (model, ClientServer.loadTransferListings) -- don't give a fuck
                 NoOp -> (model, Cmd.none)
 
     in
@@ -183,7 +184,7 @@ view model =
                             TabLeagueTables -> div [] (List.map (leagueTableTab m) m.leagueTables)
                             TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
                             TabFinances -> financesTab m
-                            TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view state
+                            TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view m.ourTeamId state
                         ]
                 ]
     ]

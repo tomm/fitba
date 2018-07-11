@@ -1,4 +1,4 @@
-module Utils exposing (dateFormat, timeFormat, moneyFormat)
+module Utils exposing (dateFormat, timeFormat, moneyFormat, timeFormatShort)
 
 import Time
 import Date
@@ -15,15 +15,26 @@ dateFormat d =
     ++ " " ++
     (Date.hour d |> toString)
     ++ ":" ++
+    (if Date.minute d < 10 then "0" else "") ++
     (Date.minute d |> toString)
+
 
 timeFormat : Time.Time -> String
 timeFormat t = Date.fromTime t |> dateFormat
 
+timeFormatShort : Time.Time -> String
+timeFormatShort t =
+    let dateFormatShort d =
+            (Date.hour d |> toString)
+            ++ ":" ++
+            (if Date.minute d < 10 then "0" else "") ++
+            (Date.minute d |> toString)
+    in Date.fromTime t |> dateFormatShort
+
 moneyFormat : Int -> String
 moneyFormat m =
     -- wow, this is shit. what's wrong with me?
-    let bits = List.reverse <| String.split "" (toString m)
+    let bits num = List.reverse <| String.split "" (toString num)
         formatByParts l = 
             let len = List.length l
             in if len == 0 then ""
@@ -31,4 +42,10 @@ moneyFormat m =
                     String.append ((formatByParts <| List.drop 3 l)) (String.join "" <| List.reverse <| List.take 3 l)
                 else 
                     String.append ((formatByParts <| List.drop 3 l) ++ ",") (String.join "" <| List.reverse <| List.take 3 l)
-    in "€" ++ formatByParts bits
+    in
+        if m >= 1000 then
+            "€" ++ formatByParts (bits (m // 1000)) ++ "k"
+
+
+        else
+            "€" ++ formatByParts (bits m)

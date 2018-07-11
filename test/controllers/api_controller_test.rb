@@ -18,6 +18,40 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 12345, body['money']
   end
 
+  test "/sell_player" do
+    login
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 2, body.size
+
+    post :sell_player, {player_id: players(:carla).id}.to_json, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "SUCCESS", body['status']
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 3, body.size
+
+    # idempotent
+    post :sell_player, {player_id: players(:carla).id}.to_json, :format => "json"
+    assert_response :success
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 3, body.size
+
+    # not our player
+    post :sell_player, {player_id: players(:zuzana).id}.to_json, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "ERROR", body['status']
+  end
+
   test "transfer market" do
     tid = transfer_listings(:one).id
     login

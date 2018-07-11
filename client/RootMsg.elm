@@ -23,4 +23,5 @@ type Msg
   | ViewTeam TeamId | ViewTeamLoaded (Result Http.Error Team)
   | ViewTransferMarket
   | GotTransferListings (Result Http.Error (List Types.TransferListing))
+  | SellPlayerResponse (Result Http.Error String)
   | NoOp

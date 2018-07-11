@@ -3,7 +3,7 @@ class CreateTransferListings < ActiveRecord::Migration
     create_table :transfer_listings do |t|
       t.references :player, index: true, foreign_key: true
       t.integer :min_price
-      t.date :deadline
+      t.datetime :deadline
       t.string :status
 
       t.timestamps null: false

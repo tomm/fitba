@@ -155,7 +155,7 @@ update msg state =
     case msg of
         ViewSquad -> ({ state | view = SquadView { selectedPlayer = Nothing } }, Cmd.none)
         ViewPlayer player -> ({ state | view = PlayerView player }, Cmd.none)
-        SellPlayer player -> ({ state | team = setPlayerOnSale state.team player }, Cmd.none)
+        SellPlayer player -> (state , ClientServer.sellPlayer player.id)
         SelectPlayer (Just p) ->
             let (newState, changed) = applySelectPlayer state p
             in (newState, if changed then ClientServer.saveFormation <| newState.team else Cmd.none)
@@ -173,9 +173,6 @@ update msg state =
                              ClientServer.saveFormation <| newTeam)
                            else ({state | view = SquadView { selectedPlayer = Nothing }}, Cmd.none)
                 _ -> (state, Cmd.none)
-
-setPlayerOnSale : Team -> Player -> Team
-setPlayerOnSale team player = Debug.crash "Not implemented"
 
 movePlayerPosition : Team -> Int -> (Int, Int) -> Team
 movePlayerPosition team playerIdx pos =

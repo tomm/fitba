@@ -61,19 +61,73 @@ module PopulateDbHelper
       User.create(name: username, team: team, money: money, secret: Digest::MD5.hexdigest(password))
     end
 
+    def self.team_can_buy(team_id, player)
+      # don't let a team buy a player way out of their league
+      players = Player.where(team_id: team_id).all.to_a
+      num_players = players.length
+      total_skill = players.inject(0){|sum,x|sum + x.skill} # is sum(players.skill)
+      avg_skill = total_skill / num_players.to_f
+      can_do = player.skill <= avg_skill * 1.25
+      puts "Attempt to buy player of skill #{player.skill} by team avg skill #{avg_skill}. Can do? #{can_do}"
+      can_do
+    end
+
     def self.update_transfer_market()
-      player_skill = [ "0+1d9" ]
+      player_skill = [ "0+1d9", "0+1d8", "0+1d7", "0+1d6", "0+1d5", "0+1d4" ]
 
       num_players = TransferListing.where("deadline > ?", Time.now).count
 
       while num_players < 20 do
         player = make_player(nil, player_skill.sample)
         price_jiggle = 1.0 + (rand * 0.1)
-        TransferListing.create(player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + 60*60*24)
+        TransferListing.create(team_id: player.team_id, player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + 60*4)
         num_players += 1
       end
 
-      TransferListing.where("deadline < ?", Time.now - 60*60*24).destroy_all
+      # resolve expired transfer listings
+      expired = TransferListing.where("deadline < ?", Time.now).where(winning_bid_id: nil).all
+      expired.each do |t|
+        player = Player.find(t.player_id)
+        bids = TransferBid.where(transfer_listing_id: t.id).order(:amount).reverse_order.all.to_a
+        seller_user = User.find_by(team_id: player.team_id)
+        sold = false
+
+        while bids.length > 0 and sold == false do
+          bid = bids.shift
+          buyer_user = User.find_by(team_id: bid.team_id)
+          
+          if buyer_user != nil then
+            if buyer_user.money >= bid.amount and team_can_buy(buyer_user.team_id, player) then
+              puts "User #{buyer_user} bought #{player} from #{seller_user} #{t}: #{bid}"
+              # won bidding
+              buyer_user.update(money: buyer_user.money - bid.amount)
+              if seller_user then
+                seller_user.update(money: seller_user.money + bid.amount)
+              end
+              player.update(team_id: buyer_user.team_id)
+              FormationPo.where(player_id: player.id).delete_all
+              # update listing, marking sold
+              t.update(winning_bid_id: bid.id)
+              sold = true
+            end
+          end
+        end
+
+        if sold == false then
+          # don't keep expired transfer listings that nobody won
+          puts "Transfer listing expired with no winning bids: #{t}"
+          # belongs to a player, so maybe sell anyway
+          if seller_user != nil then
+            seller_user.update(money: seller_user.money + t.min_price)
+            FormationPo.where(player_id: player.id).delete_all
+            player.update(team_id: nil)
+          end
+          t.delete
+        end
+      end
+
+      # nuke ancient transfer listings
+      TransferListing.where("deadline < ?", Time.now - 60*60*24).delete_all
     end
 
     def self.create_fixtures_for_league_season(league_id, season)

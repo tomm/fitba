@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   get 'fixtures' => 'api#fixtures'
   get 'transfer_listings' => 'api#transfer_listings'
   post 'transfer_bid' => 'api#transfer_bid'
+  post 'sell_player' => 'api#sell_player'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
