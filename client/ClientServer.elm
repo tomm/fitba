@@ -1,10 +1,11 @@
-module ClientServer exposing (loadGame, loadTeam, pollGameEvents, getStartGameData, getFixtures, getLeagueTables)
+module ClientServer exposing (loadGame, loadTeam, saveFormation, pollGameEvents, getStartGameData, getFixtures, getLeagueTables,
+    loadTransferListings, makeTransferBid)
 
 import Array exposing (Array)
 import Date
 import Http
 import Json.Decode as Json
-import Json.Encode as JsonEncode
+import Json.Encode
 import Time
 
 import Model exposing (..)
@@ -15,6 +16,32 @@ loadGame : GameId -> Cmd Msg
 loadGame gameId =
     let url = "/game_events/" ++ toString gameId
     in Http.send LoadGame (Http.get url jsonDecodeGame)
+
+saveFormation : Team -> Cmd Msg
+saveFormation team = 
+    let tuplePlayerPos idx player =
+            case Array.get idx team.formation of
+                Nothing -> Json.Encode.list [ Json.Encode.int player.id, Json.Encode.null ]
+                Just pos -> Json.Encode.list [
+                    Json.Encode.int player.id,
+                    Json.Encode.list [ Json.Encode.int <| Tuple.first pos, Json.Encode.int <| Tuple.second pos ]
+                    ]
+        body = Http.jsonBody <| Json.Encode.array <| Array.indexedMap tuplePlayerPos team.players
+    in
+        Http.send SavedFormation (Http.post "/save_formation" body Json.string)
+
+makeTransferBid : TransferListingId -> Maybe Int -> Cmd Msg
+makeTransferBid tid amount =
+    let body = Http.jsonBody <| Json.Encode.object [
+            ("amount", case amount of
+                Just a -> Json.Encode.int a
+                Nothing -> Json.Encode.null),
+            ("transfer_listing_id", Json.Encode.int tid)
+        ]
+    in Http.send SavedBid (Http.post "/transfer_bid" body Json.string)
+
+loadTransferListings : Cmd Msg
+loadTransferListings = Http.send GotTransferListings (Http.get "/transfer_listings" jsonDecodeTransferListings)
 
 loadTeam : TeamId -> Cmd Msg
 loadTeam teamId =
@@ -39,6 +66,24 @@ getFixtures =
 getLeagueTables : Cmd Msg
 getLeagueTables =
     Http.send UpdateLeagueTables (Http.get "/tables" jsonDecodeLeagueTables)
+
+jsonDecodeTransferListings : Json.Decoder (List TransferListing)
+jsonDecodeTransferListings =
+    Json.list (
+        Json.map6 TransferListing
+            (Json.field "id" Json.int)
+            (Json.field "minPrice" Json.int)
+            (Json.field "deadline" jsonDecodeTime)
+            (Json.field "player" jsonDecodePlayer)
+            (Json.field "youBid" Json.int |> Json.maybe)
+            (Json.field "status" Json.string |> Json.andThen
+                (\val ->
+                    case val of
+                        "OnSale" -> Json.succeed OnSale
+                        _ -> Json.fail <| "Unexpected TransferListing status: " ++ val
+                )
+            )
+    )
 
 jsonDecodeGame : Json.Decoder Game
 jsonDecodeGame =
@@ -94,11 +139,12 @@ jsonDecodeGameEventSide =
 
 jsonDecodeTeam : Json.Decoder Team
 jsonDecodeTeam =
-    Json.map4 Team
+    Json.map5 Team
         (Json.field "id" Json.int)
         (Json.field "name" Json.string)
         (Json.field "players" (Json.array jsonDecodePlayer))
         (Json.field "formation" (Json.array jsonDecodePlayerPosition))
+        (Json.field "money" Json.int |> Json.maybe)
 
 jsonDecodePlayer : Json.Decoder Player
 jsonDecodePlayer =

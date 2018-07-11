@@ -17,6 +17,7 @@ import Task
 import Time
 
 import Uitk
+import Utils
 import TransferMarket
 import TransferMarketTypes
 import FixturesView
@@ -39,7 +40,7 @@ main =
     }
 
 init : (RootModel, Cmd Msg)
-init = ({ errorMsg=Nothing, state=Loading}, Cmd.batch [getStartGameData])
+init = ({ errorMsg=Nothing, state=Loading}, getStartGameData)
 
 -- SUBSCRIPTIONS
 
@@ -82,11 +83,11 @@ update msg model =
         handleActiveStateMsgs m =
             case msg of
                 ChangeTab tab -> updateState { m | tab = tab }
-                ViewTransferMarket -> updateState { m | tab = TabTransferMarket { view=TransferMarketTypes.ListView, listings=[
-                        TransferListing 1 3400000 0.0 ForSale <| Player 1 "Bobson" 1 2 3 4 5,
-                        TransferListing 2 7900000 0.0 ForSale <| Player 2 "Jones" 2 4 3 4 7,
-                        TransferListing 3 640000 0.0 ForSale <| Player 3 "Blobby" 7 6 9 4 5
-                    ] } }
+                ViewTransferMarket -> (model, ClientServer.loadTransferListings)
+                GotTransferListings result -> case result of
+                    Ok listings -> updateState { m | tab = TabTransferMarket {
+                        view=TransferMarketTypes.ListView, listings=listings } }
+                    Err error -> handleHttpError error model
                 ViewTeam teamId -> (model, ClientServer.loadTeam teamId)
                 ViewTeamLoaded result -> case result of
                     Ok team -> updateState { m | tab = TabViewOtherTeam {
@@ -140,6 +141,7 @@ update msg model =
                     Err error -> handleHttpError error model
                 GotStartGameData _ -> ({model | errorMsg = Just "Unexpected message"}, Cmd.none)
                 SavedFormation _ -> (model, Cmd.none) -- don't give a fuck
+                SavedBid _ -> (model, Cmd.none) -- don't give a fuck
                 NoOp -> (model, Cmd.none)
 
     in
@@ -189,6 +191,7 @@ view model =
 financesTab : Model -> Html Msg
 financesTab model =
     Uitk.view Nothing "Finances" [
+        div [] [text <| "You have " ++ (Utils.moneyFormat <| Maybe.withDefault 0 model.ourTeam.money) ++ " available for transfers."],
         Uitk.actionButton ViewTransferMarket "Transfer Market"
     ]
 

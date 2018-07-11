@@ -9,7 +9,6 @@ import Svg
 import Svg.Events
 import Svg.Attributes exposing (..)
 
-import Cmds
 import Model exposing (..)
 import Types exposing (..)
 import RootMsg
@@ -18,6 +17,7 @@ import TeamViewTypes exposing (State, Msg, Msg(SellPlayer, ViewPlayer, ViewSquad
                                View(SquadView, PlayerView), SquadViewState)
 import Uitk
 import PlayerDetailedView
+import ClientServer
 
 pitchX = 812
 pitchY = 1280
@@ -158,7 +158,7 @@ update msg state =
         SellPlayer player -> ({ state | team = setPlayerOnSale state.team player }, Cmd.none)
         SelectPlayer (Just p) ->
             let (newState, changed) = applySelectPlayer state p
-            in (newState, if changed then Cmds.saveFormation <| newState.team else Cmd.none)
+            in (newState, if changed then ClientServer.saveFormation <| newState.team else Cmd.none)
         SelectPlayer Nothing -> ({ state | view = SquadView { selectedPlayer = Nothing }}, Cmd.none)
         -- move selected player to new position
         MovePosition pos ->
@@ -170,7 +170,7 @@ update msg state =
                         in if newTeam /= state.team then
                             ({state | team = newTeam,
                                       view = SquadView { selectedPlayer = Nothing} },
-                             Cmds.saveFormation <| newTeam)
+                             ClientServer.saveFormation <| newTeam)
                            else ({state | view = SquadView { selectedPlayer = Nothing }}, Cmd.none)
                 _ -> (state, Cmd.none)
 

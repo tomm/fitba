@@ -10,6 +10,8 @@ import TransferMarketTypes exposing (Msg, State, Msg(ViewListing, ViewAll, Updat
 import PlayerDetailedView
 import Styles
 import Uitk
+import Utils
+import ClientServer
 
 view : State -> Html Msg
 view state = case state.view of
@@ -21,20 +23,24 @@ view state = case state.view of
             withdrawButton = div [] [ Uitk.actionButton WithdrawBid "Withdraw bid" ]
         in Uitk.view (Just <| Uitk.backButton ViewAll) "Transfer Listing" [
                 PlayerDetailedView.view pvstate.listing.player,
-                div [class "half-width"] [
+                div [class "half-width"] ([
                     div [Styles.defaultMargin] [
                         case pvstate.listing.status of
-                        ForSale -> div [] [
-                            text <| "Accepting offers over £" ++ toString pvstate.listing.minPrice,
+                        OnSale -> div [] [
+                            text <| "Accepting offers over " ++ Utils.moneyFormat pvstate.listing.minPrice,
                             bidInput
                         ]
-                        YouBid amount -> div [] [
-                            text <| "Your current bid is £" ++ toString amount,
-                            bidInput, withdrawButton]
                         YouWon -> div [] [text "You have signed this player."]
                         YouLost -> div [] [text "You were outbid by another team."]
                     ]
-                ]
+                ] ++
+                    case pvstate.listing.youBid of
+                        Nothing -> []
+                        Just amount -> [div [] [
+                            text <| "Your current bid is " ++ Utils.moneyFormat amount,
+                            withdrawButton
+                        ]]
+                )
             ]
 
     ListView ->
@@ -43,10 +49,11 @@ view state = case state.view of
             listingToTr listing =
                 Html.tr [onClick <| ViewListing listing] [
                     Html.td [] [text <| listing.player.name],
-                    Html.td [] [text <| toString <| listing.minPrice],
+                    Html.td [] [text <| Utils.moneyFormat listing.minPrice],
                     Html.td [] [text <| case listing.status of
-                        ForSale -> "For Sale"
-                        YouBid amount -> "Your bid: " ++ toString amount
+                        OnSale -> case listing.youBid of
+                            Just amount -> "You bid " ++ Utils.moneyFormat amount
+                            Nothing -> "On sale"
                         YouWon -> "You won!"
                         YouLost -> "You lost."
                     ],
@@ -75,14 +82,14 @@ view state = case state.view of
 
 makeBid : State -> Int -> TransferListing -> State
 makeBid state amount listing =
-    let updatedListing = { listing | status = YouBid amount }
+    let updatedListing = { listing | youBid = Just amount }
         updatedListings = List.map (\l -> if l.id == listing.id then updatedListing else l) state.listings
     in { state | listings = updatedListings,
                  view = PlayerView { listing = updatedListing, bidInputValue = amount } }
 
 withdrawBid : State -> TransferListing -> State
 withdrawBid state listing =
-    let updatedListing = { listing | status = ForSale }
+    let updatedListing = { listing | youBid = Nothing }
         updatedListings = List.map (\l -> if l.id == listing.id then updatedListing else l) state.listings
     in { state | listings = updatedListings,
                  view = PlayerView { listing = updatedListing, bidInputValue = listing.minPrice } }
@@ -91,11 +98,13 @@ update : Msg -> State -> (State, Cmd RootMsg.Msg)
 update msg state = case msg of
     WithdrawBid ->
         case state.view of
-            PlayerView pvstate -> (withdrawBid state pvstate.listing, Cmd.none)
+            PlayerView pvstate -> (withdrawBid state pvstate.listing,
+                                   ClientServer.makeTransferBid pvstate.listing.id Nothing)
             _ -> (state, Cmd.none)
     MakeBid ->
         case state.view of
-            PlayerView pvstate -> (makeBid state pvstate.bidInputValue pvstate.listing, Cmd.none)
+            PlayerView pvstate -> (makeBid state pvstate.bidInputValue pvstate.listing,
+                                   ClientServer.makeTransferBid pvstate.listing.id (Just pvstate.bidInputValue))
             _ -> (state, Cmd.none)
     UpdateBidInput amount ->
         case state.view of

@@ -15,6 +15,7 @@ class ApiControllerTest < ActionController::TestCase
     body = JSON.parse(response.body)
     assert_equal user.team_id, body['id']
     assert_equal "Test Utd", body['name']
+    assert_equal 12345, body['money']
   end
 
   test "transfer market" do
@@ -27,8 +28,10 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 2, body.size
     assert_equal 123, body[0]["minPrice"]
     assert_equal nil, body[0]["youBid"]
+    assert_equal "OnSale", body[0]["status"]
     assert_equal 234, body[1]["minPrice"]
     assert_equal nil, body[1]["youBid"]
+    assert_equal "OnSale", body[1]["status"]
 
     post :transfer_bid, {amount: 200, transfer_listing_id: tid}.to_json, :format => "json"
     assert_response :success

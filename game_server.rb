@@ -3,6 +3,7 @@
 require 'date'
 require "./config/environment"
 require "./app/end_of_season"
+require "./app/helpers/populate_db_helper.rb"
 
 daily_tasks_last = nil
 DAYS_REST_BETWEEN_SEASONS = 2
@@ -17,6 +18,10 @@ while sleep 1 do
         EndOfSeason.create_new_season
       end
     end
+
+    puts "Updating transfer market"
+    PopulateDbHelper::Populate.update_transfer_market
+
     daily_tasks_last = today
   end
 

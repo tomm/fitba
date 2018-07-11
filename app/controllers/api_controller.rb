@@ -6,8 +6,8 @@ class ApiController < ApplicationController
     User.joins(:sessions).where(sessions: {identifier: cookies[:session]}).first
   end
 
-  private def get_team_json(id)
-    team = Team.find(id)
+  private def get_team_json(team_id)
+    team = Team.find(team_id)
     squad = team.squad
     {
       id: team.id,
@@ -17,17 +17,21 @@ class ApiController < ApplicationController
     }
   end
 
-  private def view_team_id(id)
+  private def view_team_id(user, team_id)
     begin
-      render json: get_team_json(id)
+      r = get_team_json(team_id)
+      if user.team_id == team_id
+        r[:money] = user.money
+      end
+      render json: r
     rescue ActiveRecord::RecordNotFound
-      head 403
+      head 404
     end
   end
 
   def view_team
-    if get_user then
-      view_team_id(params[:id])
+    if user = get_user then
+      view_team_id(user, params[:id])
     else
       head 403
     end
@@ -35,7 +39,7 @@ class ApiController < ApplicationController
 
   def load_world
     if user = get_user then
-      view_team_id(user.team_id)
+      view_team_id(user, user.team_id)
     else
       head 403
     end

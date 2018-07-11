@@ -19,6 +19,8 @@ type Msg
   | UpdateGame (Result Http.Error (List GameEvent))
   | GotStartGameData (Result Http.Error Team)
   | SavedFormation (Result Http.Error String)
+  | SavedBid (Result Http.Error String)
   | ViewTeam TeamId | ViewTeamLoaded (Result Http.Error Team)
   | ViewTransferMarket
+  | GotTransferListings (Result Http.Error (List Types.TransferListing))
   | NoOp

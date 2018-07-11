@@ -1,4 +1,6 @@
 module TransferMarketTypes exposing (..)
+import Http
+
 import Types
 
 type alias PlayerViewState = { listing: Types.TransferListing, bidInputValue: Int }

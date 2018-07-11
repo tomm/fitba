@@ -3,15 +3,15 @@ import Array exposing (Array)
 import Time exposing (Time)
 
 type alias TeamId = Int
-type alias Team = { id: TeamId, name: String, players: Array Player, formation: Array (Int, Int) }
+type alias Team = { id: TeamId, name: String, players: Array Player, formation: Array (Int, Int), money: Maybe Int }
 type alias SeasonRecord = { teamId: TeamId, name: String, played: Int, won: Int, drawn: Int, lost: Int, goalsFor: Int, goalsAgainst: Int }
 type alias LeagueTable = { name: String, record: List SeasonRecord }
 type alias PlayerId = Int
 type alias Player = { id: PlayerId, name: String, shooting: Int, passing: Int, tackling: Int, handling: Int, speed: Int }
 type alias TransferListingId = Int
-type TransferStatus = ForSale | YouBid Int | YouWon | YouLost
+type TransferStatus = OnSale | YouWon | YouLost
 type alias TransferListing = { id: TransferListingId, minPrice: Int, deadline: Time,
-                               status: TransferStatus, player: Player }
+                               player: Player, youBid: Maybe Int, status: TransferStatus }
 type alias GameId = Int
 type alias GameEventId = Int
 type GameEventKind = KickOff | Goal | Boring | Shot | EndOfGame

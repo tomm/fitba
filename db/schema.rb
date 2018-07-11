@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180710102229) do
+ActiveRecord::Schema.define(version: 20180710124504) do
 
   create_table "formation_pos", force: :cascade do |t|
     t.integer  "formation_id"
@@ -141,6 +141,7 @@ ActiveRecord::Schema.define(version: 20180710102229) do
     t.string   "secret"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "money"
   end
 
   add_index "users", ["team_id"], name: "index_users_on_team_id"

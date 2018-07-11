@@ -4,10 +4,8 @@ one:
   player: amy
   min_price: 123
   deadline: 2018-07-10
-  status: OnSale
 
 two:
   player: barbara
   min_price: 234
   deadline: 2018-07-11
-  status: OnSale

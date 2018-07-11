@@ -43,6 +43,8 @@ module PopulateDbHelper
   class Populate
 
     def self.go
+      update_transfer_market
+
       puts "Creating leagues..."
       l1 = League.create(rank: 1, name: "First Division", is_finished: false)
       l2 = League.create(rank: 2, name: "Second Division", is_finished: false)
@@ -50,13 +52,28 @@ module PopulateDbHelper
       populate_league(l1)
       populate_league(l2)
 
-      create_user_for_team("tom", Team.find_by(name: "Cock of the North"))
-      create_user_for_team("john", Team.find_by(name: "Vag of the South"))
+      create_user_for_team("tom", Team.find_by(name: "Cock of the North"), 10000000)
+      create_user_for_team("john", Team.find_by(name: "Vag of the South"), 10000000)
     end
 
-    def self.create_user_for_team(username, team)
+    def self.create_user_for_team(username, team, money)
       password = Readline.readline("Enter password for user #{username}: ")
-      User.create(name: username, team: team, secret: Digest::MD5.hexdigest(password))
+      User.create(name: username, team: team, money: money, secret: Digest::MD5.hexdigest(password))
+    end
+
+    def self.update_transfer_market()
+      player_skill = [ "0+1d9" ]
+
+      num_players = TransferListing.where("deadline > ?", Time.now).count
+
+      while num_players < 20 do
+        player = make_player(nil, player_skill.sample)
+        price_jiggle = 1.0 + (rand * 0.1)
+        TransferListing.create(player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + 60*60*24)
+        num_players += 1
+      end
+
+      TransferListing.where("deadline < ?", Time.now - 60*60*24).destroy_all
     end
 
     def self.create_fixtures_for_league_season(league_id, season)
@@ -82,7 +99,7 @@ module PopulateDbHelper
         while day.size < time_slots.size and to_play.size > 0 do
           good = to_play.find {|c| (not tid_today.include?(c[0].id)) and (not tid_today.include?(c[1].id))}
           if good == nil then
-            puts "Only filled #{day.size}/#{time_slots.size} slots today"
+            #puts "Only filled #{day.size}/#{time_slots.size} slots today"
             break
           end
           to_play.delete(good)
@@ -103,7 +120,7 @@ module PopulateDbHelper
         end
         next_start += 24*3600
       end
-      puts "League fixtues run from #{season_start.to_s} to #{next_start}"
+      #puts "League fixtues run from #{season_start.to_s} to #{next_start}"
     end
 
     def self.populate_league(league)
@@ -145,6 +162,8 @@ module PopulateDbHelper
       )
 
       player.update(name: player.pick_position + " " + player.name)
+      
+      player
     end
 
     def self.repopulate_team(team)
