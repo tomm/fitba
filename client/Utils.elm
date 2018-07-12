@@ -25,6 +25,8 @@ timeFormat t = Date.fromTime t |> dateFormat
 timeFormatShort : Time.Time -> String
 timeFormatShort t =
     let dateFormatShort d =
+            (Date.dayOfWeek d |> toString)
+            ++ " " ++
             (Date.hour d |> toString)
             ++ ":" ++
             (if Date.minute d < 10 then "0" else "") ++
