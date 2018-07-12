@@ -13,12 +13,16 @@ class Player < ActiveRecord::Base
       tackling: tackling,
       handling: handling,
       speed: speed,
-      positions: JSON.parse(positions)
+      positions: get_positions
     }
   end
 
   def skill
     shooting + passing + tackling + handling + speed
+  end
+
+  def get_positions
+    JSON.parse(positions)
   end
 
   def pick_position
@@ -37,8 +41,8 @@ class Player < ActiveRecord::Base
     end
   end
 
-  def pick_positions
-    pos = pick_position
+  def pick_positions(force_position)
+    if force_position then pos = force_position else pos = pick_position end
     case pos
       when 'A' then [[1,1],[2,1],[3,1]]
 

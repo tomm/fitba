@@ -26,7 +26,6 @@ class Team < ActiveRecord::Base
   def update_player_positions(positions) # [[playerId, [positionX, positionY]]]
     # positions are in order, ie [0] is goal keeper, [10] is centre forward
     #players = Player.find_by(team_id: self.id)
-    puts positions
     positions.each_with_index do |p,i|
       player_id = p[0]
       position_xy = p[1]
