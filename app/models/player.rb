@@ -1,3 +1,5 @@
+require 'json'
+
 class Player < ActiveRecord::Base
   belongs_to :team
   has_many :formation_pos
@@ -10,7 +12,8 @@ class Player < ActiveRecord::Base
       passing: passing,
       tackling: tackling,
       handling: handling,
-      speed: speed
+      speed: speed,
+      positions: JSON.parse(positions)
     }
   end
 
@@ -27,10 +30,36 @@ class Player < ActiveRecord::Base
       ["DM"]*((passing + tackling)/2) +
       ["D"]*tackling +
       ["G"]*(handling/2)).sample
-    if pos != 'G'
-      pos + ['L', 'R', 'C', 'C'].sample
+    if pos != 'G' and pos != 'A'
+      pos + ['L', 'R', 'C', 'C', 'C'].sample
     else
       pos
+    end
+  end
+
+  def pick_positions
+    pos = pick_position
+    case pos
+      when 'A' then [[1,1],[2,1],[3,1]]
+
+      when 'AML' then [[0,2],[0,1]]
+      when 'AMR' then [[4,2],[4,1]]
+      when 'AMC' then [[1,2],[2,2],[3,2]]
+
+      when 'ML' then [[0,3],[0,2]]
+      when 'MR' then [[4,3],[4,2]]
+      when 'MC' then [[1,3],[2,3],[3,3]]
+
+      when 'DML' then [[0,4],[0,3]]
+      when 'DMR' then [[4,4],[4,3]]
+      when 'DMC' then [[1,4],[2,4],[3,4]]
+
+      when 'DL' then [[0,3],[0,4]]
+      when 'DR' then [[4,3],[4,4]]
+      when 'DC' then [[1,5],[2,5],[3,5]]
+
+      when 'G' then [[2,6]]
+      else raise "Unexpected value: " + pos
     end
   end
 end

@@ -44,6 +44,7 @@ view state =
                         infoAction = onClick (ViewPlayer p)
                     in Html.tr [if isActive i then activeTableRowStyle else Html.Attributes.style []] [
                          Html.td [selectAction] [text <| toString <| i + 1 ]
+                       , Html.td [selectAction] [Uitk.playerPositionBadge p]
                        , Html.td [selectAction] [text <| p.name]
                        , Html.td [selectAction] [text <| toString <| p.shooting]
                        , Html.td [selectAction] [text <| toString <| p.passing]
@@ -57,6 +58,7 @@ view state =
                     Html.table
                         [Html.Attributes.class "squad-list"] <|
                         (Html.tr [] [
+                            Html.th [] [text "No."],
                             Html.th [] [text "Pos."],
                             Html.th [] [text "Name"],
                             Html.th [] [text "Sh"],
@@ -128,19 +130,31 @@ emptyPitchPosition (x, y) positionSuitsPlayer =
 playerOnPitch : Team -> SquadViewState -> Int -> Int -> Int -> Svg.Svg Msg
 playerOnPitch team squadViewState playerIdx x y =
     let maybePlayer = Array.get playerIdx team.players
+        positionSuitsSelectedPlayer = case squadViewState.selectedPlayer of
+            Nothing -> False
+            Just pidx -> List.member (x,y) (arrayDirtyGet pidx team.players).positions
         label =
             case maybePlayer of
                 Nothing -> ("Empty!", "red")
-                Just player -> (player.name, if squadViewState.selectedPlayer == Just playerIdx then "#8080ff" else "white")
+                Just player ->
+                    (player.name,
+                    if squadViewState.selectedPlayer == Just playerIdx
+                    then
+                        "#8080ff"
+                    else
+                        if List.member (x,y) player.positions then "white" else "#f77"
+                    )
 
-        opacity = case maybePlayer of
+        opacity = if positionSuitsSelectedPlayer then playerGoodPositionOpacity else playerBadPositionOpacity
+            {- case maybePlayer of
             Nothing -> playerBadPositionOpacity
             Just player ->
                 -- players sitting on good positions get 'good position' opacity
-                if {-Just playerIdx == squadViewState.selectedPlayer &&-} List.member (x,y) player.positions then
+                if Just playerIdx == squadViewState.selectedPlayer && List.member (x,y) player.positions then
                     playerGoodPositionOpacity
                 else
                     playerBadPositionOpacity
+            -}
 
         textAtPlayerPos : (String, String) -> Int -> Int -> Svg.Svg Msg
         textAtPlayerPos (str, color) x y =

@@ -165,7 +165,7 @@ jsonDecodePlayer =
         (Json.field "tackling" Json.int)
         (Json.field "handling" Json.int)
         (Json.field "speed" Json.int)
-        (Json.succeed [(1,4),(2,4),(3,4)])
+        (Json.field "positions" (Json.list jsonDecodePlayerPosition))
 
 jsonDecodePlayerPosition : Json.Decoder (Int, Int)
 jsonDecodePlayerPosition =

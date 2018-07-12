@@ -23,3 +23,21 @@ type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, eve
 type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int }
 type FixtureStatus = Scheduled | InProgress | Played FixtureStatusPlayed
 type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus }
+
+playerPositionFormat : List (Int, Int) -> String
+playerPositionFormat ps =
+    if List.member (2,6) ps then "GK"
+    else if List.member (2,5) ps then "DC"
+    else if List.member (2,4) ps then "DMC"
+    else if List.member (2,3) ps then "MC"
+    else if List.member (2,2) ps then "AMC"
+    else if List.member (2,1) ps then "CF"
+    else if List.member (0,5) ps then "DL"
+    else if List.member (4,5) ps then "DR"
+    else if List.member (0,4) ps then "DML"
+    else if List.member (4,4) ps then "DMR"
+    else if List.member (0,3) ps then "ML"
+    else if List.member (4,3) ps then "MR"
+    else if List.member (0,2) ps then "AML"
+    else if List.member (4,2) ps then "AMR"
+    else "ERROR: " ++ (toString ps)

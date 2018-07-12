@@ -54,6 +54,7 @@ view ownTeamId state = case state.view of
 
                 in Html.tr clickAction [
                     Html.td [] [text <| listing.player.name],
+                    Html.td [] [Uitk.playerPositionBadge listing.player],
                     Html.td [] [text <| Utils.moneyFormat listing.minPrice],
                     Html.td [] [text <| case listing.status of
                         OnSale -> Utils.timeFormatShort listing.deadline
@@ -79,6 +80,7 @@ view ownTeamId state = case state.view of
                 Html.table [class "transfer-listings"] (
                     (Html.tr [] [
                         Html.th [] [text "Name"]
+                      , Html.th [] [text "Pos"]
                       , Html.th [] [text "Min Price"]
                       , Html.th [] [text "Deadline"]
                       , Html.th [] [text "Your bid"]

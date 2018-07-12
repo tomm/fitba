@@ -215,7 +215,7 @@ module PopulateDbHelper
         speed: rand_skill.call(),
       )
 
-      player.update(name: player.pick_position + " " + player.name)
+      player.update(positions: JSON.generate(player.pick_positions))
       
       player
     end

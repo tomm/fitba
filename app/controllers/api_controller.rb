@@ -201,7 +201,7 @@ class ApiController < ApplicationController
           sellerTeamId: t.team_id ? t.team_id : 0,
           status: status,
           youBid: your_bid == nil ? nil : your_bid.amount,
-          player: player
+          player: player.to_api
         }
       end)
     else

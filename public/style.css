@@ -31,6 +31,14 @@ table {
 .login input { border: 0px;margin: 5px; padding: 5px; }
 .login input[type="submit"] { padding: 10px 40px; background-color: rgba(150, 150, 255, 0.5); }
 
+span.player-position-badge { border-radius: 5px; padding: 0 3px; }
+span.player-position-GK { background-color: #f7f; }
+span.player-position-DR, span.player-position-DL, span.player-position-DC { background-color: #77f; }
+span.player-position-DMR, span.player-position-DML, span.player-position-DMC { background-color: #7c7; }
+span.player-position-MR, span.player-position-ML, span.player-position-MC { background-color: #ff7; }
+span.player-position-AMR, span.player-position-AML, span.player-position-AMC { background-color: #fa7; }
+span.player-position-CF { background-color: #f77; }
+
 button.action {
 	background-color: rgba(150, 150, 255, 0.5);
 	padding: 10px;

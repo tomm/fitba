@@ -1,8 +1,10 @@
-module Uitk exposing (view, actionButton, backButton)
+module Uitk exposing (view, actionButton, backButton, playerPositionBadge)
 
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html exposing (..)
+
+import Types
 
 actionButton : a -> String -> Html a
 actionButton action label = button [class "action", onClick action] [text label]
@@ -22,3 +24,8 @@ view maybeButton title content =
     
 mainContent : List (Html a) -> Html a
 mainContent = Html.div [class "main-content"]
+
+playerPositionBadge : Types.Player -> Html a
+playerPositionBadge player = 
+    let pos = Types.playerPositionFormat player.positions
+    in Html.span [class "player-position-badge", class <| "player-position-" ++ pos] [text pos]
