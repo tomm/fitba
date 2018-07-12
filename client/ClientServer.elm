@@ -157,14 +157,15 @@ jsonDecodeTeam =
 
 jsonDecodePlayer : Json.Decoder Player
 jsonDecodePlayer =
-    Json.map7 Player
-        (Json.at ["id"] Json.int)
-        (Json.at ["name"] Json.string)
-        (Json.at ["shooting"] Json.int)
-        (Json.at ["passing"] Json.int)
-        (Json.at ["tackling"] Json.int)
-        (Json.at ["handling"] Json.int)
-        (Json.at ["speed"] Json.int)
+    Json.map8 Player
+        (Json.field "id" Json.int)
+        (Json.field "name" Json.string)
+        (Json.field "shooting" Json.int)
+        (Json.field "passing" Json.int)
+        (Json.field "tackling" Json.int)
+        (Json.field "handling" Json.int)
+        (Json.field "speed" Json.int)
+        (Json.succeed [(1,4),(2,4),(3,4)])
 
 jsonDecodePlayerPosition : Json.Decoder (Int, Int)
 jsonDecodePlayerPosition =

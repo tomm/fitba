@@ -86,13 +86,15 @@ view state =
                         case squadViewState.selectedPlayer of
                             Nothing -> []
                             Just 0 -> [] -- can't move goalkeeper
-                            Just _ ->
-                                List.map
+                            Just pidx ->
+                                let selectedPlayer = arrayDirtyGet pidx state.team.players
+                                in List.map
                                     (\(x, y) ->
-                                            -- XXX why doesn't Array.member exist!
+                                        let positionSuitsPlayer = List.member (x,y) selectedPlayer.positions
+                                        in -- xxx why doesn't array.member exist!
                                             if List.member (x, y) <| List.take 11 <| Array.toList state.team.formation
                                             then Svg.text ""
-                                            else emptyPitchPosition (x, y)
+                                            else emptyPitchPosition (x, y) positionSuitsPlayer
                                     )
                                     movablePitchPositions
                                 )
@@ -110,13 +112,18 @@ pitchPosPixelPos (x, y) =
     in
         (xpadding + (toFloat x)*xinc, ypadding + (toFloat y)*yinc)
 
-emptyPitchPosition : (Int, Int) -> Svg.Svg Msg
-emptyPitchPosition (x, y) =
+playerGoodPositionOpacity = "0.5"
+playerBadPositionOpacity = "0.1"
+
+emptyPitchPosition : (Int, Int) -> Bool -> Svg.Svg Msg
+emptyPitchPosition (x, y) positionSuitsPlayer =
     let
         (xpos, ypos) = pitchPosPixelPos (x, y)
+        opacity = if positionSuitsPlayer then playerGoodPositionOpacity else playerBadPositionOpacity
     in
         Svg.circle [ Svg.Events.onClick (MovePosition (x, y)),
-                     cx (toString xpos), cy (toString ypos), r <| toString positionCircleRadius, fill "black", fillOpacity "0.1" ] []
+                     cx (toString xpos), cy (toString ypos), r <| toString positionCircleRadius, fill "black",
+                     fillOpacity opacity ] []
 
 playerOnPitch : Team -> SquadViewState -> Int -> Int -> Int -> Svg.Svg Msg
 playerOnPitch team squadViewState playerIdx x y =
@@ -125,6 +132,15 @@ playerOnPitch team squadViewState playerIdx x y =
             case maybePlayer of
                 Nothing -> ("Empty!", "red")
                 Just player -> (player.name, if squadViewState.selectedPlayer == Just playerIdx then "#8080ff" else "white")
+
+        opacity = case maybePlayer of
+            Nothing -> playerBadPositionOpacity
+            Just player ->
+                -- players sitting on good positions get 'good position' opacity
+                if {-Just playerIdx == squadViewState.selectedPlayer &&-} List.member (x,y) player.positions then
+                    playerGoodPositionOpacity
+                else
+                    playerBadPositionOpacity
 
         textAtPlayerPos : (String, String) -> Int -> Int -> Svg.Svg Msg
         textAtPlayerPos (str, color) x y =
@@ -135,7 +151,8 @@ playerOnPitch team squadViewState playerIdx x y =
                     []
                     [ Svg.circle
                         [ Svg.Events.onClick (SelectPlayer (Just playerIdx)),
-                          cx (toString xpos), cy (toString ypos), r <| toString positionCircleRadius, fill "black", fillOpacity "0.1" ]
+                          cx (toString xpos), cy (toString ypos), r 
+                              <| toString positionCircleRadius, fill "black", fillOpacity opacity ]
                         []
                     , Svg.text_
                         [ Svg.Events.onClick (SelectPlayer (Just playerIdx)),
