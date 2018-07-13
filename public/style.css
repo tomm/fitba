@@ -41,6 +41,8 @@ span.player-position-CF { background-color: #f77; }
 
 tr.fixture-own { font-weight: bold; }
 
+.player-detailed-view td:nth-child(1) { font-weight: bold; }
+
 button.action {
 	background-color: rgba(150, 150, 255, 0.5);
 	padding: 10px;

@@ -20,6 +20,10 @@ view player =
                 td [] [Uitk.playerPositionBadge player]
             ],
             tr [] [
+                td [] [text "Skill Average"],
+                td [] [text <| Types.playerAvgSkill player]
+            ],
+            tr [] [
                 td [] [text "Shooting"],
                 td [] [text <| toString player.shooting]
             ],

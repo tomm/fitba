@@ -82,7 +82,13 @@ update msg model =
                 _ -> ({model | errorMsg = Just "Unexpected message while loading ..."}, Cmd.none)
         handleActiveStateMsgs m =
             case msg of
-                ChangeTab tab -> updateState { m | tab = tab }
+                ChangeTab tab ->
+                    let cmd = case tab of
+                        -- fetch updated poop
+                        TabFixtures _ -> getFixtures
+                        TabLeagueTables -> getLeagueTables
+                        _ -> Cmd.none
+                    in updateStateCmd { m | tab = tab } cmd
                 ViewTransferMarket -> (model, ClientServer.loadTransferListings)
                 GotTransferListings result -> case result of
                     Ok listings -> updateState { m | tab = TabTransferMarket {
