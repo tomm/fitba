@@ -70,7 +70,7 @@ matchView watching =
                 matchTimeDisplay,
                 (case latestGameEventAtTimepoint game (game.start + watching.timePoint) of
                     Nothing -> div [] [
-                        text "The match has not started.",
+                        text <| "The match has not started: kick-off on " ++ Utils.timeFormat game.start,
                         drawPitch game Nothing
                         ]
                     Just ev -> div [] [
@@ -127,16 +127,21 @@ drawBall (x, y) =
         (xpos, ypos) = pitchPosPixelPos (x, y)
     in
         Svg.g [] [
-            Svg.circle [ cx (toString xpos), cy (toString ypos), r "30", fill "white" ] [],
+            Svg.circle [ cx (toString xpos), cy (toString ypos), r "30", fill "white" ] []
+            {-,
             Svg.text_ [fill "black", Svg.Attributes.x <| toString xpos, Svg.Attributes.y <| toString ypos]
                       [Svg.text ((toString x) ++ "," ++ (toString y))]
+            -}
         ]
 
 
 fixturesTable : Model -> Html Msg
 fixturesTable model =
     let fixtureRow fixture =
-            tr [onClick (Watch fixture.gameId)] [
+            tr [Html.Attributes.class <|
+                    if fixture.homeName == model.ourTeam.name || fixture.awayName == model.ourTeam.name then
+                        "fixture-own" else "fixture-other",
+                onClick (Watch fixture.gameId)] [
                 td [] [text (fixture.homeName ++ " - " ++ fixture.awayName)],
                 td [] [text <| Utils.timeFormat fixture.start],
                 td [] [resultText fixture ]

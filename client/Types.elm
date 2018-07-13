@@ -1,4 +1,6 @@
 module Types exposing (..)
+import Round
+
 import Array exposing (Array)
 import Time exposing (Time)
 
@@ -41,3 +43,6 @@ playerPositionFormat ps =
     else if List.member (0,2) ps then "AML"
     else if List.member (4,2) ps then "AMR"
     else "ERROR: " ++ (toString ps)
+
+playerAvgSkill : Player -> String
+playerAvgSkill p = Round.round 1 <| 0.2 * toFloat (p.shooting + p.passing + p.tackling + p.handling + p.speed)

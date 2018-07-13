@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 
 import Types exposing (..)
+import Uitk
 
 view : Player -> Html a
 view player =
@@ -13,6 +14,10 @@ view player =
             tr [] [
                 td [] [text "Name"],
                 td [] [text player.name]
+            ],
+            tr [] [
+                td [] [text "Favoured Position"],
+                td [] [Uitk.playerPositionBadge player]
             ],
             tr [] [
                 td [] [text "Shooting"],

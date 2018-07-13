@@ -46,6 +46,7 @@ view state =
                          Html.td [selectAction] [text <| toString <| i + 1 ]
                        , Html.td [selectAction] [Uitk.playerPositionBadge p]
                        , Html.td [selectAction] [text <| p.name]
+                       , Html.td [selectAction] [text <| Types.playerAvgSkill p]
                        , Html.td [selectAction] [text <| toString <| p.shooting]
                        , Html.td [selectAction] [text <| toString <| p.passing]
                        , Html.td [selectAction] [text <| toString <| p.tackling]
@@ -61,6 +62,7 @@ view state =
                             Html.th [] [text "No."],
                             Html.th [] [text "Pos."],
                             Html.th [] [text "Name"],
+                            Html.th [] [text "Avg."],
                             Html.th [] [text "Sh"],
                             Html.th [] [text "Pa"],
                             Html.th [] [text "Ta"],

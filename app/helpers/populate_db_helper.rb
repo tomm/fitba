@@ -4,6 +4,8 @@ require "./app/name_gen.rb"
 
 SQUAD_SIZE = 22
 
+TRANSFER_LISTING_DURATION = 60*4
+
 FORMATION_442 = [
     [2, 6], # gk
     [0, 5], [1, 5], [3, 5], [4, 5],
@@ -121,11 +123,15 @@ module PopulateDbHelper
     def self.create_user_for_team(username, team, money)
       password = Readline.readline("Enter password for user #{username}: ")
       User.create(name: username, team: team, money: money, secret: Digest::MD5.hexdigest(password))
+      # nuke team formation, so the user has some work to do
+      FormationPo.where(formation_id: team.formation_id).delete_all
     end
 
     def self.team_can_buy(team_id, player)
       # don't let a team buy a player way out of their league
-      players = Player.where(team_id: team_id).all.to_a
+      team = Team.find(team_id)
+      # starting 11
+      players = team.formation.formation_pos.map {|f| f.player}
       num_players = players.length
       total_skill = players.inject(0){|sum,x|sum + x.skill} # is sum(players.skill)
       avg_skill = total_skill / num_players.to_f
@@ -142,7 +148,7 @@ module PopulateDbHelper
       while num_players < 20 do
         player = make_player(nil, player_skill.sample)
         price_jiggle = 1.0 + (rand * 0.1)
-        TransferListing.create(team_id: player.team_id, player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + 60*60*24)
+        TransferListing.create(team_id: player.team_id, player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + TRANSFER_LISTING_DURATION)
         num_players += 1
       end
 
@@ -265,7 +271,7 @@ module PopulateDbHelper
         skill = m[1].to_i + dice.call(m[2].to_i, m[3].to_i)
         skill >= 1 ? (skill <= 9 ? skill : 9) : 1
       }
-      puts "Creating player using #{m[1]} + #{m[2]}d#{m[3]}"
+      #puts "Creating player using #{m[1]} + #{m[2]}d#{m[3]}"
 
       player = Player.create(
         team_id: team_id,
@@ -312,7 +318,14 @@ module PopulateDbHelper
     end
 
     def self.pick_team_formation(team)
+      has_user = User.where(team_id: team.id).count > 0
+      if has_user then
+        # don't help human players ;)
+        return
+      end
+
       _players = Player.where(team_id: team.id).all.to_a
+
       # sort players by skill
       _players.sort! {|a,b| a.skill > b.skill ? -1 : (a.skill < b.skill ? 1 : 0)}
 

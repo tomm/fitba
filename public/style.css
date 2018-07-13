@@ -39,6 +39,8 @@ span.player-position-MR, span.player-position-ML, span.player-position-MC { back
 span.player-position-AMR, span.player-position-AML, span.player-position-AMC { background-color: #fa7; }
 span.player-position-CF { background-color: #f77; }
 
+tr.fixture-own { font-weight: bold; }
+
 button.action {
 	background-color: rgba(150, 150, 255, 0.5);
 	padding: 10px;

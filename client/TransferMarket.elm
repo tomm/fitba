@@ -69,6 +69,7 @@ view ownTeamId state = case state.view of
                             Just amount -> Utils.moneyFormat amount
                             Nothing -> ""
                     ],
+                    Html.td [] [text <| Types.playerAvgSkill listing.player],
                     Html.td [] [text <| toString <| listing.player.shooting],
                     Html.td [] [text <| toString <| listing.player.passing],
                     Html.td [] [text <| toString <| listing.player.tackling],
@@ -84,6 +85,7 @@ view ownTeamId state = case state.view of
                       , Html.th [] [text "Min Price"]
                       , Html.th [] [text "Deadline"]
                       , Html.th [] [text "Your bid"]
+                      , Html.th [] [text "Avg."]
                       , Html.th [] [text "Sh"]
                       , Html.th [] [text "Pa"]
                       , Html.th [] [text "Ta"]

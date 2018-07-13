@@ -18,7 +18,14 @@ class Team < ActiveRecord::Base
     squad |= players
 
     {
-      formation: positions.map {|p| [p.position_x, p.position_y]},
+      # make sure there are 11 positions!
+      formation: positions = ((0..10).map do |i|
+        if positions[i] == nil then
+          FORMATION_442[i]
+        else
+          [positions[i].position_x, positions[i].position_y]
+        end
+      end),
       players: squad.map {|p| p.to_api }
     }
   end

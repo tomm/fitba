@@ -257,20 +257,23 @@ class ApiControllerTest < ActionController::TestCase
     FormationPo.destroy_all
     login
 
-    # no formation now
+    # default formation (442)
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 0, body['formation'].size
+    assert_equal FORMATION_442, body['formation']
     assert_equal 12, body['players'].size
 
     post :save_formation, [[amy.id, [1,2]], [barbara.id, [2,3]]].to_json, :format => "json"
     assert_response :success
 
+    expected_formation = FORMATION_442.dup
+    expected_formation[0] = [1,2]
+    expected_formation[1] = [2,3]
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 2, body['formation'].size
+    assert_equal expected_formation, body['formation']
     assert_equal 12, body['players'].size
     assert_equal "Amy", body['players'][0]['name']
     assert_equal "Barbara", body['players'][1]['name']
@@ -284,7 +287,7 @@ class ApiControllerTest < ActionController::TestCase
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 2, body['formation'].size
+    assert_equal 11, body['formation'].size
     assert_equal 12, body['players'].size
     assert_equal "Barbara", body['players'][0]['name']
     assert_equal "Amy", body['players'][1]['name']
