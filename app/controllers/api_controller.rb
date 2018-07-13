@@ -176,20 +176,27 @@ class ApiController < ApplicationController
 
   def transfer_listings
     if user = get_user then
-      ts = TransferListing.order(:deadline).all
+      ts = TransferListing.order(:deadline).all.select do |t|
+        # so slow and shit. want OR condition on query
+        your_bid = TransferBid.where(team_id: user.team_id, transfer_listing_id: t.id).first
+        # show active listings, or your listings, or listings you bid on
+        (t.status == 'Active' and t.deadline > Time.now) or (your_bid != nil) or (t.team_id == user.team_id)
+      end
       render json: (ts.map do |t|
         your_bid = TransferBid.where(team_id: user.team_id, transfer_listing_id: t.id).first
         status =
-          if t.winning_bid_id == nil then
+          if t.status == 'Active' then
             'OnSale'
-          elsif your_bid != nil then
-            if t.winning_bid_id == your_bid.id then
-              'YouWon'
-            else
-              'YouLost'
-            end
           else
-            'BiddingEnded'
+            if your_bid != nil then
+              if t.winning_bid_id == your_bid.id then
+                'YouWon'
+              else
+                'YouLost'
+              end
+            else
+              t.status  # 'Sold' or 'Unsold'
+            end
           end
 
         player = Player.find(t.player_id)
@@ -213,7 +220,10 @@ class ApiController < ApplicationController
     if user = get_user then
       data = JSON.parse(request.body.read())
       tid = data["transfer_listing_id"]
-      if data["amount"] == nil then
+      transfer_listing = TransferListing.find(tid)
+      if transfer_listing.deadline < Time.now then
+        render json: {status: 'EXPIRED'}
+      elsif data["amount"] == nil then
         TransferBid.where(team_id: user.team_id, transfer_listing_id: tid).destroy_all
         render json: {status: 'SUCCESS'}
       else
@@ -244,7 +254,7 @@ class ApiController < ApplicationController
           # already listed. dandy
           render json: {status: 'SUCCESS'}
         else
-          TransferListing.create(team_id: user.team_id, player: player, min_price: player.skill * 200000, deadline: Time.now + TRANSFER_LISTING_DURATION)
+          TransferListing.create(team_id: user.team_id, status: 'Active', player: player, min_price: player.skill * 200000, deadline: Time.now + TRANSFER_LISTING_DURATION)
           render json: {status: 'SUCCESS'}
         end
       end

@@ -88,7 +88,8 @@ jsonDecodeTransferListings =
                         "OnSale" -> Json.succeed OnSale
                         "YouWon" -> Json.succeed YouWon
                         "YouLost" -> Json.succeed YouLost
-                        "BiddingEnded" -> Json.succeed BiddingEnded
+                        "Sold" -> Json.succeed Sold
+                        "Unsold" -> Json.succeed Unsold
                         _ -> Json.fail <| "Unexpected TransferListing status: " ++ val
                 )
             )

@@ -40,8 +40,9 @@ view ownTeamId state = case state.view of
                                 ] ]
                         )
                         YouWon -> div [] [text "You have signed this player."]
-                        YouLost -> div [] [text "You were outbid by another team."]
-                        BiddingEnded -> div [] [text "Bidding has ended."]
+                        YouLost -> div [] [text "You were outbid by another team or the player was not interested in playing for your team."]
+                        Sold -> div [] [text "This player has been sold."]
+                        Unsold -> div [] [text "No winning bid."]
                     ]
                 ]
             ]
@@ -60,7 +61,8 @@ view ownTeamId state = case state.view of
                         OnSale -> Utils.timeFormatShort listing.deadline
                         YouWon -> "You won!"
                         YouLost -> "You lost"
-                        BiddingEnded -> "Ended"
+                        Sold -> "Sold"
+                        Unsold -> "Unsold"
                     ],
                     Html.td [] [text <|
                         if listing.sellerTeamId == ownTeamId then

@@ -4,7 +4,7 @@ require "./app/name_gen.rb"
 
 SQUAD_SIZE = 22
 
-TRANSFER_LISTING_DURATION = 60*4
+TRANSFER_LISTING_DURATION = 60*60*24
 
 FORMATION_442 = [
     [2, 6], # gk
@@ -140,7 +140,7 @@ module PopulateDbHelper
       can_do
     end
 
-    def self.update_transfer_market()
+    def self.repopulate_transfer_market()
       player_skill = [ "0+1d9", "0+1d8", "0+1d7", "0+1d6", "0+1d5", "0+1d4" ]
 
       num_players = TransferListing.where("deadline > ?", Time.now).count
@@ -148,12 +148,15 @@ module PopulateDbHelper
       while num_players < 20 do
         player = make_player(nil, player_skill.sample)
         price_jiggle = 1.0 + (rand * 0.1)
-        TransferListing.create(team_id: player.team_id, player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + TRANSFER_LISTING_DURATION)
+        TransferListing.create(team_id: player.team_id, status: 'Active', player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + TRANSFER_LISTING_DURATION)
         num_players += 1
       end
+    end
+
+    def self.decide_transfer_market_bids()
 
       # resolve expired transfer listings
-      expired = TransferListing.where("deadline < ?", Time.now).where(winning_bid_id: nil).all
+      expired = TransferListing.where("deadline < ?", Time.now).where(status: 'Active').all
       expired.each do |t|
         player = Player.find(t.player_id)
         bids = TransferBid.where(transfer_listing_id: t.id).order(:amount).reverse_order.all.to_a
@@ -175,7 +178,7 @@ module PopulateDbHelper
               player.update(team_id: buyer_user.team_id)
               FormationPo.where(player_id: player.id).delete_all
               # update listing, marking sold
-              t.update(winning_bid_id: bid.id)
+              t.update(winning_bid_id: bid.id, status: 'Sold')
               sold = true
             end
           end
@@ -189,13 +192,20 @@ module PopulateDbHelper
             seller_user.update(money: seller_user.money + t.min_price)
             FormationPo.where(player_id: player.id).delete_all
             player.update(team_id: nil)
+            t.update(status: 'Sold')
+          else
+            t.update(status: 'Unsold')
           end
-          t.delete
         end
       end
 
       # nuke ancient transfer listings
       TransferListing.where("deadline < ?", Time.now - 60*60*24).delete_all
+    end
+
+    def self.update_transfer_market()
+      decide_transfer_market_bids
+      repopulate_transfer_market
     end
 
     def self.create_fixtures_for_league_season(league_id, season)

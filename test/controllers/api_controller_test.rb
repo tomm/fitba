@@ -24,7 +24,7 @@ class ApiControllerTest < ActionController::TestCase
     get :transfer_listings, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 2, body.size
+    assert_equal 0, body.size
 
     post :sell_player, {player_id: players(:carla).id}.to_json, :format => "json"
     assert_response :success
@@ -34,7 +34,7 @@ class ApiControllerTest < ActionController::TestCase
     get :transfer_listings, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 3, body.size
+    assert_equal 1, body.size
 
     # idempotent
     post :sell_player, {player_id: players(:carla).id}.to_json, :format => "json"
@@ -43,7 +43,7 @@ class ApiControllerTest < ActionController::TestCase
     get :transfer_listings, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 3, body.size
+    assert_equal 1, body.size
 
     # not our player
     post :sell_player, {player_id: players(:zuzana).id}.to_json, :format => "json"
@@ -52,20 +52,43 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal "ERROR", body['status']
   end
 
+  test "transfer market sold" do
+    TransferListing.delete_all
+    tl = TransferListing.create(player_id: players(:molly).id, min_price: 123,
+                           status: 'Active', team_id: teams(:test_city).id,
+                           deadline: Time.now+60)
+    tid = tl.id
+    login
+    post :transfer_bid, {amount: 200, transfer_listing_id: tid}.to_json, :format => "json"
+    assert_response :success
+
+    tl.update(deadline: Time.now-60)
+    PopulateDbHelper::Populate.decide_transfer_market_bids()
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 1, body.size
+    assert_equal 123, body[0]["minPrice"]
+    assert_equal 200, body[0]["youBid"]
+    assert_equal "YouWon", body[0]["status"]
+  end
+
   test "transfer market" do
-    tid = transfer_listings(:one).id
+    TransferListing.delete_all
+    tl = TransferListing.create(player_id: players(:molly).id, min_price: 123,
+                           status: 'Active', team_id: teams(:test_city).id,
+                           deadline: Time.now+60)
+    tid = tl.id
     login
 
     get :transfer_listings, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 2, body.size
+    assert_equal 1, body.size
     assert_equal 123, body[0]["minPrice"]
     assert_equal nil, body[0]["youBid"]
     assert_equal "OnSale", body[0]["status"]
-    assert_equal 234, body[1]["minPrice"]
-    assert_equal nil, body[1]["youBid"]
-    assert_equal "OnSale", body[1]["status"]
 
     post :transfer_bid, {amount: 200, transfer_listing_id: tid}.to_json, :format => "json"
     assert_response :success
@@ -73,11 +96,10 @@ class ApiControllerTest < ActionController::TestCase
     get :transfer_listings, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 2, body.size
+    assert_equal 1, body.size
     assert_equal 123, body[0]["minPrice"]
     assert_equal 200, body[0]["youBid"]
-    assert_equal 234, body[1]["minPrice"]
-    assert_equal nil, body[1]["youBid"]
+    assert_equal "OnSale", body[0]["status"]
     
     post :transfer_bid, {amount: 300, transfer_listing_id: tid}.to_json, :format => "json"
     assert_response :success
@@ -85,11 +107,10 @@ class ApiControllerTest < ActionController::TestCase
     get :transfer_listings, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 2, body.size
+    assert_equal 1, body.size
     assert_equal 123, body[0]["minPrice"]
     assert_equal 300, body[0]["youBid"]
-    assert_equal 234, body[1]["minPrice"]
-    assert_equal nil, body[1]["youBid"]
+    assert_equal "OnSale", body[0]["status"]
     
     post :transfer_bid, {amount: nil, transfer_listing_id: tid}.to_json, :format => "json"
     assert_response :success
@@ -97,11 +118,22 @@ class ApiControllerTest < ActionController::TestCase
     get :transfer_listings, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 2, body.size
+    assert_equal 1, body.size
     assert_equal 123, body[0]["minPrice"]
     assert_equal nil, body[0]["youBid"]
-    assert_equal 234, body[1]["minPrice"]
-    assert_equal nil, body[1]["youBid"]
+    assert_equal "OnSale", body[0]["status"]
+
+    tl.update(deadline: Time.now-60)
+    PopulateDbHelper::Populate.decide_transfer_market_bids()
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    # doesn't show expired listings that we didn't bid on
+    assert_equal 0, body.size
+
+    tl = TransferListing.find(tid)
+    assert_equal "Unsold", tl.status
   end
 
   test "/squad/:id needs login" do
