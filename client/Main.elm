@@ -87,6 +87,7 @@ update msg model =
                         -- fetch updated poop
                         TabFixtures _ -> getFixtures
                         TabLeagueTables -> getLeagueTables
+                        TabTeam _ -> getStartGameData
                         _ -> Cmd.none
                     in updateStateCmd { m | tab = tab } cmd
                 ViewTransferMarket -> (model, ClientServer.loadTransferListings)
@@ -145,7 +146,9 @@ update msg model =
                 UpdateLeagueTables result -> case result of
                     Ok tables -> updateState { m | leagueTables = tables }
                     Err error -> handleHttpError error model
-                GotStartGameData _ -> ({model | errorMsg = Just "Unexpected message"}, Cmd.none)
+                GotStartGameData result -> case result of
+                    Ok team -> updateState { m | ourTeam = team }
+                    Err error -> handleHttpError error model
                 SavedFormation _ -> (model, Cmd.none) -- don't give a fuck
                 SavedBid _ -> (model, Cmd.none) -- don't give a fuck
                 SellPlayerResponse _ -> (model, ClientServer.loadTransferListings) -- don't give a fuck
