@@ -117,7 +117,7 @@ jsonDecodeGame =
 
 jsonDecodeGameEvent : Json.Decoder GameEvent
 jsonDecodeGameEvent =
-    Json.map7 GameEvent
+    Json.map8 GameEvent
         (Json.field "id" Json.int)
         (Json.field "gameId" Json.int)
         (Json.field "kind" jsonDecodeGameEventKind)
@@ -125,6 +125,7 @@ jsonDecodeGameEvent =
         (Json.field "timestamp" jsonDecodeTime)
         (Json.field "message" Json.string)
         (Json.field "ballPos" jsonDecodePlayerPosition)
+        (Json.field "playerName" Json.string |> Json.maybe)
 
 jsonDecodeGameEventKind : Json.Decoder GameEventKind
 jsonDecodeGameEventKind =

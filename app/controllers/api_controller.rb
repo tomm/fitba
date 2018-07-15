@@ -119,6 +119,7 @@ class ApiController < ApplicationController
   end
 
   private def game_event_to_json(e)
+    p = Player.where(id: e.player_id).first
     {
       id: e.id,
       gameId: e.game_id,
@@ -126,7 +127,8 @@ class ApiController < ApplicationController
       side: e.side,
       timestamp: e.time,
       message: e.message == nil ? '' : e.message,
-      ballPos: [e.ball_pos_x, e.ball_pos_y]
+      ballPos: [e.ball_pos_x, e.ball_pos_y],
+      playerName: if p then p.name else nil end
     }
   end
 

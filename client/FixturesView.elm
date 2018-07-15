@@ -26,10 +26,17 @@ view model maybeWatchingGame =
         Nothing -> Uitk.view Nothing "Fixtures" [ fixturesTable model ]
         Just watching ->
             let status = case watching.game.status of
-                Scheduled -> "Live match"
-                InProgress -> "Live match"
-                Played _ -> "Match replay"
-            in Uitk.view Nothing status [matchView watching]
+                    Scheduled -> "Live match"
+                    InProgress -> "Live match"
+                    Played _ -> "Match replay"
+                button = case watching.game.status of
+                    Played _ -> 
+                        if watching.timePoint < match_length_seconds * Time.second then
+                            Just <| Html.div [Html.Attributes.class "game-button-jump-to-end"]
+                                                [ Uitk.actionButton ShowFinalScore "Show final score" ]
+                        else Nothing
+                    _ -> Nothing
+            in Uitk.view button status [matchView watching]
 
 eventsUpToTimepoint : Game -> Time -> List GameEvent
 eventsUpToTimepoint game time =
@@ -39,25 +46,51 @@ eventsUpToTimepoint game time =
 latestGameEventAtTimepoint : Game -> Time -> Maybe GameEvent
 latestGameEventAtTimepoint game time = eventsUpToTimepoint game time |> List.head
 
+secondsToMatchMinute : Float -> String
+secondsToMatchMinute s =
+    (toString << round) (90.0 * s / (match_length_seconds * Time.second))
+
+goalSummary : Game -> Time -> Html Msg
+goalSummary game time =
+    let allGoals side = List.filter (\a -> a.timestamp <= time) game.events
+            |> List.filter (\e -> e.kind == Goal && e.side == side)
+            |> List.sortWith (\a b -> if a.timestamp > b.timestamp then GT else LT)
+        summarizeEvent e =
+            let scorer = Maybe.withDefault "" e.playerName
+                when = secondsToMatchMinute (e.timestamp - game.start)
+            in div [] [text <| case e.side of
+                    Home -> scorer ++ " " ++ when
+                    Away -> when ++ " " ++ scorer
+                ]
+        goalSummary side =
+            div [Html.Attributes.class "half-width"] [
+                div [Html.Attributes.class "game-summary",
+                     Html.Attributes.class <| "game-summary-" ++ toString side]
+                    <| List.map summarizeEvent (allGoals side)
+            ]
+    in div [] [
+        Html.h4 [Html.Attributes.class "game-summary-title"] [text "Goal Summary:"],
+        goalSummary Home,
+        goalSummary Away
+        ]
+
 matchView : WatchingGame -> Html Msg
 matchView watching =
     let game = watching.game
         maybeEv = latestGameEventAtTimepoint game (game.start + watching.timePoint)
-        matchMinute = round <| case maybeEv of
-            Nothing -> 90.0 * watching.timePoint / match_length_seconds / Time.second
-            Just ev -> 90.0 * (ev.timestamp - game.start) / match_length_seconds / Time.second
+        matchMinute = case maybeEv of
+            Nothing -> secondsToMatchMinute watching.timePoint
+            Just ev -> secondsToMatchMinute (ev.timestamp - game.start)
         matchTimeDisplay = if matchStarted then
-                div
-                [Html.Attributes.style [("float", "right")]]
-                [text <| (++) "Time: " <| toString <| matchMinute, text ":00"]
+                div [Html.Attributes.class "game-time"] [text <| (++) "Time: " <| matchMinute ++ ":00"]
             else
                 div [] []
-        goals =
-            let all_goals = eventsUpToTimepoint game (game.start + watching.timePoint)
+        all_goals = eventsUpToTimepoint game (game.start + watching.timePoint)
                         |> List.filter (\e -> e.kind == Goal)
-            in (List.filter (\e -> e.side == Home) all_goals |> List.length,
-                List.filter (\e -> e.side == Away) all_goals |> List.length)
+        goals = (List.filter (\e -> e.side == Home) all_goals |> List.length,
+                 List.filter (\e -> e.side == Away) all_goals |> List.length)
         matchStarted = List.length game.events > 0
+        matchEventMessage e = Html.div [Html.Attributes.class "game-message"] [text e.message]
 
     in
         div []
@@ -67,17 +100,18 @@ matchView watching =
                     ++ " (" ++ (toString <| Tuple.first goals) ++ " : " ++ (toString <| Tuple.second goals) ++ ") "
                     ++ game.awayTeam.name 
                 )],
-                matchTimeDisplay,
                 (case latestGameEventAtTimepoint game (game.start + watching.timePoint) of
                     Nothing -> div [] [
                         text <| "The match has not started: kick-off on " ++ Utils.timeFormat game.start,
                         drawPitch game Nothing
                         ]
                     Just ev -> div [] [
-                        text ev.message,
+                        matchEventMessage ev,
+                        matchTimeDisplay,
                         drawPitch game <| Just ev
                     ]
-                )
+                ),
+                goalSummary game (game.start + watching.timePoint)
             ]
 
 drawPitch : Game -> (Maybe GameEvent) -> Svg.Svg Msg
@@ -174,6 +208,12 @@ update msg model =
         case msg of
             Watch gameId ->
                 (model, Cmd.batch [ClientServer.loadGame gameId])
+            ShowFinalScore -> case model.tab of
+                TabFixtures (Just watchingGame) ->
+                    ({ model | tab = TabFixtures (Just {
+                         watchingGame | timePoint = watchingGame.timePoint + match_length_seconds*Time.second
+                        })}, Cmd.none)
+                _ -> (model, Cmd.none)
             GameTick -> case model.tab of
                 TabFixtures (Just watchingGame) ->
                     let cmds = case List.head <| List.reverse watchingGame.game.events of

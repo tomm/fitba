@@ -169,7 +169,8 @@ class GameSimulator
       time: @last_event.time + 1,
       message: "#{striker.name} shoots!",
       ball_pos_x: @last_event.ball_pos_x,
-      ball_pos_y: @last_event.ball_pos_y
+      ball_pos_y: @last_event.ball_pos_y,
+      player_id: striker.id
     )
 
     if dice(1, striker.skill + BASE_SKILL) > dice(2, goalkeeper.skill + BASE_SKILL) 
@@ -180,7 +181,8 @@ class GameSimulator
         time: @last_event.time + 1,
         message: "Goal!! Great strike by #{striker.name}",
         ball_pos_x: @last_event.ball_pos_x,
-        ball_pos_y: @last_event.ball_pos_y
+        ball_pos_y: @last_event.ball_pos_y,
+        player_id: striker.id
       )
       if team == 0
         @game.home_goals += 1
@@ -195,7 +197,8 @@ class GameSimulator
         time: @last_event.time + 1,
         message: ["Great save by #{goalkeeper.name}!", "It goes wide!"].sample,
         ball_pos_x: @last_event.ball_pos_x,
-        ball_pos_y: @last_event.ball_pos_y
+        ball_pos_y: @last_event.ball_pos_y,
+        player_id: striker.id
       )
     end
   end

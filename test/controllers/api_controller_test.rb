@@ -251,6 +251,7 @@ class ApiControllerTest < ActionController::TestCase
       'side' => 0,
       'timestamp' => game.start.to_json.tr('"',''),
       'message' => 'Kick off!',
+      'playerName' => nil,
       'ballPos' => [2,3]
     }), body['events'][0]
     assert_equal game.start + 1, body['events'][1]['timestamp']

@@ -125,6 +125,13 @@ module PopulateDbHelper
       User.create(name: username, team: team, money: money, secret: Digest::MD5.hexdigest(password))
       # nuke team formation, so the user has some work to do
       FormationPo.where(formation_id: team.formation_id).delete_all
+      # then just assign a crap 442
+      playerIds = Player.where(team_id: team.id).pluck(:id)
+      positions = playerIds.each_with_index.map do |playerId,idx|
+        [playerId, [idx<11 ? FORMATION_442[idx][0] : 0,
+                     idx<11 ? FORMATION_442[idx][1] : 0]]
+      end
+      team.update_player_positions positions
     end
 
     def self.team_can_buy(team_id, player)

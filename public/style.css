@@ -43,6 +43,12 @@ tr.fixture-own { font-weight: bold; }
 
 .player-detailed-view td:nth-child(1) { font-weight: bold; }
 
+.game-summary-Home { text-align: right; margin-right: 10px; }
+.game-summary-Away { text-align: left; margin-left: 10px; }
+.game-time { float: right; text-align: right; margin-right: 5px; }
+.game-message { float: left; margin-left: 5px; font-weight: bold;}
+.game-button-jump-to-end { position: absolute; }
+
 button.action {
 	background-color: rgba(150, 150, 255, 0.5);
 	padding: 10px;
@@ -73,9 +79,11 @@ div.half-width {
 	float: left;
 }
 
-h1,h2,h3 {
+h1,h2,h3,h4,h5,h6 {
 	text-align: center;
 }
+
+h4 { margin: 5px 0px; }
 
 tr {
 	border-bottom: 1px solid grey;
