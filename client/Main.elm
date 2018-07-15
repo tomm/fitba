@@ -64,8 +64,8 @@ handleHttpError error model =
 
 update : Msg -> RootModel -> (RootModel, Cmd Msg)
 update msg model =
-    let updateState newState = ({ model | state = GameData newState}, Cmd.none)
-        updateStateCmd newState cmd = ({ model | state = GameData newState}, cmd)
+    let updateState newState = ({ model | state = GameData newState, errorMsg = Nothing }, Cmd.none)
+        updateStateCmd newState cmd = ({ model | state = GameData newState, errorMsg = Nothing }, cmd)
         updateWatchingGame watchingGame newEvents =
             let game = watchingGame.game
             in {watchingGame | game = {game | events = List.append game.events newEvents} }
@@ -207,11 +207,12 @@ financesTab model =
 
 leagueTableTab : Model -> LeagueTable -> Html Msg
 leagueTableTab model league =
-    let recordToTableLine record =
+    let recordToTableLine index record =
         Html.tr
             [onClick (ViewTeam record.teamId)] 
             [
-                Html.td [] [text record.name]
+                Html.td [] [text <| toString <| index + 1]
+              , Html.td [] [text record.name]
               , Html.td [] [record.won + record.drawn + record.lost |> toString |> text]
               , Html.td [] [record.won |> toString |> text]
               , Html.td [] [record.drawn |> toString |> text]
@@ -225,7 +226,8 @@ leagueTableTab model league =
         Uitk.view Nothing league.name [
             Html.table [class "league-table"] (
                 (Html.tr [] [
-                    Html.th [] [text "Team"]
+                    Html.th [] [text "Pos."]
+                  , Html.th [] [text "Team"]
                   , Html.th [] [text "Played"]
                   , Html.th [] [text "Won"]
                   , Html.th [] [text "Drawn"]
@@ -235,7 +237,7 @@ leagueTableTab model league =
                   , Html.th [] [text "GD"]
                   , Html.th [] [text "Points"]
                 ]) ::
-                (List.map recordToTableLine (sortLeague league.record))
+                (List.indexedMap recordToTableLine (sortLeague league.record))
             )
         ]
 

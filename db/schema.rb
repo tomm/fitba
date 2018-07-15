@@ -64,10 +64,9 @@ ActiveRecord::Schema.define(version: 20180713163832) do
 
   create_table "leagues", force: :cascade do |t|
     t.string   "name"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.integer  "rank"
-    t.boolean  "is_finished"
   end
 
   create_table "players", force: :cascade do |t|

@@ -110,8 +110,8 @@ module PopulateDbHelper
       update_transfer_market
 
       puts "Creating leagues..."
-      l1 = League.create(rank: 1, name: "First Division", is_finished: false)
-      l2 = League.create(rank: 2, name: "Second Division", is_finished: false)
+      l1 = League.create(rank: 1, name: "First Division")
+      l2 = League.create(rank: 2, name: "Second Division")
 
       populate_league(l1)
       populate_league(l2)
