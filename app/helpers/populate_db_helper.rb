@@ -99,8 +99,8 @@ TEAM_PREDEF = [
   {name: "Luton Town", player_spawn_skill: "0+1d6"},
   {name: "Millwall", player_spawn_skill: "0+1d6"},
   {name: "Portland Timbers", player_spawn_skill: "0+1d5"},
-  {name: "Vag of the South", player_spawn_skill: "0+1d5"},
-  {name: "Cock of the North", player_spawn_skill: "0+1d5"},
+  {name: "Vag of the South", player_spawn_skill: "0+1d6"},
+  {name: "Cock of the North", player_spawn_skill: "0+1d6"},
 ]
 
 module PopulateDbHelper

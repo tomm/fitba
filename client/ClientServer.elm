@@ -134,7 +134,9 @@ jsonDecodeGameEventKind =
             "KickOff" -> Json.succeed KickOff
             "Goal" -> Json.succeed Goal
             "Boring" -> Json.succeed Boring
-            "Shot" -> Json.succeed Shot
+            "ShotTry" -> Json.succeed ShotTry
+            "ShotMiss" -> Json.succeed ShotMiss
+            "ShotSaved" -> Json.succeed ShotSaved
             "EndOfGame" -> Json.succeed EndOfGame
             _ -> Json.fail ("Invalid GameEvent kind: " ++ val)
         )

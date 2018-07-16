@@ -8,7 +8,7 @@ ALL_POS = [
     [0, 1], [1, 1], [2, 1], [3, 1], [4, 1], # a
 ]
 # added to skill rolls
-BASE_SKILL = 5
+BASE_SKILL = 9  # this means skill 1 relative to skill 9 is: 1+BASE_SKILL vs 9+BASE_SKILL
 
 MATCH_LENGTH_SECONDS = 270
 
@@ -125,13 +125,17 @@ class GameSimulator
     # kick off
     if @last_event == nil || @last_event.kind == 'Goal'
       kick_off()
+    elsif @last_event.kind == 'ShotMiss'
+      goal_kick()
+    elsif @last_event.kind == 'ShotSaved' and dice(1,2) == 1
+      goal_kick()
     else
       pos = PitchPos.new(@last_event.ball_pos_x, @last_event.ball_pos_y)
 
       home_skill = get_skill_near(pos, 0)
       away_skill = get_skill_near(pos, 1)
 
-      diff = dice(1, home_skill + BASE_SKILL) - dice(1, away_skill + BASE_SKILL)
+      diff = dice(1, home_skill + 5*BASE_SKILL) - dice(1, away_skill + 5*BASE_SKILL)
       if diff > 0
         # home team advances
         advance(0)
@@ -141,6 +145,18 @@ class GameSimulator
         no_advance()
       end
     end
+  end
+
+  def goal_kick
+    @last_event = GameEvent.create(
+      game_id: @game.id,
+      kind: 'Boring',
+      side: 1 - @last_event.side,
+      time: @last_event.time + 1,
+      message: nil,
+      ball_pos_x: (0..4).to_a.sample,
+      ball_pos_y: 3
+    )
   end
 
   def no_advance
@@ -164,7 +180,7 @@ class GameSimulator
 
     @last_event = GameEvent.create(
       game_id: @game.id,
-      kind: 'Shot',
+      kind: 'ShotTry',
       side: team,
       time: @last_event.time + 1,
       message: "#{striker.name} shoots!",
@@ -190,16 +206,29 @@ class GameSimulator
         @game.away_goals += 1
       end
     else
-      @last_event = GameEvent.create(
-        game_id: @game.id,
-        kind: 'Shot',
-        side: team,
-        time: @last_event.time + 1,
-        message: ["Great save by #{goalkeeper.name}!", "It goes wide!"].sample,
-        ball_pos_x: @last_event.ball_pos_x,
-        ball_pos_y: @last_event.ball_pos_y,
-        player_id: striker.id
-      )
+      if dice(1,2) == 1 then
+        @last_event = GameEvent.create(
+          game_id: @game.id,
+          kind: 'ShotMiss',
+          side: team,
+          time: @last_event.time + 1,
+          message: ["It goes wide!", "Blasted over the bar!"].sample,
+          ball_pos_x: @last_event.ball_pos_x,
+          ball_pos_y: @last_event.ball_pos_y,
+          player_id: striker.id
+        )
+      else
+        @last_event = GameEvent.create(
+          game_id: @game.id,
+          kind: 'ShotSaved',
+          side: team, # note that team is striker's team, not GK's team
+          time: @last_event.time + 1,
+          message: ["Great save by #{goalkeeper.name}!", "Good save by #{goalkeeper.name}!"].sample,
+          ball_pos_x: @last_event.ball_pos_x,
+          ball_pos_y: @last_event.ball_pos_y,
+          player_id: striker.id
+        )
+      end
     end
   end
 

@@ -41,6 +41,6 @@ while sleep 1 do
 
   games.each do |game|
     game.simulate(now)
-    puts "Game between #{game.home_team.name} and #{game.away_team.name}: #{game.status}"
+    puts "Game between #{game.home_team.name} and #{game.away_team.name}: #{game.status} (#{game.home_goals}:#{game.away_goals})"
   end
 end
