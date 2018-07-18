@@ -167,6 +167,7 @@ class ApiController < ApplicationController
         game_event = GameEvent.find(params[:event_id])
         game_events = GameEvent.where(game_id: game.id)
                                .where('time > ?', game_event.time)
+                               .where('time <= ?', Time.now)
                                .order(:time)
                                .all
       end

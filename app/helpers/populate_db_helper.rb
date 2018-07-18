@@ -97,8 +97,8 @@ TEAM_PREDEF = [
   {name: "Besiktas", player_spawn_skill: "0+1d7"},
   {name: "FC Twente", player_spawn_skill: "0+1d6"},
   {name: "Luton Town", player_spawn_skill: "0+1d6"},
-  {name: "Millwall", player_spawn_skill: "0+1d6"},
-  {name: "Portland Timbers", player_spawn_skill: "0+1d5"},
+  {name: "Ozan Utd", player_spawn_skill: "0+1d6"},
+  {name: "FC Crøne", player_spawn_skill: "0+1d6"},
   {name: "Vag of the South", player_spawn_skill: "0+1d6"},
   {name: "Cock of the North", player_spawn_skill: "0+1d6"},
 ]
@@ -118,6 +118,8 @@ module PopulateDbHelper
 
       create_user_for_team("tom", Team.find_by(name: "Cock of the North"), 10000000)
       create_user_for_team("john", Team.find_by(name: "Vag of the South"), 10000000)
+      create_user_for_team("pete", Team.find_by(name: "FC Crøne"), 10000000)
+      create_user_for_team("ozan", Team.find_by(name: "Ozan Utd"), 10000000)
     end
 
     def self.create_user_for_team(username, team, money)
