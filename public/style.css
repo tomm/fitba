@@ -45,8 +45,10 @@ tr.fixture-own { font-weight: bold; }
 
 .game-summary-Home { text-align: right; margin-right: 10px; }
 .game-summary-Away { text-align: left; margin-left: 10px; }
-.game-time { float: right; text-align: right; margin-right: 5px; }
-.game-message { float: left; margin-left: 5px; font-weight: bold;}
+.game-time { text-align: center; }
+.game-message { font-weight: bold;}
+.game-message-Home { float: left; margin-left: 5px; }
+.game-message-Away { float: right; margin-right: 5px; }
 .game-button-jump-to-end { position: absolute; }
 
 button.action {

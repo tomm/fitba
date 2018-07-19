@@ -63,11 +63,11 @@ goalSummary game time =
                     Away -> when ++ " " ++ scorer
                 ]
         goalSummary side =
-            div [Html.Attributes.class "half-width"] [
-                div [Html.Attributes.class "game-summary",
-                     Html.Attributes.class <| "game-summary-" ++ toString side]
-                    <| List.map summarizeEvent (allGoals side)
-            ]
+            div [Html.Attributes.class "half-width"] 
+                [div [Html.Attributes.class "game-summary",
+                      Html.Attributes.class <| "game-summary-" ++ toString side]
+                     <| List.map summarizeEvent (allGoals side)
+                 , Uitk.nbsp ]
     in div [] [
         Html.h4 [Html.Attributes.class "game-summary-title"] [text "Goal Summary:"],
         goalSummary Home,
@@ -90,7 +90,9 @@ matchView watching =
         goals = (List.filter (\e -> e.side == Home) all_goals |> List.length,
                  List.filter (\e -> e.side == Away) all_goals |> List.length)
         matchStarted = List.length game.events > 0
-        matchEventMessage e = Html.div [Html.Attributes.class "game-message"] [text e.message]
+        matchEventMessage e = Html.div [Html.Attributes.class "game-message",
+                                        Html.Attributes.class <| "game-message-" ++ toString e.side]
+                                       [text e.message, Uitk.nbsp]
 
     in
         div []
@@ -106,8 +108,8 @@ matchView watching =
                         drawPitch game Nothing
                         ]
                     Just ev -> div [] [
-                        matchEventMessage ev,
                         matchTimeDisplay,
+                        div [] [matchEventMessage ev],
                         drawPitch game <| Just ev
                     ]
                 ),
