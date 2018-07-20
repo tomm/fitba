@@ -152,13 +152,19 @@ module PopulateDbHelper
     def self.repopulate_transfer_market()
       player_skill = [ "0+1d9", "0+1d8", "0+1d7", "0+1d6", "0+1d5", "0+1d4" ]
 
-      num_players = TransferListing.where("deadline > ?", Time.now).count
-
-      while num_players < 20 do
+      dice = lambda {|n,s|
+        x=0
+        (1..n).each do |_|
+          x += 1 + (rand*s).to_i; 
+        end
+        x
+      }
+      # assume this is run once every 5 minutes by the server.
+      if dice.call(1,8) == 1 then
         player = make_player(nil, player_skill.sample)
         price_jiggle = 1.0 + (rand * 0.1)
         TransferListing.create(team_id: player.team_id, status: 'Active', player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + TRANSFER_LISTING_DURATION)
-        num_players += 1
+        puts "Created new transfer market listing: #{player.name}"
       end
     end
 
