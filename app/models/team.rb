@@ -33,6 +33,8 @@ class Team < ActiveRecord::Base
   def update_player_positions(positions) # [[playerId, [positionX, positionY]]]
     # positions are in order, ie [0] is goal keeper, [10] is centre forward
     #players = Player.find_by(team_id: self.id)
+    # move existing positions away
+    FormationPo.where(formation_id: self.formation_id).update_all(position_num: 12)
     positions.each_with_index do |p,i|
       player_id = p[0]
       position_xy = p[1]

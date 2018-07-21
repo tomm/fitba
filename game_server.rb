@@ -23,6 +23,12 @@ while sleep 1 do
       end
     end
 
+    # update team formations
+    Team.all.each do |t|
+      puts "Updating formation of #{t.name}"
+      PopulateDbHelper::Populate.pick_team_formation(t)
+    end
+
     daily_tasks_last = today
   end
 
