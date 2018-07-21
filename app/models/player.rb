@@ -58,8 +58,8 @@ class Player < ActiveRecord::Base
       when 'DMR' then [[4,4],[4,3]]
       when 'DMC' then [[1,4],[2,4],[3,4]]
 
-      when 'DL' then [[0,3],[0,4]]
-      when 'DR' then [[4,3],[4,4]]
+      when 'DL' then [[0,5],[0,4]]
+      when 'DR' then [[4,5],[4,4]]
       when 'DC' then [[1,5],[2,5],[3,5]]
 
       when 'G' then [[2,6]]
