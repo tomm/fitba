@@ -160,7 +160,7 @@ module PopulateDbHelper
         x
       }
       # assume this is run once every 5 minutes by the server.
-      if dice.call(1,8) == 1 then
+      if dice.call(1,10) == 1 then
         player = make_player(nil, player_skill.sample)
         price_jiggle = 1.0 + (rand * 0.1)
         TransferListing.create(team_id: player.team_id, status: 'Active', player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + TRANSFER_LISTING_DURATION)
