@@ -207,10 +207,10 @@ fixturesTable model =
             case model.currentTime of
                 Nothing -> span [] []
                 Just now -> 
-                    fixtureTable "Today's matches"
+                    fixtureTable "Today's Matches"
                         (List.filter (\f -> Utils.dateEq (Date.fromTime f.start) (Date.fromTime now)) model.fixtures)
             ,
-            fixtureTable "Season fixtures" model.fixtures
+            fixtureTable "Season Fixtures" model.fixtures
         ]
 
 update : Msg -> Model -> (Model, Cmd RootMsg.Msg)
