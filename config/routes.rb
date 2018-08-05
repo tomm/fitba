@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
 
+  get '/', :to => redirect('/index.html')
   get 'login' => 'login#login'
   post 'try_login' => 'login#try_login'
   post 'save_formation' => 'api#save_formation'
