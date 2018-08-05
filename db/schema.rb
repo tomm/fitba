@@ -13,6 +13,9 @@
 
 ActiveRecord::Schema.define(version: 20180715104201) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "formation_pos", force: :cascade do |t|
     t.integer  "formation_id"
     t.integer  "player_id"
@@ -23,8 +26,8 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.datetime "updated_at",   null: false
   end
 
-  add_index "formation_pos", ["formation_id"], name: "index_formation_pos_on_formation_id"
-  add_index "formation_pos", ["player_id"], name: "index_formation_pos_on_player_id"
+  add_index "formation_pos", ["formation_id"], name: "index_formation_pos_on_formation_id", using: :btree
+  add_index "formation_pos", ["player_id"], name: "index_formation_pos_on_player_id", using: :btree
 
   create_table "formations", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -44,8 +47,8 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.integer  "player_id"
   end
 
-  add_index "game_events", ["game_id"], name: "index_game_events_on_game_id"
-  add_index "game_events", ["player_id"], name: "index_game_events_on_player_id"
+  add_index "game_events", ["game_id"], name: "index_game_events_on_game_id", using: :btree
+  add_index "game_events", ["player_id"], name: "index_game_events_on_player_id", using: :btree
 
   create_table "games", force: :cascade do |t|
     t.integer  "league_id"
@@ -60,9 +63,9 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.integer  "season"
   end
 
-  add_index "games", ["away_team_id"], name: "index_games_on_away_team_id"
-  add_index "games", ["home_team_id"], name: "index_games_on_home_team_id"
-  add_index "games", ["league_id"], name: "index_games_on_league_id"
+  add_index "games", ["away_team_id"], name: "index_games_on_away_team_id", using: :btree
+  add_index "games", ["home_team_id"], name: "index_games_on_home_team_id", using: :btree
+  add_index "games", ["league_id"], name: "index_games_on_league_id", using: :btree
 
   create_table "leagues", force: :cascade do |t|
     t.string   "name"
@@ -84,7 +87,7 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.string   "positions"
   end
 
-  add_index "players", ["team_id"], name: "index_players_on_team_id"
+  add_index "players", ["team_id"], name: "index_players_on_team_id", using: :btree
 
   create_table "sessions", force: :cascade do |t|
     t.integer  "user_id"
@@ -93,7 +96,7 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.string   "identifier"
   end
 
-  add_index "sessions", ["user_id"], name: "index_sessions_on_user_id"
+  add_index "sessions", ["user_id"], name: "index_sessions_on_user_id", using: :btree
 
   create_table "team_leagues", force: :cascade do |t|
     t.integer  "team_id"
@@ -103,8 +106,8 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.integer  "season"
   end
 
-  add_index "team_leagues", ["league_id"], name: "index_team_leagues_on_league_id"
-  add_index "team_leagues", ["team_id"], name: "index_team_leagues_on_team_id"
+  add_index "team_leagues", ["league_id"], name: "index_team_leagues_on_league_id", using: :btree
+  add_index "team_leagues", ["team_id"], name: "index_team_leagues_on_team_id", using: :btree
 
   create_table "teams", force: :cascade do |t|
     t.string   "name"
@@ -113,7 +116,7 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.datetime "updated_at",   null: false
   end
 
-  add_index "teams", ["formation_id"], name: "index_teams_on_formation_id"
+  add_index "teams", ["formation_id"], name: "index_teams_on_formation_id", using: :btree
 
   create_table "transfer_bids", force: :cascade do |t|
     t.integer  "team_id"
@@ -123,8 +126,8 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.integer  "transfer_listing_id"
   end
 
-  add_index "transfer_bids", ["team_id"], name: "index_transfer_bids_on_team_id"
-  add_index "transfer_bids", ["transfer_listing_id"], name: "index_transfer_bids_on_transfer_listing_id"
+  add_index "transfer_bids", ["team_id"], name: "index_transfer_bids_on_team_id", using: :btree
+  add_index "transfer_bids", ["transfer_listing_id"], name: "index_transfer_bids_on_transfer_listing_id", using: :btree
 
   create_table "transfer_listings", force: :cascade do |t|
     t.integer  "player_id"
@@ -137,9 +140,8 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.string   "status"
   end
 
-  add_index "transfer_listings", ["player_id"], name: "index_transfer_listings_on_player_id"
-  add_index "transfer_listings", ["team_id"], name: "index_transfer_listings_on_team_id"
-  add_index "transfer_listings", ["winning_bid_id"], name: "index_transfer_listings_on_winning_bid_id"
+  add_index "transfer_listings", ["player_id"], name: "index_transfer_listings_on_player_id", using: :btree
+  add_index "transfer_listings", ["team_id"], name: "index_transfer_listings_on_team_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
@@ -150,6 +152,22 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.integer  "money"
   end
 
-  add_index "users", ["team_id"], name: "index_users_on_team_id"
+  add_index "users", ["team_id"], name: "index_users_on_team_id", using: :btree
 
+  add_foreign_key "formation_pos", "formations"
+  add_foreign_key "formation_pos", "players"
+  add_foreign_key "game_events", "games"
+  add_foreign_key "game_events", "players"
+  add_foreign_key "games", "leagues"
+  add_foreign_key "players", "teams"
+  add_foreign_key "sessions", "users"
+  add_foreign_key "team_leagues", "leagues"
+  add_foreign_key "team_leagues", "teams"
+  add_foreign_key "teams", "formations"
+  add_foreign_key "transfer_bids", "teams"
+  add_foreign_key "transfer_bids", "transfer_listings"
+  add_foreign_key "transfer_listings", "players"
+  add_foreign_key "transfer_listings", "teams"
+  add_foreign_key "transfer_listings", "transfer_bids", column: "winning_bid_id"
+  add_foreign_key "users", "teams"
 end

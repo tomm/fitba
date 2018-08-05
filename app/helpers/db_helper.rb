@@ -4,7 +4,7 @@ module DbHelper
     def self.current
       r = ActiveRecord::Base.connection.execute("select max(season) as max from games")
       raise "No fixtures exist!" unless r.present?
-      r[0]["max"]
+      r[0]["max"].to_i
     end
   end
 
