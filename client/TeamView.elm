@@ -30,7 +30,7 @@ view : State -> Html Msg
 view state =
     case state.view of
         PlayerView player ->
-            Uitk.view (Just <| Uitk.backButton ViewSquad) player.name [
+            Uitk.view (Just <| Uitk.backButton ViewSquad) (player.forename ++ " " ++ player.name) [
                 PlayerDetailedView.view player,
                 Uitk.actionButton (SellPlayer player) "Sell this player"
             ]
