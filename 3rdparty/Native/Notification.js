@@ -1,5 +1,10 @@
 var _user$project$Native_Notification = function() {
 
+    var NotificationAPI = null;
+    if (typeof Notification !== "undefined") {
+        NotificationAPI = Notification;
+    }
+
     var Task = _elm_lang$core$Native_Scheduler;
 
     var status = {
@@ -9,7 +14,7 @@ var _user$project$Native_Notification = function() {
     }
 
     function permission() {
-        switch (Notification.permission){
+        switch (NotificationAPI.permission){
         case status.Denied:
             return {ctor: "Denied"}
         case status.Granted:
@@ -46,28 +51,36 @@ var _user$project$Native_Notification = function() {
     return {
 
         getPermission: Task.nativeBinding(function(callback) {
-	        callback(Task.succeed(permission(Notification.permission)));
+	        if (NotificationAPI) {
+                callback(Task.succeed(permission(NotificationAPI.permission)));
+            }
         }),
 
         requestPermission: Task.nativeBinding(function(callback) {
-            Notification.requestPermission(function(result) {
-                callback(Task.succeed(permission()));
-           })
+            if (NotificationAPI) {
+                NotificationAPI.requestPermission(function(result) {
+                    callback(Task.succeed(permission()));
+               });
+            }
         }),
 
         spawnNotification: function(data) {
-            return Task.nativeBinding(function(callback) {
-                switch (Notification.permission) {
-                    case status.Granted:
-                    new Notification(data.title, prepareOptions(data.options));
-                        return callback(Task.succeed(_elm_lang$core$Native_Utils.Tuple0));
-                    case status.Denied:
-                        return callback(Task.fail({ctor: "PermissionDenied"}))
-                    case status.Default:
-                        return callback(Task.fail({ctor: "UserNotAsked"}))
+            if (NotificationAPI) {
+                return Task.nativeBinding(function(callback) {
+                    switch (NotificationAPI.permission) {
+                        case status.Granted:
+                            new NotificationAPI(data.title, prepareOptions(data.options));
+                            return callback(Task.succeed(_elm_lang$core$Native_Utils.Tuple0));
+                        case status.Denied:
+                            return callback(Task.fail({ctor: "PermissionDenied"}))
+                        case status.Default:
+                            return callback(Task.fail({ctor: "UserNotAsked"}))
 
-                }
-            })
+                    }
+                });
+            } else {
+                return Task.nativeBinding(function(callback) {});
+            }
         }
     }
 }();
