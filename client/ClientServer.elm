@@ -168,6 +168,7 @@ jsonDecodePlayer =
     P.decode Player
         |> P.required "id" Json.int
         |> P.required "name" Json.string
+        |> P.required "age" Json.int
         |> P.required "forename" Json.string
         |> P.required "shooting" Json.int
         |> P.required "passing" Json.int

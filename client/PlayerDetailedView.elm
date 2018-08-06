@@ -16,6 +16,10 @@ view player =
                 td [] [text <| player.forename ++ " " ++ player.name]
             ],
             tr [] [
+                td [] [text "Age"],
+                td [] [text <| toString player.age ]
+            ],
+            tr [] [
                 td [] [text "Favoured Position"],
                 td [] [Uitk.playerPositionBadge player]
             ],

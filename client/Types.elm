@@ -9,7 +9,7 @@ type alias Team = { id: TeamId, name: String, players: Array Player, formation: 
 type alias SeasonRecord = { teamId: TeamId, name: String, played: Int, won: Int, drawn: Int, lost: Int, goalsFor: Int, goalsAgainst: Int }
 type alias LeagueTable = { name: String, record: List SeasonRecord }
 type alias PlayerId = Int
-type alias Player = { id: PlayerId, name: String, forename: String, shooting: Int, passing: Int, tackling: Int,
+type alias Player = { id: PlayerId, name: String, age: Int, forename: String, shooting: Int, passing: Int, tackling: Int,
                       handling: Int, speed: Int, positions: List (Int, Int) }
 type alias TransferListingId = Int
 type TransferStatus = OnSale | Sold | Unsold | YouWon | OutBid | TeamRejected | PlayerRejected | InsufficientMoney

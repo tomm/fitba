@@ -124,7 +124,8 @@ module PopulateDbHelper
 
     def self.create_user_for_team(username, team, money)
       password = Readline.readline("Enter password for user #{username}: ")
-      User.create(name: username, team: team, money: money, secret: Digest::MD5.hexdigest(password))
+      team.update(money: money)
+      User.create(name: username, team: team, secret: Digest::MD5.hexdigest(password))
       # nuke team formation, so the user has some work to do
       FormationPo.where(formation_id: team.formation_id).delete_all
       # then just assign a crap 442
@@ -310,6 +311,8 @@ module PopulateDbHelper
         tackling: rand_skill.call(),
         handling: rand_skill.call(),
         speed: rand_skill.call(),
+        positions: "[]",
+        age: (rand*12 + 18).round
       )
 
       player.update(positions: JSON.generate(player.pick_positions(nil)))
