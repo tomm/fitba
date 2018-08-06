@@ -136,9 +136,8 @@ module PopulateDbHelper
       team.update_player_positions positions
     end
 
-    def self.team_can_buy(team_id, player)
+    def self.player_iterested_in_transfer(team, player)
       # don't let a team buy a player way out of their league
-      team = Team.find(team_id)
       # starting 11
       players = team.formation.formation_pos.map {|f| f.player}
       num_players = players.length
@@ -175,47 +174,51 @@ module PopulateDbHelper
       expired.each do |t|
         player = Player.find(t.player_id)
         bids = TransferBid.where(transfer_listing_id: t.id).order(:amount).reverse_order.all.to_a
-        seller_user = User.find_by(team_id: player.team_id)
+        seller_team = Team.where(id: player.team_id).first
         sold = false
 
-        while bids.length > 0 and sold == false do
+        while bids.length > 0 do
           bid = bids.shift
-          buyer_user = User.find_by(team_id: bid.team_id)
+          buyer_team = Team.find(bid.team_id)
           
-          if buyer_user != nil then
-            if buyer_user.money >= bid.amount and team_can_buy(buyer_user.team_id, player) then
-              puts "User #{buyer_user} bought #{player} from #{seller_user} #{t}: #{bid}"
-              # won bidding
-              buyer_user.update(money: buyer_user.money - bid.amount)
-              if seller_user then
-                seller_user.update(money: seller_user.money + bid.amount)
-              end
-              player.update(team_id: buyer_user.team_id)
-              FormationPo.where(player_id: player.id).delete_all
-              # update listing, marking sold
-              t.update(winning_bid_id: bid.id, status: 'Sold')
-              sold = true
+          if sold == true then
+            # already sold
+            bid.update(status: "OutBid")
+          elsif not player_iterested_in_transfer(buyer_team, player) then
+            bid.update(status: "PlayerRejected")
+          elsif bid.amount < t.min_price then
+            bid.update(status: "TeamRejected")
+          elsif not buyer_team.money >= bid.amount then
+            bid.update(status: "InsufficientMoney")
+          else
+            bid.update(status: "YouWon")
+            t.update(status: 'Sold')
+            buyer_team.update(money: buyer_team.money - bid.amount)
+            if seller_team != nil then
+              seller_team.update(money: seller_team.money + bid.amount)
             end
+            player.update(team_id: buyer_team.id)
+            FormationPo.where(player_id: player.id).delete_all
+            # update listing, marking sold
+            sold = true
+            puts "Team #{buyer_team.name} bought #{player.name} for #{bid.amount}"
           end
         end
 
         if sold == false then
-          # don't keep expired transfer listings that nobody won
-          puts "Transfer listing expired with no winning bids: #{t}"
-          # belongs to a player, so maybe sell anyway
-          if seller_user != nil then
-            seller_user.update(money: seller_user.money + t.min_price)
-            FormationPo.where(player_id: player.id).delete_all
-            player.update(team_id: nil)
-            t.update(status: 'Sold')
-          else
-            t.update(status: 'Unsold')
+          # always sell to someone ;)
+          puts "Transfer listing #{t} sold to outside team."
+          if seller_team != nil then
+            seller_team.update(money: seller_team.money + t.min_price)
           end
+          FormationPo.where(player_id: player.id).delete_all
+          player.update(team_id: nil)
+          t.update(status: 'Sold')
         end
       end
 
       # nuke ancient transfer listings
-      TransferListing.where("deadline < ?", Time.now - 60*60*24).delete_all
+      TransferListing.where("deadline < ?", Time.now - 60*60*24).destroy_all
     end
 
     def self.update_transfer_market()

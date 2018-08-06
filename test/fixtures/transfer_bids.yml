@@ -3,7 +3,9 @@
 one:
   team_id: 
   amount: 1
+  status: Pending
 
 two:
   team_id: 
   amount: 1
+  status: Pending

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180715104201) do
+ActiveRecord::Schema.define(version: 20180806103136) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -112,8 +112,9 @@ ActiveRecord::Schema.define(version: 20180715104201) do
   create_table "teams", force: :cascade do |t|
     t.string   "name"
     t.integer  "formation_id"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
+    t.integer  "money",        default: 0, null: false
   end
 
   add_index "teams", ["formation_id"], name: "index_teams_on_formation_id", using: :btree
@@ -124,6 +125,7 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.datetime "created_at",          null: false
     t.datetime "updated_at",          null: false
     t.integer  "transfer_listing_id"
+    t.string   "status",              null: false
   end
 
   add_index "transfer_bids", ["team_id"], name: "index_transfer_bids_on_team_id", using: :btree
@@ -133,9 +135,8 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.integer  "player_id"
     t.integer  "min_price"
     t.datetime "deadline"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
-    t.integer  "winning_bid_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.integer  "team_id"
     t.string   "status"
   end
@@ -149,7 +150,6 @@ ActiveRecord::Schema.define(version: 20180715104201) do
     t.string   "secret"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer  "money"
   end
 
   add_index "users", ["team_id"], name: "index_users_on_team_id", using: :btree
@@ -165,9 +165,7 @@ ActiveRecord::Schema.define(version: 20180715104201) do
   add_foreign_key "team_leagues", "teams"
   add_foreign_key "teams", "formations"
   add_foreign_key "transfer_bids", "teams"
-  add_foreign_key "transfer_bids", "transfer_listings"
   add_foreign_key "transfer_listings", "players"
   add_foreign_key "transfer_listings", "teams"
-  add_foreign_key "transfer_listings", "transfer_bids", column: "winning_bid_id"
   add_foreign_key "users", "teams"
 end

@@ -52,7 +52,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal "ERROR", body['status']
   end
 
-  test "transfer market sold" do
+  test "transfer_market_sold" do
     TransferListing.delete_all
     tl = TransferListing.create(player_id: players(:molly).id, min_price: 123,
                            status: 'Active', team_id: teams(:test_city).id,
@@ -72,9 +72,41 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 123, body[0]["minPrice"]
     assert_equal 200, body[0]["youBid"]
     assert_equal "YouWon", body[0]["status"]
+
+    # should be deleted once over a day old
+    tl.update(deadline: Time.now-60*60*25)
+    PopulateDbHelper::Populate.decide_transfer_market_bids()
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 0, body.size
   end
 
-  test "transfer market" do
+  test "transfer_listing_from_no_team" do
+    TransferListing.delete_all
+    pl1 = PopulateDbHelper::Populate.make_player(nil, "0+1d9")
+    pl2 = PopulateDbHelper::Populate.make_player(nil, "0+1d9")
+    tl1 = TransferListing.create(player_id: pl1.id, min_price: 123, status: 'Active', team_id: nil, deadline: Time.now+60)
+    tl2 = TransferListing.create(player_id: pl2.id, min_price: 123, status: 'Active', team_id: nil, deadline: Time.now+60)
+    login
+
+    post :transfer_bid, {amount: 200, transfer_listing_id: tl1.id}.to_json, :format => "json"
+    assert_response :success
+
+    tl1.update(deadline: Time.now-60)
+    tl2.update(deadline: Time.now-60)
+    PopulateDbHelper::Populate.decide_transfer_market_bids()
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    # doesn't show expired listings that we didn't bid on
+    assert_equal 1, body.size
+    assert_equal "YouWon", body[0]["status"]
+  end
+
+  test "transfer_market" do
     TransferListing.delete_all
     tl = TransferListing.create(player_id: players(:molly).id, min_price: 123,
                            status: 'Active', team_id: teams(:test_city).id,
@@ -132,8 +164,9 @@ class ApiControllerTest < ActionController::TestCase
     # doesn't show expired listings that we didn't bid on
     assert_equal 0, body.size
 
+    # always sells (even without any bids)
     tl = TransferListing.find(tid)
-    assert_equal "Unsold", tl.status
+    assert_equal "Sold", tl.status
   end
 
   test "/squad/:id needs login" do

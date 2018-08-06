@@ -4,4 +4,3 @@ user_tom:
   name: Tom
   team: test_utd
   secret: MyString
-  money: 12345

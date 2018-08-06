@@ -1,4 +1,5 @@
 class TransferListing < ActiveRecord::Base
   belongs_to :player
-  belongs_to :winning_bid, :class_name => 'TransferBid'
+  has_many :transfer_bids, dependent: :destroy
+  # status = Active | Sold | Unsold
 end

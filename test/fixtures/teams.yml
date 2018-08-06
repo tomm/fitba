@@ -3,31 +3,39 @@
 test_utd:
   name: Test Utd
   formation: one
+  money: 12345
 
 test_city:
   name: Test City
   formation: two
+  money: 0
 
 test_athletico:
   name: Test Athletico
   formation: three
+  money: 0
 
 test_team4:
   name: Test Team4
   formation: four
+  money: 0
 
 test_team5:
   name: Test Team5
   formation: five
+  money: 0
 
 test_team6:
   name: Test Team6
   formation: six
+  money: 0
 
 test_team7:
   name: Test Team7
   formation: seven
+  money: 0
 
 test_team8:
   name: Test Team8
   formation: eight
+  money: 0

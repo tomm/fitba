@@ -6,8 +6,7 @@ class ApiController < ApplicationController
     User.joins(:sessions).where(sessions: {identifier: cookies[:session]}).first
   end
 
-  private def get_team_json(team_id)
-    team = Team.find(team_id)
+  private def get_team_json(team)
     squad = team.squad
     {
       id: team.id,
@@ -19,9 +18,10 @@ class ApiController < ApplicationController
 
   private def view_team_id(user, team_id)
     begin
-      r = get_team_json(team_id)
+      team = Team.find(team_id)
+      r = get_team_json(team)
       if user.team_id == team_id
-        r[:money] = user.money
+        r[:money] = team.money
       end
       render json: r
     rescue ActiveRecord::RecordNotFound
@@ -141,8 +141,8 @@ class ApiController < ApplicationController
                              #.where('time >= ?', params[:from_time])
       render json: {
         id: game.id,
-        homeTeam: get_team_json(game.home_team_id),
-        awayTeam: get_team_json(game.away_team_id),
+        homeTeam: get_team_json(Team.find(game.home_team_id)),
+        awayTeam: get_team_json(Team.find(game.away_team_id)),
         start: game.start,
         status: game.status,
         homeGoals: game.home_goals,
@@ -192,11 +192,7 @@ class ApiController < ApplicationController
             'OnSale'
           else
             if your_bid != nil then
-              if t.winning_bid_id == your_bid.id then
-                'YouWon'
-              else
-                'YouLost'
-              end
+              your_bid.status
             else
               t.status  # 'Sold' or 'Unsold'
             end
@@ -232,7 +228,7 @@ class ApiController < ApplicationController
       else
         your_bid = TransferBid.where(team_id: user.team_id, transfer_listing_id: tid).first
         if your_bid == nil then
-          TransferBid.create(transfer_listing_id: tid, team_id: user.team_id, amount: data["amount"])
+          TransferBid.create(transfer_listing_id: tid, team_id: user.team_id, amount: data["amount"], status: "Pending")
           render json: {status: 'SUCCESS'}
         else
           your_bid.update(amount: data["amount"])
@@ -252,7 +248,7 @@ class ApiController < ApplicationController
       if player == nil then
         render json: {status: 'ERROR'}
       else
-        num_listings = TransferListing.where(player_id: player.id, winning_bid_id: nil).count
+        num_listings = TransferListing.where(player_id: player.id, status: "Active").count
         if num_listings > 0 then
           # already listed. dandy
           render json: {status: 'SUCCESS'}
