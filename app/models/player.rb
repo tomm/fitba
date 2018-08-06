@@ -8,6 +8,7 @@ class Player < ActiveRecord::Base
     {
       id: id,
       name: name,
+      forename: forename,
       shooting: shooting,
       passing: passing,
       tackling: tackling,

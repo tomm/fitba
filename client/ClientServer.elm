@@ -7,6 +7,7 @@ import Http
 import Json.Decode as Json
 import Json.Encode
 import Time
+import Json.Decode.Pipeline as P
 
 import Model exposing (..)
 import RootMsg exposing (Msg, Msg(..))
@@ -164,15 +165,16 @@ jsonDecodeTeam =
 
 jsonDecodePlayer : Json.Decoder Player
 jsonDecodePlayer =
-    Json.map8 Player
-        (Json.field "id" Json.int)
-        (Json.field "name" Json.string)
-        (Json.field "shooting" Json.int)
-        (Json.field "passing" Json.int)
-        (Json.field "tackling" Json.int)
-        (Json.field "handling" Json.int)
-        (Json.field "speed" Json.int)
-        (Json.field "positions" (Json.list jsonDecodePlayerPosition))
+    P.decode Player
+        |> P.required "id" Json.int
+        |> P.required "name" Json.string
+        |> P.required "forename" Json.string
+        |> P.required "shooting" Json.int
+        |> P.required "passing" Json.int
+        |> P.required "tackling" Json.int
+        |> P.required "handling" Json.int
+        |> P.required "speed" Json.int
+        |> P.required "positions" (Json.list jsonDecodePlayerPosition)
 
 jsonDecodePlayerPosition : Json.Decoder (Int, Int)
 jsonDecodePlayerPosition =

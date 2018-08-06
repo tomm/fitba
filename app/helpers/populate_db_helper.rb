@@ -303,7 +303,8 @@ module PopulateDbHelper
 
       player = Player.create(
         team_id: team_id,
-        name: NameGen.pick,
+        name: NameGen.surname,
+        forename: NameGen.forename,
         shooting: rand_skill.call(),
         passing: rand_skill.call(),
         tackling: rand_skill.call(),

@@ -13,7 +13,7 @@ view player =
         table [class "player-detailed-view"] [
             tr [] [
                 td [] [text "Name"],
-                td [] [text player.name]
+                td [] [text <| player.forename ++ " " ++ player.name]
             ],
             tr [] [
                 td [] [text "Favoured Position"],
