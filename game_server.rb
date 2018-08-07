@@ -2,7 +2,6 @@
 # $ RAILS_ENV=development ruby test_server.rb
 require 'date'
 require "./config/environment"
-require "./app/end_of_season"
 require "./app/helpers/populate_db_helper.rb"
 
 daily_tasks_last = nil
@@ -17,16 +16,16 @@ while sleep 1 do
 
   if daily_tasks_last != today then
     puts "Executing daily tasks..."
-    if EndOfSeason.is_end_of_season? then
-      if Date.today - EndOfSeason.last_game_date >= DAYS_REST_BETWEEN_SEASONS then
-        EndOfSeason.create_new_season
+    if SeasonHelper.is_end_of_season? then
+      if Date.today - SeasonHelper.last_game_date >= DAYS_REST_BETWEEN_SEASONS then
+        SeasonHelper.create_new_season
       end
     end
 
     # update team formations
     Team.all.each do |t|
       puts "Updating formation of #{t.name}"
-      PopulateDbHelper::Populate.pick_team_formation(t)
+      AiManagerHelper.pick_team_formation(t)
     end
 
     daily_tasks_last = today
@@ -34,7 +33,7 @@ while sleep 1 do
 
   if five_minutely_tasks_last == nil or now - five_minutely_tasks_last > 5*60 then
     puts "Executing five-minutely tasks..."
-    PopulateDbHelper::Populate.update_transfer_market
+    TransferMarketHelper.update_transfer_market
 
     five_minutely_tasks_last = now
   end

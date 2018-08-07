@@ -3,6 +3,15 @@ class Team < ActiveRecord::Base
   has_many :team_leagues
   has_many :players
 
+  scope :in_league_season, ->(league_id, season) { 
+    joins(:team_leagues).where({
+      team_leagues: {
+        league_id: league_id,
+        season: season
+      }
+    })
+  }
+
   def squad
     positions = FormationPo.where(formation_id: self.formation_id).order(:position_num).all
     players = Player.where(team_id: self.id).all

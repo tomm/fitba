@@ -63,7 +63,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_response :success
 
     tl.update(deadline: Time.now-60)
-    PopulateDbHelper::Populate.decide_transfer_market_bids()
+    TransferMarketHelper.decide_transfer_market_bids()
 
     get :transfer_listings, :format => "json"
     assert_response :success
@@ -75,7 +75,7 @@ class ApiControllerTest < ActionController::TestCase
 
     # should be deleted once over a day old
     tl.update(deadline: Time.now-60*60*25)
-    PopulateDbHelper::Populate.decide_transfer_market_bids()
+    TransferMarketHelper.decide_transfer_market_bids()
 
     get :transfer_listings, :format => "json"
     assert_response :success
@@ -85,8 +85,10 @@ class ApiControllerTest < ActionController::TestCase
 
   test "transfer_listing_from_no_team" do
     TransferListing.delete_all
-    pl1 = PopulateDbHelper::Populate.make_player(nil, "0+1d9")
-    pl2 = PopulateDbHelper::Populate.make_player(nil, "0+1d9")
+    pl1 = Player.random(nil, "0+1d9")
+    pl1.save
+    pl2 = Player.random(nil, "0+1d9")
+    pl2.save
     tl1 = TransferListing.create(player_id: pl1.id, min_price: 123, status: 'Active', team_id: nil, deadline: Time.now+60)
     tl2 = TransferListing.create(player_id: pl2.id, min_price: 123, status: 'Active', team_id: nil, deadline: Time.now+60)
     login
@@ -96,7 +98,7 @@ class ApiControllerTest < ActionController::TestCase
 
     tl1.update(deadline: Time.now-60)
     tl2.update(deadline: Time.now-60)
-    PopulateDbHelper::Populate.decide_transfer_market_bids()
+    TransferMarketHelper.decide_transfer_market_bids()
 
     get :transfer_listings, :format => "json"
     assert_response :success
@@ -156,7 +158,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal "OnSale", body[0]["status"]
 
     tl.update(deadline: Time.now-60)
-    PopulateDbHelper::Populate.decide_transfer_market_bids()
+    TransferMarketHelper.decide_transfer_market_bids()
 
     get :transfer_listings, :format => "json"
     assert_response :success

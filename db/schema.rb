@@ -76,7 +76,7 @@ ActiveRecord::Schema.define(version: 20180806122550) do
 
   create_table "players", force: :cascade do |t|
     t.integer  "team_id"
-    t.string   "name"
+    t.string   "name",       null: false
     t.integer  "shooting",   null: false
     t.integer  "passing",    null: false
     t.integer  "tackling",   null: false
@@ -167,6 +167,7 @@ ActiveRecord::Schema.define(version: 20180806122550) do
   add_foreign_key "team_leagues", "teams"
   add_foreign_key "teams", "formations"
   add_foreign_key "transfer_bids", "teams"
+  add_foreign_key "transfer_bids", "transfer_listings"
   add_foreign_key "transfer_listings", "players"
   add_foreign_key "transfer_listings", "teams"
   add_foreign_key "users", "teams"

@@ -59,7 +59,7 @@ class ApiController < ApplicationController
   }
 
   @@load_league_record = lambda {|league|
-    season = DbHelper::Season.current
+    season = SeasonHelper.current_season
     teams = Team.joins(:team_leagues).where({team_leagues: {league_id: league.id,
                                                             season: season}}).all
     {
@@ -70,12 +70,12 @@ class ApiController < ApplicationController
 
   def league_tables
     if get_user then
-      season = DbHelper::SeasonHelper.current
+      season = SeasonHelper::current_season
       leagues = League.order(:rank).all
       render json: (leagues.map do |l|
         {
           "name": l.name,
-          "record": DbHelper::LeagueHelper.league_table(l.id, season)
+          "record": DbHelper::league_table(l.id, season)
         }
       end)
     else
@@ -85,7 +85,7 @@ class ApiController < ApplicationController
 
   def fixtures
     if user = get_user then
-      season = DbHelper::SeasonHelper.current
+      season = SeasonHelper::current_season
       team_league = TeamLeague.find_by(team_id: user.team_id)
       games = Game.where(league_id: team_league.league_id, season: season).order(:start).all
       render json: (games.map do |g|

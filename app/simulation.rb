@@ -83,14 +83,6 @@ class GameSimulator
     @last_event = GameEvent.where(game_id: game.id).order(:time).reverse_order.first
   end
 
-  def dice(n,s)
-    x=0
-    (1..n).each do |_|
-      x += 1 + (rand*s).to_i; 
-    end
-    x
-  end
-
   def simulate_until(until_time)
     if until_time > @game.start + MATCH_LENGTH_SECONDS
       until_time = @game.start + MATCH_LENGTH_SECONDS
@@ -109,7 +101,7 @@ class GameSimulator
       @last_event = GameEvent.create(
         game_id: @game.id,
         kind: 'EndOfGame',
-        side: dice(1,2) - 1,
+        side: RngHelper.dice(1,2) - 1,
         time: @last_event.time + 1,
         message: 'Full time!',
         ball_pos_x: @last_event.ball_pos_x,
@@ -127,7 +119,7 @@ class GameSimulator
       kick_off()
     elsif @last_event.kind == 'ShotMiss'
       goal_kick()
-    elsif @last_event.kind == 'ShotSaved' and dice(1,2) == 1
+    elsif @last_event.kind == 'ShotSaved' and RngHelper.dice(1,2) == 1
       goal_kick()
     else
       pos = PitchPos.new(@last_event.ball_pos_x, @last_event.ball_pos_y)
@@ -135,7 +127,7 @@ class GameSimulator
       home_skill = get_skill_near(pos, 0)
       away_skill = get_skill_near(pos, 1)
 
-      diff = dice(1, home_skill + 5*BASE_SKILL) - dice(1, away_skill + 5*BASE_SKILL)
+      diff = RngHelper.dice(1, home_skill + 5*BASE_SKILL) - RngHelper.dice(1, away_skill + 5*BASE_SKILL)
       if diff > 0
         # home team advances
         advance(0)
@@ -189,7 +181,7 @@ class GameSimulator
       player_id: striker.id
     )
 
-    if dice(1, striker.skill + BASE_SKILL) > dice(2, goalkeeper.skill + BASE_SKILL) 
+    if RngHelper.dice(1, striker.skill + BASE_SKILL) > RngHelper.dice(2, goalkeeper.skill + BASE_SKILL) 
       @last_event = GameEvent.create(
         game_id: @game.id,
         kind: 'Goal',
@@ -206,7 +198,7 @@ class GameSimulator
         @game.away_goals += 1
       end
     else
-      if dice(1,2) == 1 then
+      if RngHelper.dice(1,2) == 1 then
         @last_event = GameEvent.create(
           game_id: @game.id,
           kind: 'ShotMiss',
@@ -292,7 +284,7 @@ class GameSimulator
     @last_event = GameEvent.create(
       game_id: @game.id,
       kind: 'KickOff',
-      side: dice(1,2) - 1, # XXX more logic here
+      side: RngHelper.dice(1,2) - 1, # XXX more logic here
       time: @last_event == nil ? @game.start : @last_event.time + 1,
       message: 'Kick off!',
       ball_pos_x: 2,
