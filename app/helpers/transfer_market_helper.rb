@@ -1,4 +1,11 @@
 module TransferMarketHelper
+  def self.list_player(player)
+    price_jiggle = 1.0 + (rand * 0.1)
+    TransferListing.create(team_id: player.team_id, status: 'Active', player: player,
+                           min_price: player.skill * 200000 * price_jiggle,
+                           deadline: Time.now + TRANSFER_LISTING_DURATION)
+  end
+
   def self.player_iterested_in_transfer(team, player)
     # don't let a team buy a player way out of their league
     # starting 11
@@ -16,9 +23,8 @@ module TransferMarketHelper
 
     # assume this is run once every 5 minutes by the server.
     if RngHelper.dice(1,10) == 1 then
-      player = make_player(nil, player_skill.sample)
-      price_jiggle = 1.0 + (rand * 0.1)
-      TransferListing.create(team_id: player.team_id, status: 'Active', player: player, min_price: player.skill * 200000 * price_jiggle, deadline: Time.now + TRANSFER_LISTING_DURATION)
+      player = make_player(RngHelper.dice(1,9))
+      list_player(player)
       puts "Created new transfer market listing: #{player.name}"
     end
   end

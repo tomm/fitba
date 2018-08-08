@@ -65,6 +65,33 @@ FORMATIONS = [ FORMATION_442, FORMATION_352, FORMATION_433, FORMATION_4231, FORM
   FORMATION_4141d, FORMATION_451, FORMATION_532 ]
 
 module AiManagerHelper
+  def self.daily_task(team)
+    if team.has_user? then
+      return
+    end
+
+    if RngHelper.dice(1,10) == 1 then
+      maybe_acquire_player(team)
+    end
+    if RngHelper.dice(1,10) == 1 then
+      maybe_sell_player(team)
+    end
+    
+    AiManagerHelper.pick_team_formation(team)
+  end
+
+  def self.maybe_acquire_player(team)
+    if team.has_user? || team.players.count >= 22 then
+      return
+    end
+
+    p = Player.random(team.player_spawn_quality)
+    p.team_id = team.id
+    p.save
+    pick_team_formation(team)
+    puts "Team #{team.name} signed new player #{p.name}"
+  end
+
   def self.maybe_sell_player(team)
     if team.has_user? then
       return
@@ -77,7 +104,32 @@ module AiManagerHelper
       return
     end
 
-    puts "Would sell someone!"
+    pos_freq = _player_position_frequency(team).to_a.sort_by { |a| -a[1] }
+    commonest_pos = pos_freq
+      .take_while { |v| v[1] == pos_freq.first[1] }
+      .map { |v| v[0] }
+
+    _sell_player_in_position(team, commonest_pos.sample)
+  end
+
+  private_class_method
+  def self._sell_player_in_position(team, pos)
+    matching = team.players.select {|p| p.get_positions.include? pos}
+    to_sell = matching.sort_by!(&:skill).first
+    puts "Team #{team.name} has listed #{to_sell.name} on the transfer market."
+    TransferMarketHelper.list_player(to_sell)
+  end
+
+  private_class_method
+  def self._player_position_frequency(team)
+    freqs = {}
+    team.players.each do |p|
+      p.get_positions.each do |pos|
+        freqs[pos] ||= 0
+        freqs[pos] += 1
+      end
+    end
+    freqs
   end
 
   def self.pick_team_formation(team)

@@ -18,8 +18,17 @@ class EndOfSeasonTest < ActiveSupport::TestCase
   end
 
   test "maybe_sell_player" do
-    #team = PopulateDbHelper.make_team
-    #puts "Team has #{team.players.size} players!"
-    #AiManagerHelper.maybe_sell_player(team)
+    team = PopulateDbHelper.make_team(name: "Test team", player_spawn_quality: 5)
+    assert_equal 0, TransferListing.count
+    AiManagerHelper.maybe_sell_player(team)
+    assert_equal 1, TransferListing.count
+  end
+
+  test "maybe_acquire_player" do
+    team = PopulateDbHelper.make_team(name: "Test team", player_spawn_quality: 5)
+    team.players.first.destroy
+    num_players = team.players.count
+    AiManagerHelper.maybe_acquire_player(team)
+    assert_equal num_players+1, team.players.count
   end
 end

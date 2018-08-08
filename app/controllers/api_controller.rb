@@ -253,7 +253,7 @@ class ApiController < ApplicationController
           # already listed. dandy
           render json: {status: 'SUCCESS'}
         else
-          TransferListing.create(team_id: user.team_id, status: 'Active', player: player, min_price: player.skill * 200000, deadline: Time.now + TRANSFER_LISTING_DURATION)
+          TransferMarketHelper.list_player(player)
           render json: {status: 'SUCCESS'}
         end
       end

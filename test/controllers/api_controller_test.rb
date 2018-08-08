@@ -85,9 +85,9 @@ class ApiControllerTest < ActionController::TestCase
 
   test "transfer_listing_from_no_team" do
     TransferListing.delete_all
-    pl1 = Player.random(nil, "0+1d9")
+    pl1 = Player.random(1)
     pl1.save
-    pl2 = Player.random(nil, "0+1d9")
+    pl2 = Player.random(1)
     pl2.save
     tl1 = TransferListing.create(player_id: pl1.id, min_price: 123, status: 'Active', team_id: nil, deadline: Time.now+60)
     tl2 = TransferListing.create(player_id: pl2.id, min_price: 123, status: 'Active', team_id: nil, deadline: Time.now+60)

@@ -6,104 +6,39 @@ SQUAD_SIZE = 22
 
 TRANSFER_LISTING_DURATION = 60*60*24
 
-FORMATION_442 = [
-    [2, 6], # gk
-    [0, 5], [1, 5], [3, 5], [4, 5],
-    [0, 3], [1, 3], [3, 3], [4, 3],
-    [1, 1], [3, 1]
-]
-FORMATION_352 = [
-  [2,6],
-  [1,5],[2,5],[3,5],
-  [2,4],
-  [1,3],[3,3],
-  [0,2],[4,2],
-  [1,1],[3,1]
-]
-FORMATION_532 = [
-  [2,6],
-  [1,5],[2,5],[3,5],
-  [0,4],[4,4],
-  [1,3],[2,3],[3,3],
-  [1,1],[3,1]
-]
-FORMATION_433 = [
-  [2,6],
-  [0,5],[1,5],[3,5],[4,5],
-  [2,3],
-  [1,2],[3,2],
-  [0,1],[2,1],[4,1]
-]
-FORMATION_451 = [
-  [2,6],
-  [0,5],[1,5],[3,5],[4,5],
-  [2,4],
-  [0,3],[1,3],[3,3],[4,3],
-  [2,1]
-]
-FORMATION_4231 = [
-    [2,6],
-    [0,5],[1,5],[3,5],[4,5],
-    [1,3],[3,3],
-    [0,2],[2,2],[4,2],
-    [2,1]
-]
-FORMATION_4231d = [
-    [2,6],
-    [0,5],[1,5],[3,5],[4,5],
-    [1,4],[3,4],
-    [0,2],[2,2],[4,2],
-    [2,1]
-]
-FORMATION_4141 = [
-  [2,6],
-  [0,5],[1,5],[3,5],[4,5],
-  [2,3],
-  [0,2],[1,2],[3,2],[4,2],
-  [2,1]
-]
-FORMATION_4141d = [
-  [2,6],
-  [0,5],[1,5],[3,5],[4,5],
-  [2,4],
-  [0,3],[1,3],[3,3],[4,3],
-  [2,1]
-]
-  
-FORMATIONS = [ FORMATION_442, FORMATION_352, FORMATION_433, FORMATION_4231, FORMATION_4231d, FORMATION_4141,
-  FORMATION_4141d, FORMATION_451, FORMATION_532 ]
-
 TEAMS_PER_LEAGUE = 12
 
 TEAM_PREDEF = [
-  {name: "Barcelona", player_spawn_skill: "3+1d6"},
-  {name: "Real Madrid", player_spawn_skill: "3+1d6"},
-  {name: "Chelsea", player_spawn_skill: "3+1d6"},
-  {name: "AEK Athens", player_spawn_skill: "2+1d7"},
-  {name: "Celtic F.C", player_spawn_skill: "2+1d7"},
-  {name: "Hamburg", player_spawn_skill: "2+1d7"},
-  {name: "S.S. Lazio", player_spawn_skill: "1+1d8"},
-  {name: "Rangers F.C", player_spawn_skill: "1+1d8"},
-  {name: "Paris St-Germain", player_spawn_skill: "1+1d8"},
-  {name: "Red Star Belgrade", player_spawn_skill: "0+1d9"},
-  {name: "Bologna F.C. 1909", player_spawn_skill: "0+1d9"},
-  {name: "Athletic Bilbao", player_spawn_skill: "0+1d9"},
+  {name: "Barcelona", player_spawn_quality: 9},
+  {name: "Real Madrid", player_spawn_quality: 9},
+  {name: "Chelsea", player_spawn_quality: 8},
+  {name: "AEK Athens", player_spawn_quality: 8},
+  {name: "Celtic F.C", player_spawn_quality: 7},
+  {name: "Hamburg", player_spawn_quality: 7},
+  {name: "S.S. Lazio", player_spawn_quality: 6},
+  {name: "Rangers F.C", player_spawn_quality: 6},
+  {name: "Paris St-Germain", player_spawn_quality: 6},
+  {name: "Red Star Belgrade", player_spawn_quality: 5},
+  {name: "Bologna F.C. 1909", player_spawn_quality: 5},
+  {name: "Athletic Bilbao", player_spawn_quality: 5},
 
-  {name: "Sporting Toulon", player_spawn_skill: "0+1d8"},
-  {name: "St Pauli", player_spawn_skill: "0+1d8"},
-  {name: "U.C. Sampdoria", player_spawn_skill: "0+1d8"},
-  {name: "Partizan", player_spawn_skill: "0+1d7"},
-  {name: "Livorno Calcio", player_spawn_skill: "0+1d7"},
-  {name: "Besiktas", player_spawn_skill: "0+1d7"},
-  {name: "FC Twente", player_spawn_skill: "0+1d6"},
-  {name: "Luton Town", player_spawn_skill: "0+1d6"},
-  {name: "Ozan Utd", player_spawn_skill: "0+1d6"},
-  {name: "FC Krøne", player_spawn_skill: "0+1d6"},
-  {name: "Vag of the South", player_spawn_skill: "0+1d6"},
-  {name: "Cock of the North", player_spawn_skill: "0+1d6"},
+  {name: "Sporting Toulon", player_spawn_quality: 4},
+  {name: "St Pauli", player_spawn_quality: 4},
+  {name: "U.C. Sampdoria", player_spawn_quality: 4},
+  {name: "Partizan", player_spawn_quality: 3},
+  {name: "Livorno Calcio", player_spawn_quality: 3},
+  {name: "Besiktas", player_spawn_quality: 3},
+  {name: "FC Twente", player_spawn_quality: 2},
+  {name: "Luton Town", player_spawn_quality: 2},
+  {name: "Ozan Utd", player_spawn_quality: 2},
+  {name: "FC Krøne", player_spawn_quality: 1},
+  {name: "Vag of the South", player_spawn_quality: 1},
+  {name: "Cock of the North", player_spawn_quality: 1},
 ]
 
 module PopulateDbHelper
+  @@next_team_idx = 0
+
   def self.go
     TransferMarketHelper.update_transfer_market
 
@@ -127,18 +62,25 @@ module PopulateDbHelper
     # nuke team formation, so the user has some work to do
     FormationPo.where(formation_id: team.formation_id).delete_all
     # then just assign a crap 442
+    fm442 = [
+        [2, 6], # gk
+        [0, 5], [1, 5], [3, 5], [4, 5],
+        [0, 3], [1, 3], [3, 3], [4, 3],
+        [1, 1], [3, 1]
+    ]
     playerIds = Player.where(team_id: team.id).pluck(:id)
     positions = playerIds.each_with_index.map do |playerId,idx|
-      [playerId, [idx<11 ? FORMATION_442[idx][0] : 0,
-                   idx<11 ? FORMATION_442[idx][1] : 0]]
+      [playerId, [idx<11 ? fm442[idx][0] : 0,
+                   idx<11 ? fm442[idx][1] : 0]]
     end
     team.update_player_positions positions
   end
 
   def self.populate_league(league)
     puts "Populating league: " + league.name
-    (1..TEAMS_PER_LEAGUE).to_a.map do |i|
-      team = make_team()
+    (0...TEAMS_PER_LEAGUE).to_a.map do |i|
+      team = make_team(TEAM_PREDEF[@@next_team_idx])
+      @@next_team_idx += 1
       TeamLeague.create(team_id: team.id, league_id: league.id, season: 1)
       team
     end
@@ -163,10 +105,9 @@ module PopulateDbHelper
     (2-num_mc).times do needed_positions << "MC" end
     (1-num_st).times do needed_positions << "A" end
 
-    player_spawn_skill = TEAM_PREDEF[team.id - 1][:player_spawn_skill]
-
     (num_players..(SQUAD_SIZE-1)).each do |i|
-      player = Player.random(team.id, player_spawn_skill)
+      player = Player.random(team.player_spawn_quality)
+      player.team_id = team.id
       player.save
       needed_pos = needed_positions.pop
       if needed_pos != nil then
@@ -177,12 +118,12 @@ module PopulateDbHelper
     AiManagerHelper.pick_team_formation(team)
   end
 
-  def self.make_team
+  def self.make_team(name: nil, player_spawn_quality: 5)
     formation = Formation.create()
-    team = Team.create(formation_id: formation.id)
-    team_predef = TEAM_PREDEF[team.id-1]
-    team.update(name: team_predef[:name])
-    puts "Creating team " + team.name
+    puts "Creating team " + name
+    team = Team.create(name: name,
+                       player_spawn_quality: player_spawn_quality,
+                       formation_id: formation.id)
     repopulate_team(team)
 
     team

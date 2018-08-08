@@ -42,17 +42,34 @@ class Player < ActiveRecord::Base
     end
   end
 
-  def self.random(team_id, player_spawn_skill)
-    # player skill as '4+2d6' kinda thing
-    m = player_spawn_skill.match(/(\d+)\+(\d+)d(\d+)/)
-    rand_skill = lambda {
-      skill = m[1].to_i + RngHelper.dice(m[2].to_i, m[3].to_i)
-      skill >= 1 ? (skill <= 9 ? skill : 9) : 1
-    }
-    #puts "Creating player using #{m[1]} + #{m[2]}d#{m[3]}"
+  def self.random(player_spawn_quality)
+    player_spawn_quality = player_spawn_quality >= 1 ? player_spawn_quality : 1
+    skill_range = (
+      case player_spawn_quality
+        when 1
+          (1..6)
+        when 2
+          (1..6)
+        when 3
+          (1..7)
+        when 4
+          (1..7)
+        when 5
+          (1..8)
+        when 6
+          (1..9)
+        when 7
+          (2..9)
+        when 8
+          (3..9)
+        else
+          (4..9)
+      end
+    ).to_a
+
+    rand_skill = lambda { skill_range.sample }
 
     player = new(
-      team_id: team_id,
       name: NameGen.surname,
       forename: NameGen.forename,
       age: (rand*12 + 18).round,

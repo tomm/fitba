@@ -2,7 +2,7 @@ require 'test_helper'
 
 class PlayerTest < ActiveSupport::TestCase
   test "happy_birthday" do
-    p = Player.random(nil, "5+1d4")
+    p = Player.random(9)
     p.age = 30
     p.happy_birthday
     assert_equal 31, p.age
