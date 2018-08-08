@@ -107,12 +107,22 @@ module AiManagerHelper
       return
     end
 
-    pos_freq = _player_position_frequency(team).to_a.sort_by { |a| -a[1] }
-    commonest_pos = pos_freq
+    pos_freq = _player_position_frequency(team)
+
+    # subtract formation positions, since we are using players in those positions
+    team.formation.formation_pos.each do |formation_pos|
+      pos = [formation_pos.position_x, formation_pos.position_y]
+      pos_freq[pos] ||= 0
+      # allowance of 2 players per used formation position, so considers subs ;)
+      pos_freq[pos] -= 1.5
+    end
+    pos_freq = pos_freq.to_a.sort_by! { |a| -a[1] }
+
+    most_surplus_position = pos_freq
       .take_while { |v| v[1] == pos_freq.first[1] }
       .map { |v| v[0] }
 
-    _sell_player_in_position(team, commonest_pos.sample)
+    _sell_player_in_position(team, most_surplus_position.sample)
   end
 
   private_class_method
@@ -127,9 +137,11 @@ module AiManagerHelper
   def self._player_position_frequency(team)
     freqs = {}
     team.players.each do |p|
+      poss = p.get_positions
+      weight = 1.0 / poss.size()
       p.get_positions.each do |pos|
         freqs[pos] ||= 0
-        freqs[pos] += 1
+        freqs[pos] += weight
       end
     end
     freqs
