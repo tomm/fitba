@@ -26,15 +26,10 @@ module TransferMarketHelper
     can_do
   end
 
-  def self.repopulate_transfer_market()
-    player_skill = [ "0+1d9", "0+1d8", "0+1d7", "0+1d6", "0+1d5", "0+1d4" ]
-
-    # assume this is run once every 5 minutes by the server.
-    if RngHelper.dice(1,10) == 1 then
-      player = make_player(RngHelper.dice(1,9))
-      list_player(player)
-      puts "Created new transfer market listing: #{player.name}"
-    end
+  def self.spawn_transfer_listing()
+    player = Player.random(RngHelper.dice(1,9))
+    list_player(player)
+    puts "Created new transfer market listing: #{player.name}"
   end
 
   def self.decide_transfer_market_bids()
@@ -93,6 +88,9 @@ module TransferMarketHelper
 
   def self.update_transfer_market()
     decide_transfer_market_bids
-    repopulate_transfer_market
+    # assume this is run once every 5 minutes by the server.
+    if RngHelper.dice(1,10) == 1 then
+      spawn_transfer_listing
+    end
   end
 end
