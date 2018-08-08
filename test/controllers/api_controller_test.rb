@@ -186,7 +186,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal team.id, body['id']
     assert_equal "Test Utd", body['name']
     # should return formation ordered positions 1-11
-    assert_equal FORMATION_442, body['formation']
+    assert_equal AiManagerHelper::FORMATION_442, body['formation']
     # should return players ordered 1-11, then reserves
     assert_equal "Amy", body['players'][0]['name'] # GK
     assert_equal 2, body['players'][0]['shooting']
@@ -329,13 +329,13 @@ class ApiControllerTest < ActionController::TestCase
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal FORMATION_442, body['formation']
+    assert_equal AiManagerHelper::FORMATION_442, body['formation']
     assert_equal 12, body['players'].size
 
     post :save_formation, [[amy.id, [1,2]], [barbara.id, [2,3]]].to_json, :format => "json"
     assert_response :success
 
-    expected_formation = FORMATION_442.dup
+    expected_formation = AiManagerHelper::FORMATION_442.dup
     expected_formation[0] = [1,2]
     expected_formation[1] = [2,3]
     get :load_world, :format => "json"

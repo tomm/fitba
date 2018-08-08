@@ -26,7 +26,6 @@ class EndOfSeasonTest < ActiveSupport::TestCase
 
   test "maybe_acquire_player" do
     team = PopulateDbHelper.make_team(name: "Test team", player_spawn_quality: 5)
-    team.players.first.destroy
     num_players = team.players.count
     AiManagerHelper.maybe_acquire_player(team)
     assert_equal num_players+1, team.players.count
