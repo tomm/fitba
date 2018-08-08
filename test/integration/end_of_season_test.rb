@@ -9,7 +9,7 @@ class EndOfSeasonTest < ActiveSupport::TestCase
     assert_equal Date.new(2018, 7, 3), SeasonHelper.last_game_date
     assert_equal 1, SeasonHelper::current_season
     assert Game.where(season: 2).count == 0
-    SeasonHelper.create_new_season
+    SeasonHelper.handle_end_of_season
     assert_equal 2, SeasonHelper::current_season
     assert Game.where(season: 2).count > 0
   end

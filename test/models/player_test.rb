@@ -1,7 +1,17 @@
 require 'test_helper'
 
 class PlayerTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  test "happy_birthday" do
+    p = Player.random(nil, "5+1d4")
+    p.age = 30
+    p.happy_birthday
+    assert_equal 31, p.age
+    15.times do
+      p.happy_birthday
+    end
+
+    Player::ALL_SKILLS.each do |skill|
+      assert_equal 1, p.method(skill).call()
+    end
+  end
 end

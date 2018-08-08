@@ -20,10 +20,13 @@ module SeasonHelper
   end
 
   #: ()
-  def self.create_new_season
+  def self.handle_end_of_season
     if not is_end_of_season? then
-      p "Warning: Called create_new_season even though the season is not finished. Doing it anyway..."
+      p "Warning: Called handle_end_of_season even though the season is not finished. Doing it anyway..."
     end
+
+    # make all players age
+    Player.all.each(&:happy_birthday)
 
     last_season = current_season
     leagues = League.order(:rank).all

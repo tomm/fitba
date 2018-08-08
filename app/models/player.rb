@@ -1,8 +1,11 @@
 require 'json'
+require './app/name_gen.rb'
 
 class Player < ActiveRecord::Base
   belongs_to :team
   has_many :formation_pos
+      
+  ALL_SKILLS = [:shooting, :passing, :tackling, :handling, :speed]
 
   def to_api
     {
@@ -25,6 +28,18 @@ class Player < ActiveRecord::Base
 
   def get_positions
     JSON.parse(positions)
+  end
+
+  def happy_birthday
+    self.age = self.age + 1
+    # reduce skills on old players!
+    (self.age - 30).times do
+      which_skill = ALL_SKILLS.sample.to_s
+      v = self.method(which_skill).call()
+      if v > 1 then
+        self.method(which_skill + "=").call(v-1)
+      end
+    end
   end
 
   def self.random(team_id, player_spawn_skill)

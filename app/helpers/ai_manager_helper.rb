@@ -1,7 +1,87 @@
+FORMATION_442 = [
+    [2, 6], # gk
+    [0, 5], [1, 5], [3, 5], [4, 5],
+    [0, 3], [1, 3], [3, 3], [4, 3],
+    [1, 1], [3, 1]
+]
+FORMATION_352 = [
+  [2,6],
+  [1,5],[2,5],[3,5],
+  [2,4],
+  [1,3],[3,3],
+  [0,2],[4,2],
+  [1,1],[3,1]
+]
+FORMATION_532 = [
+  [2,6],
+  [1,5],[2,5],[3,5],
+  [0,4],[4,4],
+  [1,3],[2,3],[3,3],
+  [1,1],[3,1]
+]
+FORMATION_433 = [
+  [2,6],
+  [0,5],[1,5],[3,5],[4,5],
+  [2,3],
+  [1,2],[3,2],
+  [0,1],[2,1],[4,1]
+]
+FORMATION_451 = [
+  [2,6],
+  [0,5],[1,5],[3,5],[4,5],
+  [2,4],
+  [0,3],[1,3],[3,3],[4,3],
+  [2,1]
+]
+FORMATION_4231 = [
+    [2,6],
+    [0,5],[1,5],[3,5],[4,5],
+    [1,3],[3,3],
+    [0,2],[2,2],[4,2],
+    [2,1]
+]
+FORMATION_4231d = [
+    [2,6],
+    [0,5],[1,5],[3,5],[4,5],
+    [1,4],[3,4],
+    [0,2],[2,2],[4,2],
+    [2,1]
+]
+FORMATION_4141 = [
+  [2,6],
+  [0,5],[1,5],[3,5],[4,5],
+  [2,3],
+  [0,2],[1,2],[3,2],[4,2],
+  [2,1]
+]
+FORMATION_4141d = [
+  [2,6],
+  [0,5],[1,5],[3,5],[4,5],
+  [2,4],
+  [0,3],[1,3],[3,3],[4,3],
+  [2,1]
+]
+FORMATIONS = [ FORMATION_442, FORMATION_352, FORMATION_433, FORMATION_4231, FORMATION_4231d, FORMATION_4141,
+  FORMATION_4141d, FORMATION_451, FORMATION_532 ]
+
 module AiManagerHelper
+  def self.maybe_sell_player(team)
+    if team.has_user? then
+      return
+    end
+
+    players = team.players.to_a
+
+    # team too small
+    if players.size < 17 then
+      return
+    end
+
+    puts "Would sell someone!"
+  end
+
   def self.pick_team_formation(team)
-    has_user = User.where(team_id: team.id).count > 0
-    if has_user then
+    if team.has_user? then
       # don't help human players ;)
       return
     end
@@ -44,8 +124,11 @@ module AiManagerHelper
           # take best player
           picked = can_play_there[0]
         end
-        players.delete(picked)
-        positions << [picked.id, f]
+
+        if picked != nil then
+          players.delete(picked)
+          positions << [picked.id, f]
+        end
       end
       { positions: positions, badness: badness }
     end)

@@ -12,6 +12,10 @@ class Team < ActiveRecord::Base
     })
   }
 
+  def has_user?
+    User.where(team_id: self.id).count > 0
+  end
+
   def squad
     positions = FormationPo.where(formation_id: self.formation_id).order(:position_num).all
     players = Player.where(team_id: self.id).all

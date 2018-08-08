@@ -18,7 +18,7 @@ while sleep 1 do
     puts "Executing daily tasks..."
     if SeasonHelper.is_end_of_season? then
       if Date.today - SeasonHelper.last_game_date >= DAYS_REST_BETWEEN_SEASONS then
-        SeasonHelper.create_new_season
+        SeasonHelper.handle_end_of_season
       end
     end
 
