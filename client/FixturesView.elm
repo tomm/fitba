@@ -19,7 +19,7 @@ import Types exposing (..)
 import Uitk
 
 match_length_seconds : Float
-match_length_seconds = 270.0  -- make sure this matches app/simulation.rb:MATCH_LENGTH_SECONDS
+match_length_seconds = 270.0  -- make sure this matches app/helpers/match_sim_helper.rb:MATCH_LENGTH_SECONDS
 
 view : Model -> Maybe WatchingGame -> Html Msg
 view model maybeWatchingGame =
