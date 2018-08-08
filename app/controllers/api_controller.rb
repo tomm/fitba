@@ -248,14 +248,8 @@ class ApiController < ApplicationController
       if player == nil then
         render json: {status: 'ERROR'}
       else
-        num_listings = TransferListing.where(player_id: player.id, status: "Active").count
-        if num_listings > 0 then
-          # already listed. dandy
-          render json: {status: 'SUCCESS'}
-        else
-          TransferMarketHelper.list_player(player)
-          render json: {status: 'SUCCESS'}
-        end
+        TransferMarketHelper.list_player(player)
+        render json: {status: 'SUCCESS'}
       end
     else
       head 403

@@ -1,9 +1,17 @@
+TRANSFER_LISTING_DURATION = 60*60*23
+
 module TransferMarketHelper
+  def self.is_listed?(player_id)
+    TransferListing.where(player_id: player_id, status: "Active").count > 0
+  end
+
   def self.list_player(player)
-    price_jiggle = 1.0 + (rand * 0.1)
-    TransferListing.create(team_id: player.team_id, status: 'Active', player: player,
-                           min_price: player.skill * 200000 * price_jiggle,
-                           deadline: Time.now + TRANSFER_LISTING_DURATION)
+    if not is_listed?(player.id) then
+      price_jiggle = 1.0 + (rand * 0.1)
+      TransferListing.create(team_id: player.team_id, status: 'Active', player: player,
+                             min_price: player.skill * 200000 * price_jiggle,
+                             deadline: Time.now + TRANSFER_LISTING_DURATION)
+    end
   end
 
   def self.player_iterested_in_transfer(team, player)

@@ -3,7 +3,7 @@ require './app/name_gen.rb'
 
 class Player < ActiveRecord::Base
   belongs_to :team
-  has_many :formation_pos
+  has_many :formation_pos, dependent: :delete_all
       
   ALL_SKILLS = [:shooting, :passing, :tackling, :handling, :speed]
 

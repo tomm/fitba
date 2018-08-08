@@ -4,8 +4,6 @@ require "./app/name_gen.rb"
 
 SQUAD_SIZE = 22
 
-TRANSFER_LISTING_DURATION = 60*60*24
-
 TEAMS_PER_LEAGUE = 12
 
 TEAM_PREDEF = [

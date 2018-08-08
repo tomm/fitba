@@ -1,5 +1,0 @@
-smith
-jones
-morton
-robertson
-see surname.txt
