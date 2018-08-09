@@ -18,16 +18,18 @@ backButton action = button [class "pure-button", class "button-action", onClick 
 view : Maybe (Html a) -> String -> List (Html a) -> Html a
 view maybeButton title content =
     div [class "view"] [
-        case maybeButton of
-            Just b -> row [
-                column 4 [b],
-                column 20 [Html.h2 [] [text title]]
-            ]
-            Nothing -> row [
-                column 24 [Html.h2 [] [text title]]
-            ]
-        ,
-        mainContent content
+        div [class "view-content"] [
+            case maybeButton of
+                Just b -> row [
+                    column 4 [b],
+                    column 20 [Html.h2 [] [text title]]
+                ]
+                Nothing -> row [
+                    column 24 [Html.h2 [] [text title]]
+                ]
+            ,
+            mainContent content
+        ]
     ]
     
 mainContent : List (Html a) -> Html a

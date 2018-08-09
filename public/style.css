@@ -105,7 +105,12 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 div.view {
-  margin: 3em 0 0 0;
+  margin: 3em auto 0 auto;
+}
+
+div.view-content {
+  max-width: 980px;
+  margin: 0 auto;
 }
 
 h4 { margin: 5px 0px; }
