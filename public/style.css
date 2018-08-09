@@ -24,6 +24,8 @@ table {
 .league-table tr:nth-child(2) { background-color: rgba(180, 255, 180, 0.5); }
 .league-table tr:nth-child(3) { background-color: rgba(180, 255, 180, 0.5); }
 .league-table tr:nth-child(4) { background-color: rgba(180, 255, 180, 0.5); }
+.home-team { color: blue; }
+.away-team { color: red; }
 
 .login { font-size: 200%; }
 .login form { margin: 20px; }
@@ -46,10 +48,16 @@ tr.fixture-own { font-weight: bold; }
 .game-summary-Home { text-align: right; margin-right: 10px; }
 .game-summary-Away { text-align: left; margin-left: 10px; }
 .game-time { text-align: center; }
-.game-message { font-weight: bold;}
-.game-message-Home { float: left; margin-left: 5px; }
-.game-message-Away { float: right; margin-right: 5px; }
+.game-message { font-weight: bold; float: left; margin-left: 5px; }
 .game-button-jump-to-end { position: absolute; }
+
+.match-ball-label {
+	font-size: 150%;
+	font-weight: bold;
+}
+.match-player-label {
+	font-size: 140%;
+}
 
 button.action {
 	background-color: rgba(150, 150, 255, 0.5);

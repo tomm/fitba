@@ -40,7 +40,7 @@ module MatchSimHelper
 
   class TeamPos
     def initialize(team)
-      positions = team.formation.formation_pos
+      positions = team.player_positions.limit(11)
       
       pos_pid_tuples = ALL_POS.map {|p|
         pitch_pos = PitchPos.new(p[0], p[1])
@@ -92,10 +92,10 @@ module MatchSimHelper
         TeamPos.new(game.away_team)
       ]
       @team_pids = [
-        game.home_team.formation.formation_pos.map(&:player_id),
-        game.away_team.formation.formation_pos.map(&:player_id),
+        game.home_team.player_positions.limit(11).map(&:player_id),
+        game.away_team.player_positions.limit(11).map(&:player_id),
       ]
-      @player_by_id = ((game.home_team.formation.formation_pos + game.away_team.formation.formation_pos).map do |f|
+      @player_by_id = ((game.home_team.player_positions.limit(11) + game.away_team.player_positions.limit(11)).map do |f|
         [f.player_id, f.player]
       end).to_h
       @last_event = GameEvent.where(game_id: game.id).order(:time).reverse_order.first
@@ -157,10 +157,14 @@ module MatchSimHelper
     def player_near(pos, side, tries=1)
       p = maybe_player_near(pos, side, tries)
       if p then
-        p
+        return p
       else
-        # fall back to random player
-        @player_by_id[@team_pids[side].sample]
+        gk = get_goalkeeper(side)
+        while p == nil || p == gk
+          # fall back to random player (but not GK)
+          p = @player_by_id[@team_pids[side].sample]
+        end
+        return p
       end
     end
 
@@ -202,7 +206,7 @@ module MatchSimHelper
 
       if defender then
         if defense_success?(on_ball, defender) then
-          emit_event("Boring", 1 - @last_event.side, self.ball_pos, msg_won_tackle(defender, on_ball))
+          emit_event("Boring", 1 - @last_event.side, self.ball_pos, msg_won_tackle(defender, on_ball), defender.id)
           return
         else
           @interesting_action = "evades #{defender.name}'s tackle"
@@ -216,10 +220,14 @@ module MatchSimHelper
       RngHelper.dice(1, on_ball.handling + BASE_SKILL) < RngHelper.dice(1, defender.tackling + BASE_SKILL)
     end
 
+    # position of side's own goals
+    def pos_of_goals(side)
+      side == 0 ? PitchPos.new(2,6) : PitchPos.new(2,0)
+    end
+
     def attacking_move(on_ball)
       side = @last_event.side
-      goals = side == 0 ? PitchPos.new(2,0) : PitchPos.new(2,6)
-      dist_to_goals = 1.0 + PitchPos.dist(goals, ball_pos)
+      dist_to_goals = 1.0 + PitchPos.dist(pos_of_goals(1 - side), ball_pos)
 
       options = []
       if dist_to_goals < 4.0 then
@@ -291,6 +299,7 @@ module MatchSimHelper
 
     def action_shoot(striker)
       side = @last_event.side
+      dist_to_goals = PitchPos.dist(pos_of_goals(1 - side), ball_pos)
       # in attack position. try shot
       goalkeeper = get_goalkeeper(1 - side)
 
@@ -299,7 +308,7 @@ module MatchSimHelper
 
       emit_event("ShotTry", side, ball_pos, msg_shoots(striker, goalkeeper), striker.id)
 
-      if RngHelper.dice(1, striker.shooting + BASE_SKILL) > RngHelper.dice(1, goalkeeper.handling  + goalkeeper.speed + 2*BASE_SKILL) 
+      if RngHelper.dice(1, striker.shooting + BASE_SKILL - dist_to_goals) > RngHelper.dice(1, goalkeeper.handling  + goalkeeper.speed + 2*BASE_SKILL) 
         emit_event("Goal", side, ball_pos, msg_goal(striker, goalkeeper), striker.id)
         if side == 0
           @game.home_goals += 1
@@ -331,14 +340,14 @@ module MatchSimHelper
       defender = maybe_player_near(new_pos, 1 - side, 2)
       
       if defender != nil && interception_success?(on_ball, defender) then
-        emit_event("Boring", 1 - side, new_pos, "#{defender.name} intercepts #{on_ball.name}'s pass")
+        emit_event("Boring", 1 - side, new_pos, "#{defender.name} intercepts #{on_ball.name}'s pass", defender.id)
       else
         if @interesting_action != nil then
           msg = "#{on_ball.name} #{@interesting_action}"
         else
           msg = nil
         end
-        emit_event("Boring", side, new_pos, msg)
+        emit_event("Boring", side, new_pos, msg, on_ball.id)
       end
     end
 

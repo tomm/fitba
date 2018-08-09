@@ -5,6 +5,8 @@ import Html.Events exposing (onInput, onClick)
 import Html exposing (Html, Attribute, div, input, span, table, tr, td, th, text, ul, h3, li, button)
 import Svg
 import Date
+import List
+import Array
 import Svg.Attributes exposing (..)
 import Time exposing (Time)
 
@@ -33,11 +35,11 @@ view model maybeWatchingGame =
                 button = case watching.game.status of
                     Played _ -> 
                         if watching.timePoint < match_length_seconds * Time.second then
-                            Just <| Html.div [Html.Attributes.class "game-button-jump-to-end"]
+                            Html.div [Html.Attributes.class "game-button-jump-to-end"]
                                                 [ Uitk.actionButton ShowFinalScore "Show final score" ]
-                        else Nothing
-                    _ -> Nothing
-            in Uitk.view button status [matchView watching]
+                        else Html.span [] []
+                    _ -> Html.span [] []
+            in Uitk.view Nothing status [matchView watching, button]
 
 eventsUpToTimepoint : Game -> Time -> List GameEvent
 eventsUpToTimepoint game time =
@@ -66,6 +68,7 @@ goalSummary game time =
         goalSummary side =
             div [Html.Attributes.class "half-width"] 
                 [div [Html.Attributes.class "game-summary",
+                      teamColorClass side,
                       Html.Attributes.class <| "game-summary-" ++ toString side]
                      <| List.map summarizeEvent (allGoals side)
                  , Uitk.nbsp ]
@@ -74,6 +77,8 @@ goalSummary game time =
         goalSummary Home,
         goalSummary Away
         ]
+
+teamColorClass side = Html.Attributes.class <| if side == Home then "home-team" else "away-team"
 
 matchView : WatchingGame -> Html Msg
 matchView watching =
@@ -92,17 +97,17 @@ matchView watching =
                  List.filter (\e -> e.side == Away) all_goals |> List.length)
         matchStarted = List.length game.events > 0
         matchEventMessage e = Html.div [Html.Attributes.class "game-message",
-                                        Html.Attributes.class <| "game-message-" ++ toString e.side]
+                                        teamColorClass e.side]
                                        [text e.message, Uitk.nbsp]
 
     in
         div []
             [
-                Html.h3 [] [text (
-                    game.homeTeam.name
-                    ++ " (" ++ (toString <| Tuple.first goals) ++ " : " ++ (toString <| Tuple.second goals) ++ ") "
-                    ++ game.awayTeam.name 
-                )],
+                Html.h3 [] [
+                    Html.span [teamColorClass Home] [text game.homeTeam.name],
+                    text (" (" ++ (toString <| Tuple.first goals) ++ " : " ++ (toString <| Tuple.second goals) ++ ") "),
+                    Html.span [teamColorClass Away] [text game.awayTeam.name]
+                ],
                 (case latestGameEventAtTimepoint game (game.start + watching.timePoint) of
                     Nothing -> div [] [
                         text <| "The match has not started: kick-off on " ++ Utils.timeFormat game.start,
@@ -125,10 +130,12 @@ drawPitch game maybeEv =
             Svg.image
                 [Svg.Attributes.width "100%", Svg.Attributes.height "100%", Svg.Attributes.xlinkHref "/pitch_h.png" ]
                 []
+            ,
+            drawPlayers game
         ] ++
             (case maybeEv of
                 Nothing -> []
-                Just ev -> [drawBall ev.ballPos]
+                Just ev -> [drawBall ev]
             )
             {- show all positions. useful for debug
             ++
@@ -148,27 +155,59 @@ pitchPosPixelPos (x, y) =
     in
         (xpadding + (toFloat (6-y))*xinc, ypadding + (toFloat x)*yinc)
 
-    {- this worked for bigger pitch size -- may need when moving formations work
+playerHalfPos : GameEventSide -> (Int, Int) -> (Float, Float)
+playerHalfPos side (x, y) =
     let
-        xpadding = 150.0
+        xpadding = 50.0
         ypadding = 50.0
-        xinc = (pitchX - 2*xpadding) / 4
+        xinc = (pitchX - 2*xpadding) / 12
         yinc = (pitchY - 2*ypadding) / 4
+        sideFlip = toFloat <| if side == Home then 6-y else y+6
     in
-        (xpadding + (toFloat (4-y))*xinc, ypadding + (toFloat x)*yinc)
-    -}
+        (xpadding + sideFlip*xinc, ypadding + (toFloat x)*yinc)
 
-drawBall : (Int, Int) -> Svg.Svg Msg
-drawBall (x, y) =
+zip : List a -> List b -> List (a,b)
+zip aa bb = case (aa, bb) of
+    ([],_) -> []
+    (_,[]) -> []
+    (a::ar, b::br) -> (a,b)::zip ar br
+
+drawPlayers : Game -> Svg.Svg Msg
+drawPlayers game =
+    let playerPos team = zip (List.take 11 <| Array.toList team.players) (List.take 11 <| Array.toList team.formation)
+        drawTeam side team = List.map (drawPlayer side) (playerPos team)
+        drawPlayer side (player,pos) = 
+            let (xpos, ypos) = playerHalfPos side pos
+            in [
+                Svg.circle [ cx (toString xpos), cy (toString ypos), r "20", fill "white", fillOpacity "0.2" ] [],
+                Svg.text_ [Svg.Attributes.x <| toString xpos, Svg.Attributes.y <| toString (ypos + 32),
+                           Svg.Attributes.textAnchor "middle",
+                           Svg.Attributes.class "match-player-label",
+                           fill "white",
+                           fillOpacity "0.2"]
+                          [Svg.text player.name]
+            ]
+        
+    in Svg.g []
+        (List.concat <| drawTeam Home game.homeTeam ++
+                        drawTeam Away game.awayTeam)
+        --++
+        --drawTeam Away game.awayTeam
+
+drawBall : GameEvent -> Svg.Svg Msg
+drawBall ev =
     let
-        (xpos, ypos) = pitchPosPixelPos (x, y)
+        (xpos, ypos) = pitchPosPixelPos (ev.ballPos)
+        fillCol = if ev.side == Home then "blue" else "red"
     in
         Svg.g [] [
-            Svg.circle [ cx (toString xpos), cy (toString ypos), r "30", fill "white" ] []
-            {-,
-            Svg.text_ [fill "black", Svg.Attributes.x <| toString xpos, Svg.Attributes.y <| toString ypos]
-                      [Svg.text ((toString x) ++ "," ++ (toString y))]
-            -}
+            Svg.circle [ cx (toString xpos), cy (toString ypos), r "30", fill "white" ] [],
+            Svg.circle [ cx (toString xpos), cy (toString ypos), r "15", fill fillCol ] [],
+            Svg.text_ [Svg.Attributes.x <| toString xpos, Svg.Attributes.y <| toString (ypos + 48),
+                       Svg.Attributes.textAnchor "middle",
+                       Svg.Attributes.class "match-ball-label",
+                       fill "white"]
+                      [Svg.text <| Maybe.withDefault "" ev.playerName]
         ]
 
 
