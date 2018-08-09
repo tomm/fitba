@@ -12,7 +12,6 @@ import Svg.Attributes exposing (..)
 import Model exposing (..)
 import Types exposing (..)
 import RootMsg
-import Styles exposing (..)
 import TeamViewTypes exposing (State, Msg, Msg(SellPlayer, ViewPlayer, ViewSquad, SelectPlayer, MovePosition),
                                View(SquadView, PlayerView), SquadViewState)
 import Uitk
@@ -31,8 +30,10 @@ view state =
     case state.view of
         PlayerView player ->
             Uitk.view (Just <| Uitk.backButton ViewSquad) (player.forename ++ " " ++ player.name) [
-                PlayerDetailedView.view player,
-                Uitk.actionButton (SellPlayer player) "Sell this player"
+                Uitk.row [
+                    Uitk.column 12 [PlayerDetailedView.view player],
+                    Uitk.column 12 [Uitk.actionButton (SellPlayer player) "Sell this player"]
+                ]
             ]
         SquadView squadViewState -> 
             let isActive i =
@@ -42,7 +43,7 @@ view state =
                 playerToDiv i p =
                     let selectAction = onClick (SelectPlayer <| Just i)
                         infoAction = onClick (ViewPlayer p)
-                    in Html.tr [if isActive i then activeTableRowStyle else Html.Attributes.style []] [
+                    in Html.tr (if isActive i then [Html.Attributes.class "active-table-row-style"] else []) [
                          Html.td [selectAction] [text <| toString <| i + 1 ]
                        , Html.td [selectAction] [Uitk.playerPositionBadge p]
                        , Html.td [selectAction] [text <| p.name]
@@ -54,54 +55,62 @@ view state =
                        , Html.td [selectAction] [text <| toString <| p.speed]
                        , Html.td [infoAction, Html.Attributes.style [("padding", "0"), ("font-size", "200%")]] [text "ⓘ"]
                     ]
+                squadList = Html.table [Html.Attributes.class "squad-list"] <|
+                    (Html.tr [] [
+                        Html.th [] [text "No."],
+                        Html.th [] [text "Pos."],
+                        Html.th [] [text "Name"],
+                        Html.th [] [text "Avg."],
+                        Html.th [] [text "Sh"],
+                        Html.th [] [text "Pa"],
+                        Html.th [] [text "Ta"],
+                        Html.th [] [text "Ha"],
+                        Html.th [] [text "Sp"],
+                        Html.th [] []
+                    ]) ::
+                    (List.indexedMap playerToDiv (Array.toList state.team.players))
+                formationWidget = Svg.svg
+                            [Svg.Attributes.width "100%", Svg.Attributes.height "95%", viewBox "0 0 812 1280" ]
+                            ([ 
+                                Svg.image
+                                    [ Svg.Events.onClick <| SelectPlayer Nothing,
+                                      Svg.Attributes.width "100%", Svg.Attributes.height "100%", Svg.Attributes.xlinkHref "/pitch.png" ]
+                                    []
+                            ] ++
+                            -- players
+                            (List.take 11
+                                <| Array.toList
+                                <| Array.indexedMap (
+                                    \i (x,y) -> playerOnPitch state.team squadViewState i x y) state.team.formation)
+                            ++
+                            -- pitch positions unused by our formation
+                            case squadViewState.selectedPlayer of
+                                Nothing -> []
+                                Just 0 -> [] -- can't move goalkeeper
+                                Just pidx ->
+                                    let selectedPlayer = arrayDirtyGet pidx state.team.players
+                                    in List.map
+                                        (\(x, y) ->
+                                            let positionSuitsPlayer = List.member (x,y) selectedPlayer.positions
+                                            in -- xxx why doesn't array.member exist!
+                                                if List.member (x, y) <| List.take 11 <| Array.toList state.team.formation
+                                                then Svg.text ""
+                                                else emptyPitchPosition (x, y) positionSuitsPlayer
+                                        )
+                                        movablePitchPositions
+                                    )
             in
                 Uitk.view Nothing state.team.name [
-                    Html.table
-                        [Html.Attributes.class "squad-list"] <|
-                        (Html.tr [] [
-                            Html.th [] [text "No."],
-                            Html.th [] [text "Pos."],
-                            Html.th [] [text "Name"],
-                            Html.th [] [text "Avg."],
-                            Html.th [] [text "Sh"],
-                            Html.th [] [text "Pa"],
-                            Html.th [] [text "Ta"],
-                            Html.th [] [text "Ha"],
-                            Html.th [] [text "Sp"],
-                            Html.th [] []
-                        ]) ::
-                        (List.indexedMap playerToDiv (Array.toList state.team.players)),
-
-                    Svg.svg
-                        [Svg.Attributes.width "100%", Svg.Attributes.height "100%", viewBox "0 0 812 1280" ]
-                        ([ 
-                            Svg.image
-                                [ Svg.Events.onClick <| SelectPlayer Nothing,
-                                  Svg.Attributes.width "100%", Svg.Attributes.height "100%", Svg.Attributes.xlinkHref "/pitch.png" ]
-                                []
-                        ] ++
-                        -- players
-                        (List.take 11
-                            <| Array.toList
-                            <| Array.indexedMap (
-                                \i (x,y) -> playerOnPitch state.team squadViewState i x y) state.team.formation)
-                        ++
-                        -- pitch positions unused by our formation
-                        case squadViewState.selectedPlayer of
-                            Nothing -> []
-                            Just 0 -> [] -- can't move goalkeeper
-                            Just pidx ->
-                                let selectedPlayer = arrayDirtyGet pidx state.team.players
-                                in List.map
-                                    (\(x, y) ->
-                                        let positionSuitsPlayer = List.member (x,y) selectedPlayer.positions
-                                        in -- xxx why doesn't array.member exist!
-                                            if List.member (x, y) <| List.take 11 <| Array.toList state.team.formation
-                                            then Svg.text ""
-                                            else emptyPitchPosition (x, y) positionSuitsPlayer
-                                    )
-                                    movablePitchPositions
-                                )
+                    Uitk.row [
+                        Uitk.responsiveColumn 12 [
+                            Html.h3 [] [text "Squad"],
+                            squadList
+                        ],
+                        Uitk.responsiveColumn 12 [
+                            Html.h3 [] [text "Formation"],
+                            formationWidget
+                        ]
+                    ]
                 ]
 
 positionCircleRadius = 75

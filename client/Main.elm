@@ -28,7 +28,6 @@ import TeamViewTypes
 import Model exposing (..)
 import Types exposing (..)
 import RootMsg exposing (..)
-import Styles exposing (..)
 import TeamView
 import ClientServer exposing (..)
 
@@ -200,16 +199,15 @@ update msg model =
 
 tabs : Model -> Html Msg
 tabs model =
-  let liStyle = style[("display", "block"), ("float", "left"), ("width", "25%"), ("border", "0")]
-      tabStyle tab = if model.tab == tab then activeTabStyle else inactiveTabStyle
+  let tabStyle tab = if model.tab == tab then class "active-tab-style" else class "inactive-tab-style"
       tabLabels = [(TabTeam { team = model.ourTeam, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } }, "Team"),
                    (TabLeagueTables, "Tables"),
                    (TabFixtures Nothing, "Fixtures"),
                    (TabFinances, "Finances")]
 
-  in ul [style [("opacity", "0.9"), ("listStyleType", "none"), ("width", "100%"), ("padding", "0 0 1em 0"), ("top", "0"), ("left", "0"), ("margin", "0"), ("position", "fixed")]]
+  in ul [class "tab-menu"]
       (List.map (\(tab, label) ->
-          li [liStyle] [button [onClick (ChangeTab tab), tabStyle tab] [text label]]
+          li [class "tab-item"] [button [onClick (ChangeTab tab), tabStyle tab] [text label]]
         )
         tabLabels)
 
@@ -221,23 +219,23 @@ view model =
             GameData m ->
                 div [] [
                     tabs m,
-                    div [style [("clear", "both"), ("margin", "4em 0 0 0")]] [
-                        text <| Maybe.withDefault "" model.errorMsg,
-                        case m.tab of
-                            TabViewOtherTeam state -> Html.map (\_ -> NoOp {- can't edit -}) <| TeamView.view state
-                            TabTeam state -> Html.map MsgTeamView <| TeamView.view state
-                            TabLeagueTables -> div [] (List.map (leagueTableTab m) m.leagueTables)
-                            TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
-                            TabFinances -> financesTab m
-                            TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view m.ourTeamId state
-                        ]
+                    text <| Maybe.withDefault "" model.errorMsg,
+                    case m.tab of
+                        TabViewOtherTeam state -> Html.map (\_ -> NoOp {- can't edit -}) <| TeamView.view state
+                        TabTeam state -> Html.map MsgTeamView <| TeamView.view state
+                        TabLeagueTables -> div [] (List.map (leagueTableTab m) m.leagueTables)
+                        TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
+                        TabFinances -> financesTab m
+                        TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view m.ourTeamId state
                 ]
     ]
 
 financesTab : Model -> Html Msg
 financesTab model =
     Uitk.view Nothing "Finances" [
-        div [] [text <| "You have " ++ (Utils.moneyFormat <| Maybe.withDefault 0 model.ourTeam.money) ++ " available for transfers."],
+        Html.p [] [
+            text <| "You have " ++ (Utils.moneyFormat <| Maybe.withDefault 0 model.ourTeam.money) ++ " available for transfers."
+        ],
         Uitk.actionButton ViewTransferMarket "Transfer Market"
     ]
 

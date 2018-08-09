@@ -8,7 +8,6 @@ import Types exposing (..)
 import TransferMarketTypes exposing (Msg, State, Msg(ViewListing, ViewAll, UpdateBidInput, MakeBid, WithdrawBid),
                                      View(ListView, PlayerView))
 import PlayerDetailedView
-import Styles
 import Uitk
 import Utils
 import ClientServer
@@ -17,38 +16,48 @@ view : TeamId -> State -> Html Msg
 view ownTeamId state = case state.view of
     PlayerView pvstate ->
         let bidInput = div [] [
-                Uitk.actionButton MakeBid "Make bid",
-                input [ type_ "number", step "10000", value <| toString pvstate.bidInputValue, onInput <| UpdateBidInput ] [],
-                Uitk.actionButton (UpdateBidInput <| toString <| pvstate.bidInputValue + 10000) "+",
-                Uitk.actionButton (UpdateBidInput <| toString <| pvstate.bidInputValue - 10000) "-"
+                Uitk.row [
+                    Uitk.column 12 [ Uitk.actionButton MakeBid "Make bid"]
+                ],
+                Uitk.row [
+                    Uitk.column 24 [
+                        input [ type_ "number", step "10000", value <| toString pvstate.bidInputValue, onInput <|
+                            UpdateBidInput ] []
+                    ]
+                ],
+                Uitk.row [
+                    Uitk.column 6 [ Uitk.actionButton (UpdateBidInput <| toString <| pvstate.bidInputValue + 10000) "+" ],
+                    Uitk.column 6 [ Uitk.actionButton (UpdateBidInput <| toString <| pvstate.bidInputValue - 10000) "-" ]
+                ]
             ]
             withdrawButton = div [] [ Uitk.actionButton WithdrawBid "Withdraw bid" ]
         in Uitk.view (Just <| Uitk.backButton ViewAll) "Transfer Listing" [
-                PlayerDetailedView.view pvstate.listing.player,
-                div [class "half-width"] [
-                    div [Styles.defaultMargin] [
-                        case pvstate.listing.status of
-                        OnSale -> div [] ([
-                                text <| "Accepting offers over " ++ Utils.moneyFormat pvstate.listing.minPrice,
-                                bidInput
-                            ] ++
-                            case pvstate.listing.youBid of
-                                Nothing -> []
-                                Just amount -> [div [] [
-                                    text <| "Your current bid is " ++ Utils.moneyFormat amount,
-                                    withdrawButton
-                                ] ]
-                        )
-                        Sold -> div [] [text "This player has been sold."]
-                        Unsold -> div [] [text "No winning bid."]
-                        YouWon -> div [] [text "You have signed this player."]
-                        OutBid -> div [] [text "You were outbid by another team."]
-                        TeamRejected -> div [] [text "The seller rejected your offer."]
-                        PlayerRejected -> div [] [text "The player was not interested in playing for your team."]
-                        InsufficientMoney -> div [] [text "You did not have enough money to conclude the deal."]
-                    ]
+            Uitk.row [
+                Uitk.column 11 [ PlayerDetailedView.view pvstate.listing.player ],
+                Uitk.column 2 [],
+                Uitk.column 11 [
+                    case pvstate.listing.status of
+                    OnSale -> div [] ([
+                            text <| "Accepting offers over " ++ Utils.moneyFormat pvstate.listing.minPrice,
+                            bidInput
+                        ] ++
+                        case pvstate.listing.youBid of
+                            Nothing -> []
+                            Just amount -> [div [] [
+                                text <| "Your current bid is " ++ Utils.moneyFormat amount,
+                                withdrawButton
+                            ] ]
+                    )
+                    Sold -> div [] [text "This player has been sold."]
+                    Unsold -> div [] [text "No winning bid."]
+                    YouWon -> div [] [text "You have signed this player."]
+                    OutBid -> div [] [text "You were outbid by another team."]
+                    TeamRejected -> div [] [text "The seller rejected your offer."]
+                    PlayerRejected -> div [] [text "The player was not interested in playing for your team."]
+                    InsufficientMoney -> div [] [text "You did not have enough money to conclude the deal."]
                 ]
             ]
+        ]
 
     ListView ->
         let

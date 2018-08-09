@@ -10,7 +10,6 @@ import Array
 import Svg.Attributes exposing (..)
 import Time exposing (Time)
 
-import Styles
 import Model exposing (..)
 import Utils
 import Dict
@@ -32,13 +31,18 @@ view model maybeWatchingGame =
                     Scheduled -> "Live match"
                     InProgress -> "Live match"
                     Played _ -> "Match replay"
-                button = case watching.game.status of
-                    Played _ -> 
-                        if watching.timePoint < match_length_seconds * Time.second then
-                            Html.div [Html.Attributes.class "game-button-jump-to-end"]
-                                                [ Uitk.actionButton ShowFinalScore "Show final score" ]
-                        else Html.span [] []
-                    _ -> Html.span [] []
+                button = Uitk.row (
+                    case watching.game.status of
+                        Played _ -> 
+                            if watching.timePoint < match_length_seconds * Time.second then
+                                [
+                                    Uitk.column 9 [],
+                                    Uitk.column 6 [ Uitk.actionButton ShowFinalScore "Show final score" ],
+                                    Uitk.column 9 []
+                                ]
+                            else []
+                        _ -> []
+                    )
             in Uitk.view Nothing status [matchView watching, button]
 
 eventsUpToTimepoint : Game -> Time -> List GameEvent
@@ -66,17 +70,17 @@ goalSummary game time =
                     Away -> when ++ " " ++ scorer
                 ]
         goalSummary side =
-            div [Html.Attributes.class "half-width"] 
-                [div [Html.Attributes.class "game-summary",
-                      teamColorClass side,
-                      Html.Attributes.class <| "game-summary-" ++ toString side]
-                     <| List.map summarizeEvent (allGoals side)
-                 , Uitk.nbsp ]
+            div [Html.Attributes.class "game-summary",
+                  teamColorClass side,
+                  Html.Attributes.class <| "game-summary-" ++ toString side]
+                 <| List.map summarizeEvent (allGoals side)
     in div [] [
         Html.h4 [Html.Attributes.class "game-summary-title"] [text "Goal Summary:"],
-        goalSummary Home,
-        goalSummary Away
+        Uitk.row [
+            Uitk.column 12 [ goalSummary Home ],
+            Uitk.column 12 [ goalSummary Away ]
         ]
+    ]
 
 teamColorClass side = Html.Attributes.class <| if side == Home then "home-team" else "away-team"
 
@@ -98,7 +102,7 @@ matchView watching =
         matchStarted = List.length game.events > 0
         matchEventMessage e = Html.div [Html.Attributes.class "game-message",
                                         teamColorClass e.side]
-                                       [text e.message, Uitk.nbsp]
+                                       [text e.message]
 
     in
         div []
@@ -113,11 +117,14 @@ matchView watching =
                         text <| "The match has not started: kick-off on " ++ Utils.timeFormat game.start,
                         drawPitch game Nothing
                         ]
-                    Just ev -> div [] [
-                        matchTimeDisplay,
-                        div [] [matchEventMessage ev],
-                        drawPitch game <| Just ev
-                    ]
+                    Just ev ->
+                        div [] [
+                            Uitk.row [
+                                Uitk.column 18 [matchEventMessage ev ],
+                                Uitk.column 6  [ matchTimeDisplay ]
+                            ],
+                            drawPitch game <| Just ev
+                        ]
                 ),
                 goalSummary game (game.start + watching.timePoint)
             ]

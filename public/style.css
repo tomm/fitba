@@ -49,7 +49,6 @@ tr.fixture-own { font-weight: bold; }
 .game-summary-Away { text-align: left; margin-left: 10px; }
 .game-time { text-align: center; }
 .game-message { font-weight: bold; float: left; margin-left: 5px; }
-.game-button-jump-to-end { position: absolute; }
 
 .match-ball-label {
 	font-size: 150%;
@@ -59,38 +58,54 @@ tr.fixture-own { font-weight: bold; }
 	font-size: 140%;
 }
 
-button.action {
+.button-action {
 	background-color: rgba(150, 150, 255, 0.5);
 	padding: 10px;
 	font-weight: bold;
 	margin: 10px;
 }
 
-button {
-	outline: none;
-	border: 0;
+ul.tab-menu {
+  opacity: 0.9;
+  list-style-type: none;
+  width: 100%;
+  padding: 0 0 0 0;
+  top: 0;
+  left: 0;
+  margin: 0;
+  position: fixed;
 }
 
-button.circle-button {
-	width: 40px;
-	height: 40px;
-	border-radius: 20px;
-	text-align: center;
-	vertical-align: center;
-	padding: 0;
-	font-size: 200%;
-	background-color: rgba(150, 150, 255, 0.5);
-	margin: 0px 10px;
-	float: left;
+li.tab-item {
+  display: block;
+  float: left;
+  width: 25%;
+  border: 0;
 }
 
-div.half-width {
-	width: 49%;
-	float: left;
+button.active-tab-style {
+  border: none;
+  width: 100%;
+  height: 3em;
+  background-color: blue;
+  color: white;
 }
+
+button.inactive-tab-style {
+  border: none;
+  width: 100%;
+  height: 3em;
+  background-color: white;
+}
+
+tr.active-table-row-style { background-color: blue; }
 
 h1,h2,h3,h4,h5,h6 {
 	text-align: center;
+}
+
+div.view {
+  margin: 3em 0 0 0;
 }
 
 h4 { margin: 5px 0px; }
@@ -110,8 +125,4 @@ th {
 
 div.main-content {
 	clear: both;
-}
-
-div.view {
-	margin: 0;
 }
