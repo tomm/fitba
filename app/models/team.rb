@@ -21,6 +21,10 @@ class Team < ActiveRecord::Base
     FormationPo.where(formation_id: self.formation_id).order(:position_num)
   end
 
+  def player_positions_can_play
+    player_positions.joins(:player).where(players: {injury: 0})
+  end
+
   def squad
     positions = player_positions.all
     players = Player.where(team_id: self.id).all

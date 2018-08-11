@@ -38,6 +38,8 @@ table {
   border: none;
   font-weight: bold;
 }
+span.injury-icon { background-color: white; color: red; margin: 0 5px; padding: 0 2px; }
+tr.player-row-injury { background-color: rgba(255,0,0,0.5); }
 .icon-button { background: none; border: none; margin: 0; padding: 0 0 0 5px; }
 .squad-list tr:nth-child(12) { border-bottom: 3px solid black; }
 .league-table tr:nth-last-child(1) { background-color: rgba(255, 180, 180, 0.5); }

@@ -39,9 +39,7 @@ module MatchSimHelper
   end
 
   class TeamPos
-    def initialize(team)
-      positions = team.player_positions.limit(11)
-      
+    def initialize(positions)
       pos_pid_tuples = ALL_POS.map {|p|
         pitch_pos = PitchPos.new(p[0], p[1])
         pos = positions.find {|q| q.position_x == pitch_pos.x and q.position_y == pitch_pos.y }
@@ -85,17 +83,20 @@ module MatchSimHelper
 
   class GameSimulator
     def initialize(game)
+      team0_players = game.home_team.player_positions_can_play.limit(11).all
+      team1_players = game.away_team.player_positions_can_play.limit(11).all
+
       @game = game
       @teams = [game.home_team, game.away_team]
       @team_pos = [
-        TeamPos.new(game.home_team),
-        TeamPos.new(game.away_team)
+        TeamPos.new(team0_players),
+        TeamPos.new(team1_players)
       ]
       @team_pids = [
-        game.home_team.player_positions.limit(11).map(&:player_id),
-        game.away_team.player_positions.limit(11).map(&:player_id),
+        team0_players.map(&:player_id),
+        team1_players.map(&:player_id),
       ]
-      @player_by_id = ((game.home_team.player_positions.limit(11) + game.away_team.player_positions.limit(11)).map do |f|
+      @player_by_id = ((team0_players + team1_players).map do |f|
         [f.player_id, f.player]
       end).to_h
       @last_event = GameEvent.where(game_id: game.id).order(:time).reverse_order.first

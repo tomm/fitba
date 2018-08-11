@@ -1,6 +1,6 @@
 -- This file uses purecss.io classes.
 -- The aim is to avoid putting css-framework-specific stuff anywhere except this file.
-module Uitk exposing (view, actionButton, backButton, playerPositionBadge,
+module Uitk exposing (view, actionButton, backButton, playerPositionBadge, playerInjuryBadge,
     row, column, responsiveColumn, blockButton, blockButtonRow, crossButton)
 
 import Html.Attributes exposing (..)
@@ -51,6 +51,14 @@ playerPositionBadge : Types.Player -> Html a
 playerPositionBadge player = 
     let pos = Types.playerPositionFormat player.positions
     in Html.span [class "player-position-badge", class <| "player-position-" ++ pos] [text pos]
+
+playerInjuryBadge : Types.Player -> Html a
+playerInjuryBadge player =
+    if player.injury == 0 then
+        Html.span [] []
+    else
+        Html.span [ class "injury-icon", property "innerHTML" (Json.Encode.string "&#x271a;") ] []
+
 
 type RowColumn a = RowColumn (Html a)
 

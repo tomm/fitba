@@ -9,7 +9,7 @@ import Uitk
 
 view : Player -> Html a
 view player =
-    table [class "player-detailed-view"] [
+    table [class "player-detailed-view"] <| [
         tr [] [
             td [] [text "Name"],
             td [] [text <| player.forename ++ " " ++ player.name]
@@ -46,4 +46,9 @@ view player =
             td [] [text "Speed"],
             td [] [text <| toString player.speed]
         ]
-    ]
+    ] ++ case player.injury of
+        0 -> []
+        n -> [tr [] [
+            td [] [text "Injured"],
+            td [] [text <| "Expected recovery in " ++ toString player.injury ++ " days"]
+        ]]

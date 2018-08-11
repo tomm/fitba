@@ -153,7 +153,7 @@ module AiManagerHelper
       return
     end
 
-    _players = Player.where(team_id: team.id).all.to_a
+    _players = Player.where(team_id: team.id, injury: 0).all.to_a
 
     # sort players by skill
     _players.sort! {|a,b| a.skill > b.skill ? -1 : (a.skill < b.skill ? 1 : 0)}

@@ -40,12 +40,16 @@ view state =
                     case squadViewState.selectedPlayer of
                         Just j -> j == i
                         Nothing -> False
+                rowStyle p i =
+                    if isActive i then [Html.Attributes.class "active-table-row-style"] else []
+                    ++
+                    if p.injury > 0 then [Html.Attributes.class "player-row-injury"] else []
                 playerToDiv i p =
                     let selectAction = onClick (SelectPlayer <| Just i)
                         infoAction = onClick (ViewPlayer p)
-                    in Html.tr (if isActive i then [Html.Attributes.class "active-table-row-style"] else []) [
+                    in Html.tr (rowStyle p i) [
                          Html.td [selectAction] [text <| toString <| i + 1 ]
-                       , Html.td [selectAction] [Uitk.playerPositionBadge p]
+                       , Html.td [selectAction] [Uitk.playerPositionBadge p, Uitk.playerInjuryBadge p]
                        , Html.td [selectAction] [text <| p.name]
                        , Html.td [selectAction] [text <| Types.playerAvgSkill p]
                        , Html.td [selectAction] [text <| toString <| p.shooting]
@@ -153,7 +157,7 @@ playerOnPitch team squadViewState playerIdx x y =
                     then
                         "#8080ff"
                     else
-                        if List.member (x,y) player.positions then "white" else "#f77"
+                        if List.member (x,y) player.positions && player.injury == 0 then "white" else "#f77"
                     )
 
         opacity = if positionSuitsSelectedPlayer then playerGoodPositionOpacity else playerBadPositionOpacity

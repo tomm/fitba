@@ -9,16 +9,17 @@ class Player < ActiveRecord::Base
 
   def to_api
     {
-      id: id,
-      name: name,
-      age: age,
-      forename: forename,
-      shooting: shooting,
-      passing: passing,
-      tackling: tackling,
-      handling: handling,
-      speed: speed,
-      positions: get_positions
+      id: self.id,
+      name: self.name,
+      age: self.age,
+      forename: self.forename,
+      shooting: self.shooting,
+      passing: self.passing,
+      tackling: self.tackling,
+      handling: self.handling,
+      speed: self.speed,
+      injury: self.injury,
+      positions: self.get_positions
     }
   end
 

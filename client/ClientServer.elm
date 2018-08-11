@@ -190,6 +190,7 @@ jsonDecodePlayer =
         |> P.required "tackling" Json.int
         |> P.required "handling" Json.int
         |> P.required "speed" Json.int
+        |> P.required "injury" Json.int
         |> P.required "positions" (Json.list jsonDecodePlayerPosition)
 
 jsonDecodePlayerPosition : Json.Decoder (Int, Int)
