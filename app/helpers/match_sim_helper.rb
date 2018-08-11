@@ -1,4 +1,5 @@
 module MatchSimHelper
+  PLAYERS_ON_BENCH = 5
   GK = [2, 6]
   ALL_POS = [
       GK,
@@ -83,8 +84,16 @@ module MatchSimHelper
 
   class GameSimulator
     def initialize(game)
-      team0_players = game.home_team.player_positions_can_play.limit(11).all
-      team1_players = game.away_team.player_positions_can_play.limit(11).all
+      @last_event = GameEvent.where(game_id: game.id).order(:time).reverse_order.first
+
+      if @last_event == nil then
+        # start of match. copy starting formation from teams
+        game.home_formation = dup_starting_formation(game.home_team)
+        game.away_formation = dup_starting_formation(game.away_team)
+      end
+
+      team0_players = game.home_formation.formation_pos.order(:position_num).all
+      team1_players = game.away_formation.formation_pos.order(:position_num).all
 
       @game = game
       @teams = [game.home_team, game.away_team]
@@ -99,11 +108,20 @@ module MatchSimHelper
       @player_by_id = ((team0_players + team1_players).map do |f|
         [f.player_id, f.player]
       end).to_h
-      @last_event = GameEvent.where(game_id: game.id).order(:time).reverse_order.first
     end
 
-    def to_s
-      p @player_by_id
+    def dup_starting_formation(team)
+      players_pos = team.player_positions_can_play.limit(11 + PLAYERS_ON_BENCH).all
+      formation = team.formation.dup
+      formation.save
+
+      players_pos.each do |p|
+        new_p = p.dup
+        new_p.formation_id = formation.id
+        new_p.save
+      end
+
+      formation
     end
 
     def simulate_until(until_time)

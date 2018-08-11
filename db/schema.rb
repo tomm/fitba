@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180811153316) do
+ActiveRecord::Schema.define(version: 20180811201717) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -58,9 +58,11 @@ ActiveRecord::Schema.define(version: 20180811153316) do
     t.datetime "start"
     t.integer  "home_goals"
     t.integer  "away_goals"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
     t.integer  "season"
+    t.integer  "home_formation_id"
+    t.integer  "away_formation_id"
   end
 
   add_index "games", ["away_team_id"], name: "index_games_on_away_team_id", using: :btree
@@ -174,6 +176,8 @@ ActiveRecord::Schema.define(version: 20180811153316) do
   add_foreign_key "formation_pos", "players"
   add_foreign_key "game_events", "games"
   add_foreign_key "game_events", "players"
+  add_foreign_key "games", "formations", column: "away_formation_id"
+  add_foreign_key "games", "formations", column: "home_formation_id"
   add_foreign_key "games", "leagues"
   add_foreign_key "messages", "teams"
   add_foreign_key "players", "teams"

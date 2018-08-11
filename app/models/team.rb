@@ -56,26 +56,35 @@ class Team < ActiveRecord::Base
     # positions are in order, ie [0] is goal keeper, [10] is centre forward
     #players = Player.find_by(team_id: self.id)
     # move existing positions away
-    FormationPo.where(formation_id: self.formation_id).update_all(position_num: 12)
+    all_player_id = Player.where(team_id: self.id).pluck(:id)
+
+    # make sure they are our players
+    positions.select! {|p| all_player_id.include?(p[0]) }
+
+    # add missing playerIds at end of positions
+    all_player_id.each do |player_id|
+      if not positions.any? {|p| p[0] == player_id} then
+        positions << [player_id, [0,0]]
+      end
+    end
+
+    # nuke any formation positions to players not on this team...
+    FormationPo.where(formation_id: self.formation_id).where.not(player_id: all_player_id).delete_all
+
     positions.each_with_index do |p,i|
       player_id = p[0]
       position_xy = p[1]
       if position_xy == nil then position_xy = [0,0] end
       # ^^ haskell version handles this differently, saving a combined "Maybe (Int,Int) field to DB
       # first check it's our player
-      if Player.exists?(id: player_id, team_id: self.id)
-        formation_po = FormationPo.find_by(player_id: player_id, formation_id: self.formation_id)
-        if formation_po == nil
-          FormationPo.create(formation_id: self.formation_id,
-                             player_id: player_id,
-                             position_num: i,
-                             position_x: position_xy[0], position_y: position_xy[1])
-        else
-          formation_po.update(position_num: i, position_x: position_xy[0], position_y: position_xy[1])
-        end
+      formation_po = FormationPo.find_by(player_id: player_id, formation_id: self.formation_id)
+      if formation_po == nil
+        FormationPo.create(formation_id: self.formation_id,
+                           player_id: player_id,
+                           position_num: i,
+                           position_x: position_xy[0], position_y: position_xy[1])
       else
-        # player is not on this team
-        logger.warn("Error (silly client): attempted to save player_id #{player_id} to formation on team #{self.id}, but player does not belong to this team.")
+        formation_po.update(position_num: i, position_x: position_xy[0], position_y: position_xy[1])
       end
     end
   end

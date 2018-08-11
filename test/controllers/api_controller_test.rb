@@ -361,7 +361,7 @@ class ApiControllerTest < ActionController::TestCase
     post :save_formation, [[amy.id, [1,2]], [barbara.id, [2,3]]].to_json, :format => "json"
     assert_response :success
 
-    expected_formation = AiManagerHelper::FORMATION_442.dup
+    expected_formation = [[1, 2], [2, 3], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
     expected_formation[0] = [1,2]
     expected_formation[1] = [2,3]
     get :load_world, :format => "json"
