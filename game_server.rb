@@ -5,7 +5,7 @@ require "./config/environment"
 require "./app/helpers/populate_db_helper.rb"
 
 daily_tasks_last = Date.today
-DAYS_REST_BETWEEN_SEASONS = 2
+DAYS_REST_BETWEEN_SEASONS = 1
 
 five_minutely_tasks_last = nil
 

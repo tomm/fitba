@@ -2,6 +2,7 @@ class Team < ActiveRecord::Base
   belongs_to :formation
   has_many :team_leagues
   has_many :players
+  has_many :messages
 
   scope :in_league_season, ->(league_id, season) { 
     joins(:team_leagues).where({

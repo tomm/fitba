@@ -25,6 +25,7 @@ import TransferMarketTypes
 import FixturesView
 import FixturesViewMsg
 import TeamViewTypes
+import InboxView
 import Model exposing (..)
 import Types exposing (..)
 import RootMsg exposing (..)
@@ -122,6 +123,7 @@ update msg model =
                         TabTeam _ -> getStartGameData
                         _ -> Cmd.none
                     in updateStateCmd { m | tab = tab } cmd
+                ViewInbox -> updateState { m | tab = TabInbox }
                 ViewTransferMarket -> (model, ClientServer.loadTransferListings)
                 GotTransferListings result -> case result of
                     Ok listings -> updateState { m | tab = TabTransferMarket {
@@ -187,6 +189,11 @@ update msg model =
                 SavedFormation _ -> (model, Cmd.none) -- don't give a fuck
                 SavedBid _ -> (model, Cmd.none) -- don't give a fuck
                 SellPlayerResponse _ -> (model, ClientServer.loadTransferListings) -- don't give a fuck
+                DeleteInboxMessage msgId ->
+                    let team = m.ourTeam
+                    in  updateStateCmd { m | ourTeam = { team | inbox = List.filter (\item -> item.id /= msgId) team.inbox } }
+                        (ClientServer.deleteInboxMessage msgId)
+                DeleteMessageResponse _ -> (model, Cmd.none)
                 NoOp -> (model, Cmd.none)
 
     in
@@ -200,10 +207,13 @@ update msg model =
 tabs : Model -> Html Msg
 tabs model =
   let tabStyle tab = if model.tab == tab then class "active-tab-style" else class "inactive-tab-style"
-      tabLabels = [(TabTeam { team = model.ourTeam, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } }, "Team"),
+      clubTabLabel = case List.length model.ourTeam.inbox of
+          0 -> "Club"
+          n -> "(" ++ toString n ++ ") Club"
+      tabLabels = [(TabTeam { team = model.ourTeam, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } }, "Squad"),
                    (TabLeagueTables, "Tables"),
                    (TabFixtures Nothing, "Fixtures"),
-                   (TabFinances, "Finances")]
+                   (TabClub, clubTabLabel)]
 
   in ul [class "tab-menu"]
       (List.map (\(tab, label) ->
@@ -225,18 +235,26 @@ view model =
                         TabTeam state -> Html.map MsgTeamView <| TeamView.view state
                         TabLeagueTables -> div [] (List.map (leagueTableTab m) m.leagueTables)
                         TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
-                        TabFinances -> financesTab m
+                        TabClub -> clubTab m
                         TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view m.ourTeamId state
+                        TabInbox -> InboxView.view m
                 ]
     ]
 
-financesTab : Model -> Html Msg
-financesTab model =
-    Uitk.view Nothing "Finances" [
-        Html.p [] [
+clubTab : Model -> Html Msg
+clubTab model =
+    let numMsgs = "(" ++ toString (List.length model.ourTeam.inbox) ++ ")"
+    in Uitk.view Nothing "Club" [
+        Html.p [class "center"] [
             text <| "You have " ++ (Utils.moneyFormat <| Maybe.withDefault 0 model.ourTeam.money) ++ " available for transfers."
         ],
-        Uitk.actionButton ViewTransferMarket "Transfer Market"
+        Uitk.blockButtonRow [
+            Uitk.column 4 [],
+            Uitk.blockButton 8 ViewTransferMarket "Transfer Market",
+            Uitk.blockButton 8 ViewInbox (numMsgs ++ " Inbox"),
+            Uitk.column 4 []
+            --Uitk.blockButton 8 NoOp "Something else"
+        ]
     ]
 
 leagueTableTab : Model -> LeagueTable -> Html Msg

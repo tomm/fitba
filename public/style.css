@@ -17,6 +17,28 @@ table {
 	margin-bottom: 1em;
 }
 
+.cross-icon {
+  font-size: 2.0rem;
+}
+.clicky-clicky div.pure-g {
+  padding: 6px;
+  }
+.clicky-clicky div.pure-g > div {
+  padding: 0;
+}
+.clicky-clicky div.pure-g > div > div{
+  padding: 0 5px;
+}
+.clicky-clicky div.pure-g > div > div > button {
+  background-color: rgba(150, 150, 255, 0.5);
+  padding: 25px 0;
+  margin: 0 3px;
+  width: 100%;
+  display: block;
+  border: none;
+  font-weight: bold;
+}
+.icon-button { background: none; border: none; margin: 0; padding: 0 0 0 5px; }
 .squad-list tr:nth-child(12) { border-bottom: 3px solid black; }
 .league-table tr:nth-last-child(1) { background-color: rgba(255, 180, 180, 0.5); }
 .league-table tr:nth-last-child(2) { background-color: rgba(255, 180, 180, 0.5); }
@@ -47,8 +69,14 @@ tr.fixture-own { font-weight: bold; }
 
 .game-summary-Home { text-align: right; margin-right: 10px; }
 .game-summary-Away { text-align: left; margin-left: 10px; }
+.center { text-align: center; }
 .game-time { text-align: center; }
 .game-message { font-weight: bold; float: left; margin-left: 5px; }
+.inbox-message { background-color: rgba(255,255,255,0.5); padding: 10px; margin: 0 10px 10px 10px;}
+.inbox-message-from { font-weight: bold; }
+.inbox-message-subject { font-weight: bold; }
+.inbox-message-date { font-weight: bold; text-align: right; }
+.inbox-message-body { margin-top: 10px; }
 
 .match-ball-label {
 	font-size: 150%;

@@ -18,6 +18,32 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 12345, body['money']
   end
 
+  test "team_messages" do
+    user = login
+
+    get :load_world, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal [], body['inbox']
+
+    Message.send_message(user.team, "Bob", "Hello", "Hello old bean", Time.now)
+
+    get :load_world, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "Hello", body['inbox'][0]['subject']
+
+    post :delete_message, {message_id: body['inbox'][0]['id']}.to_json, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "SUCCESS", body['status']
+
+    get :load_world, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal [], body['inbox']
+  end
+
   test "/sell_player" do
     login
 

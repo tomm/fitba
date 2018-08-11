@@ -67,6 +67,8 @@ module TransferMarketHelper
           # update listing, marking sold
           sold = true
           puts "Team #{buyer_team.name} bought #{player.name} for #{bid.amount}"
+          Message.send_message(buyer_team, "The Chairman", "New signing",
+                               "You have signed #{player.name} for €#{bid.amount}", Time.now)
         end
       end
 

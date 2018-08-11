@@ -25,8 +25,11 @@ type Msg
   | SavedBid (Result Http.Error String)
   | ViewTeam TeamId | ViewTeamLoaded (Result Http.Error Team)
   | ViewTransferMarket
+  | ViewInbox
   | GotTransferListings (Result Http.Error (List Types.TransferListing))
   | SellPlayerResponse (Result Http.Error String)
   | NoOp
   | RequestNotificationPermissionResult Notification.Permission
   | NotificationResult (Result Notification.Error ())
+  | DeleteInboxMessage InboxMessageId
+  | DeleteMessageResponse (Result Http.Error String)

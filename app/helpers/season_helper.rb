@@ -35,6 +35,9 @@ module SeasonHelper
 
     leagues.each do |l|
       record = DbHelper::league_table(l.id, last_season)
+
+      record.each_with_index.map {|rec,idx| chairman_end_of_season_action(rec, idx+1)}
+
       #staying in
       can_promote = teams_in_league.key?(l.rank-1)
       can_relegate = teams_in_league.key?(l.rank+1)
@@ -62,6 +65,31 @@ module SeasonHelper
 
       create_fixtures_for_league_season(leagueId, last_season + 1)
     end
+  end
+
+  def self.chairman_end_of_season_action(record, finishing_position)
+    team = Team.find(record[:teamId])
+
+    if finishing_position == 1 then
+      msg = "Congratulations on finishing in the top spot! We've had a great season, and expect more of the same from you next season!"
+    elsif finishing_position <= 3 then
+      msg = "Congratulations on a fantastic season."
+    elsif finishing_position <= 6 then
+      msg = "Congratulations on finishing in the top half of the tables. I hope we can build on this success next season."
+    elsif finishing_position <= 9 then
+      msg = "The team's performance this season was not adequate, and I expect improvement in the coming year."
+    elsif finishing_position <= 11 then
+      msg = "I am extremely disappointed with the team's performance this year. Significant improvement must be evident early next season or your position can not be assured."
+    else
+      msg = "What an utterly abysmal season. I will be seeking your dismissal unless we can win a game soon, or the fans will turn on me too. This is your last chance."
+    end
+
+    Message.send_message(team, "The Chairman", "Your performance this season", msg, Time.now)
+    
+    amount = 10000000
+    team.update(money: team.money + amount)
+    Message.send_message(team, "The Chairman", "Transfer budget for the new season",
+                         "I have allocated a transfer budget of €" + amount.to_s, Time.now)
   end
 
   def self.create_fixtures_for_league_season(league_id, season)

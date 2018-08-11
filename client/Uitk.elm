@@ -1,6 +1,7 @@
 -- This file uses purecss.io classes.
 -- The aim is to avoid putting css-framework-specific stuff anywhere except this file.
-module Uitk exposing (view, actionButton, backButton, playerPositionBadge, row, column, responsiveColumn)
+module Uitk exposing (view, actionButton, backButton, playerPositionBadge,
+    row, column, responsiveColumn, blockButton, blockButtonRow, crossButton)
 
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -9,11 +10,22 @@ import Json.Encode
 
 import Types
 
+blockButtonRow : List (RowColumn a) -> Html a
+blockButtonRow columns = div [class "clicky-clicky"] [ row columns ]
+
+blockButton : Int -> a -> String -> RowColumn a
+blockButton num24ths action label = 
+    column num24ths [div [] [button [class "pure-button", onClick action] [text label]]]
+
 actionButton : a -> String -> Html a
 actionButton action label = button [class "pure-button", class "button-action", onClick action] [text label]
 
 backButton : a -> Html a
 backButton action = button [class "pure-button", class "button-action", onClick action] [text "Back"]
+
+crossButton : a -> Html a
+crossButton action = button [class "icon-button", onClick action]
+    [span [ class "cross-icon", property "innerHTML" (Json.Encode.string "&#x2716;") ] []]
 
 view : Maybe (Html a) -> String -> List (Html a) -> Html a
 view maybeButton title content =
@@ -40,13 +52,16 @@ playerPositionBadge player =
     let pos = Types.playerPositionFormat player.positions
     in Html.span [class "player-position-badge", class <| "player-position-" ++ pos] [text pos]
 
-type alias RowColumn a = Html a
+type RowColumn a = RowColumn (Html a)
+
+unpackRowColumn (RowColumn r) = r
 
 row : List (RowColumn a) -> Html a
-row columns = Html.div [class "pure-g"] columns
+row columns = Html.div [class "pure-g"] (List.map unpackRowColumn columns)
 
 column : Int -> List(Html a) -> RowColumn a
-column num24ths = Html.div [class <| "pure-u-" ++ toString num24ths ++ "-24"]
+column num24ths contents = RowColumn <| Html.div [class <| "pure-u-" ++ toString num24ths ++ "-24"] contents
 
 responsiveColumn : Int -> List(Html a) -> RowColumn a
-responsiveColumn num24ths = Html.div [class "pure-u-1", class <| "pure-u-md-" ++ toString num24ths ++ "-24"]
+responsiveColumn num24ths contents =
+    RowColumn <| Html.div [class "pure-u-1", class <| "pure-u-md-" ++ toString num24ths ++ "-24"] contents

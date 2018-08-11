@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180808081348) do
+ActiveRecord::Schema.define(version: 20180811134614) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -73,6 +73,18 @@ ActiveRecord::Schema.define(version: 20180808081348) do
     t.datetime "updated_at", null: false
     t.integer  "rank"
   end
+
+  create_table "messages", force: :cascade do |t|
+    t.integer  "team_id",    null: false
+    t.string   "from",       null: false
+    t.string   "subject",    null: false
+    t.text     "body",       null: false
+    t.datetime "date",       null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "messages", ["team_id"], name: "index_messages_on_team_id", using: :btree
 
   create_table "players", force: :cascade do |t|
     t.integer  "team_id"
@@ -162,12 +174,14 @@ ActiveRecord::Schema.define(version: 20180808081348) do
   add_foreign_key "game_events", "games"
   add_foreign_key "game_events", "players"
   add_foreign_key "games", "leagues"
+  add_foreign_key "messages", "teams"
   add_foreign_key "players", "teams"
   add_foreign_key "sessions", "users"
   add_foreign_key "team_leagues", "leagues"
   add_foreign_key "team_leagues", "teams"
   add_foreign_key "teams", "formations"
   add_foreign_key "transfer_bids", "teams"
+  add_foreign_key "transfer_bids", "transfer_listings"
   add_foreign_key "transfer_listings", "players"
   add_foreign_key "transfer_listings", "teams"
   add_foreign_key "users", "teams"

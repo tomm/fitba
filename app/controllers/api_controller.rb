@@ -1,5 +1,7 @@
 class ApiController < ApplicationController
-  skip_before_filter :verify_authenticity_token, :only => [:save_formation, :transfer_bid, :sell_player]
+  skip_before_filter :verify_authenticity_token, :only => [
+      :save_formation, :transfer_bid, :sell_player, :delete_message
+    ]
 
   # () -> User | nil
   private def get_user
@@ -12,7 +14,8 @@ class ApiController < ApplicationController
       id: team.id,
       name: team.name,
       players: squad[:players],
-      formation: squad[:formation]
+      formation: squad[:formation],
+      inbox: []
     }
   end
 
@@ -20,8 +23,9 @@ class ApiController < ApplicationController
     begin
       team = Team.find(team_id)
       r = get_team_json(team)
-      if user.team_id == team_id
+      if user.team_id == team_id then
         r[:money] = team.money
+        r[:inbox] = team.messages.order(:date).reverse_order.limit(10).map(&:to_api)
       end
       render json: r
     rescue ActiveRecord::RecordNotFound
@@ -251,6 +255,17 @@ class ApiController < ApplicationController
         TransferMarketHelper.list_player(player)
         render json: {status: 'SUCCESS'}
       end
+    else
+      head 403
+    end
+  end
+
+  def delete_message
+    if user = get_user then
+      data = JSON.parse(request.body.read())
+      message_id = data["message_id"]
+      Message.where(team_id: user.team_id, id: message_id).destroy_all
+      render json: {status: 'SUCCESS'}
     else
       head 403
     end

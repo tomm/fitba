@@ -1,5 +1,5 @@
 module ClientServer exposing (loadGame, loadTeam, saveFormation, sellPlayer, pollGameEvents, getStartGameData, getFixtures, getLeagueTables,
-    loadTransferListings, makeTransferBid)
+    loadTransferListings, makeTransferBid, deleteInboxMessage)
 
 import Array exposing (Array)
 import Date
@@ -22,6 +22,11 @@ sellPlayer : PlayerId -> Cmd Msg
 sellPlayer playerId =
     let body = Http.jsonBody <| Json.Encode.object [("player_id", Json.Encode.int playerId)]
     in Http.send SellPlayerResponse (Http.post "/sell_player" body Json.string)
+
+deleteInboxMessage : InboxMessageId -> Cmd Msg
+deleteInboxMessage messageId =
+    let body = Http.jsonBody <| Json.Encode.object [("message_id", Json.Encode.int messageId)]
+    in Http.send DeleteMessageResponse (Http.post "/delete_message" body Json.string)
 
 saveFormation : Team -> Cmd Msg
 saveFormation team = 
@@ -156,12 +161,22 @@ jsonDecodeGameEventSide =
 
 jsonDecodeTeam : Json.Decoder Team
 jsonDecodeTeam =
-    Json.map5 Team
+    Json.map6 Team
         (Json.field "id" Json.int)
         (Json.field "name" Json.string)
         (Json.field "players" (Json.array jsonDecodePlayer))
         (Json.field "formation" (Json.array jsonDecodePlayerPosition))
         (Json.field "money" Json.int |> Json.maybe)
+        (Json.field "inbox" (Json.list jsonDecodeInboxMessage))
+
+jsonDecodeInboxMessage : Json.Decoder InboxMessage
+jsonDecodeInboxMessage =
+    Json.map5 InboxMessage
+        (Json.field "id" Json.int)
+        (Json.field "from" Json.string)
+        (Json.field "subject" Json.string)
+        (Json.field "body" Json.string)
+        (Json.field "date" jsonDecodeTime)
 
 jsonDecodePlayer : Json.Decoder Player
 jsonDecodePlayer =

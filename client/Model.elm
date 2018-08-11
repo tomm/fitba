@@ -16,9 +16,10 @@ type alias TabTransferMarketState = { listings: List Player }
 type UiTab = TabTeam TeamViewTypes.State |
              TabLeagueTables |
              TabFixtures (Maybe WatchingGame) |
-             TabFinances |
+             TabClub |
              TabTransferMarket TransferMarketTypes.State |
              TabViewOtherTeam TeamViewTypes.State
+             | TabInbox
 
 type alias RootModel = {
     errorMsg: Maybe String,
