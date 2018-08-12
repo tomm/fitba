@@ -75,7 +75,7 @@ module MatchSimHelper
             # don't want to consider goalkeepers for random player selection
             [player_id, 0]
           else
-            [player_id, 1.0 / (1.0+PitchPos.dist(ppos, pos))]
+            [player_id, 1.0 / (1.0+PitchPos.dist(ppos, pos)**2)]
           end
         }
       )
@@ -263,7 +263,9 @@ module MatchSimHelper
     end
 
     def defense_success?(on_ball, defender)
-      RngHelper.dice(1, on_ball.handling + BASE_SKILL) < RngHelper.dice(1, defender.tackling + BASE_SKILL)
+      side = @last_event.side
+      RngHelper.dice(1, skill(side, on_ball, :handling, ball_pos)) <
+      RngHelper.dice(1, skill(1-side, defender, :tackling, ball_pos))
     end
 
     # position of side's own goals
@@ -343,6 +345,23 @@ module MatchSimHelper
       ].sample % {s: striker.name, g: goalkeeper.name}
     end
 
+    def skill(side, player, type, position)
+      if side == 1 then position = position.flip end
+      s = player.method(type).call() + BASE_SKILL
+      if player.get_positions.any?{|p|
+        PitchPos.dist(
+          PitchPos.new(p[0],p[1]),
+          position
+        ) <= 1.5
+      } then
+       # puts "#{player.name} in position! bonus"
+        s += 2
+      else
+        #puts "#{player.name} out of position :( #{player.get_positions} vs #{position}"
+      end
+      s
+    end
+
     def action_shoot(striker)
       side = @last_event.side
       dist_to_goals = PitchPos.dist(pos_of_goals(1 - side), ball_pos)
@@ -354,7 +373,8 @@ module MatchSimHelper
 
       emit_event("ShotTry", side, ball_pos, msg_shoots(striker, goalkeeper), striker.id)
 
-      if RngHelper.dice(1, striker.shooting + BASE_SKILL - dist_to_goals) > RngHelper.dice(1, goalkeeper.handling  + goalkeeper.speed + 2*BASE_SKILL) 
+      if RngHelper.dice(1, skill(side, striker, :shooting, ball_pos) - dist_to_goals) >
+         RngHelper.dice(1, skill(1-side, goalkeeper, :handling, ball_pos) + skill(1-side, goalkeeper, :speed, ball_pos))
         emit_event("Goal", side, ball_pos, msg_goal(striker, goalkeeper), striker.id)
         if side == 0
           @game.home_goals += 1
@@ -398,7 +418,9 @@ module MatchSimHelper
     end
 
     def interception_success?(on_ball, defender)
-      RngHelper.dice(1, on_ball.passing + BASE_SKILL) < RngHelper.dice(1, defender.handling + BASE_SKILL)
+      side = @last_event.side
+      RngHelper.dice(1, skill(side, on_ball, :passing, ball_pos)) <
+      RngHelper.dice(1, skill(1-side, defender, :handling, ball_pos))
     end
 
     def get_goalkeeper(side)

@@ -8,6 +8,25 @@ module AiManagerHelper
       [0, 3], [1, 3], [3, 3], [4, 3],
       [1, 1], [3, 1]
   ]
+  FORMATION_VAG = [
+      [2,6], # gk
+      [0,4], [1,5], [3,5], [4,4],
+      [2,3],
+      [0,2],[2,2],[4,2],
+      [1,1],[3,1]
+  ]
+  FORMATION_442_wingback_diamond = [
+      [2, 6], # gk
+      [0, 4], [1, 5], [3, 5], [4, 4],
+      [2, 4], [1, 3], [3, 3], [2, 2],
+      [1, 1], [3, 1]
+  ]
+  FORMATION_442_diamond = [
+      [2, 6], # gk
+      [0, 5], [1, 5], [3, 5], [4, 5],
+      [2, 4], [1, 3], [3, 3], [2, 2],
+      [1, 1], [3, 1]
+  ]
   FORMATION_352 = [
     [2,6],
     [1,5],[2,5],[3,5],
@@ -30,11 +49,23 @@ module AiManagerHelper
     [1,2],[3,2],
     [0,1],[2,1],[4,1]
   ]
-  FORMATION_451 = [
+  FORMATION_451m = [
+    [2,6],
+    [0,5],[1,5],[3,5],[4,5],
+    [0,3],[1,3],[2,3],[3,3],[4,3],
+    [2,1]
+  ]
+  FORMATION_451d = [
     [2,6],
     [0,5],[1,5],[3,5],[4,5],
     [2,4],
     [0,3],[1,3],[3,3],[4,3],
+    [2,1]
+  ]
+  FORMATION_451a = [
+    [2,6],
+    [0,5],[1,5],[3,5],[4,5],
+    [0,2],[1,3],[2,3],[3,3],[4,2],
     [2,1]
   ]
   FORMATION_4231 = [
@@ -66,7 +97,9 @@ module AiManagerHelper
     [2,1]
   ]
   FORMATIONS = [ FORMATION_442, FORMATION_352, FORMATION_433, FORMATION_4231, FORMATION_4231d, FORMATION_4141,
-    FORMATION_4141d, FORMATION_451, FORMATION_532 ]
+                 FORMATION_4141d, FORMATION_451m, FORMATION_451d, FORMATION_451a, FORMATION_532,
+                 FORMATION_442_diamond, FORMATION_442_wingback_diamond,
+                 FORMATION_VAG ]
 
   def self.daily_task(team)
     if team.has_user? then
@@ -160,7 +193,7 @@ module AiManagerHelper
 
     formation_viability = (FORMATIONS.map do |formation|
       players = _players.dup
-      badness = 0
+      goodness = 0
 
       positions = []
       formation.each do |f|
@@ -181,15 +214,18 @@ module AiManagerHelper
           if can_play_almost_there.size == 0 then
             # FUCK. there's really nobody. pick at random
             picked = players.sample
-            badness += 2
+            if picked != nil then
+              goodness += picked.skill + 5
+            end
           else
             # take a random bad match ;)
             picked = can_play_almost_there.sample
-            badness += 1
+            goodness += picked.skill
           end
         else
           # take best player
           picked = can_play_there[0]
+          goodness += picked.skill + 10
         end
 
         if picked != nil then
@@ -197,12 +233,12 @@ module AiManagerHelper
           positions << [picked.id, f]
         end
       end
-      { positions: positions, badness: badness }
+      { positions: positions, goodness: goodness }
     end)
 
-    formation_viability.sort! {|a,b| a[:badness] > b[:badness] ? 1 : (a[:badness] < b[:badness] ? -1 : 0)}
+    formation_viability.sort! {|a,b| a[:goodness] > b[:goodness] ? -1 : (a[:goodness] < b[:goodness] ? 1 : 0)}
 
-    # pick least worst formation choice
+    # pick best formation
     team.update_player_positions formation_viability[0][:positions]
   end
 end

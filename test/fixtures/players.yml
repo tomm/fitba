@@ -22,7 +22,7 @@ barbara:
   tackling: 6
   handling: 6
   speed: 6
-  positions: "[[2,6]]"
+  positions: "[[0,5]]"
 
 carla:
   team: test_utd
@@ -34,7 +34,7 @@ carla:
   tackling: 7
   handling: 7
   speed: 7
-  positions: "[[2,6]]"
+  positions: "[[1,5]]"
 
 denise:
   team: test_utd
@@ -46,7 +46,7 @@ denise:
   tackling: 4
   handling: 4
   speed: 4
-  positions: "[[2,6]]"
+  positions: "[[3,5]]"
 
 ellen:
   team: test_utd
@@ -58,7 +58,7 @@ ellen:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[4,5]]"
 
 frances:
   team: test_utd
@@ -70,7 +70,7 @@ frances:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[0,3]]"
 
 gemma:
   team: test_utd
@@ -82,7 +82,7 @@ gemma:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[1,3]]"
 
 hannah:
   team: test_utd
@@ -94,7 +94,7 @@ hannah:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[3,3]]"
 
 inga:
   team: test_utd
@@ -106,7 +106,7 @@ inga:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[4,3]]"
 
 jennifer:
   team: test_utd
@@ -118,7 +118,7 @@ jennifer:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[1,1]]"
 
 katherine:
   team: test_utd
@@ -130,7 +130,7 @@ katherine:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[3,1]]"
 
 lena:
   team: test_utd
@@ -178,7 +178,7 @@ olena:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[0,5]]"
 
 paula:
   team: test_city
@@ -190,7 +190,7 @@ paula:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[1,5]]"
 
 quaternion:
   team: test_city
@@ -202,7 +202,7 @@ quaternion:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[3,5]]"
 
 rosie:
   team: test_city
@@ -214,7 +214,7 @@ rosie:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[4,5]]"
 
 sandra:
   team: test_city
@@ -226,7 +226,7 @@ sandra:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[0,3]]"
 
 tanya:
   team: test_city
@@ -238,7 +238,7 @@ tanya:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[1,3]]"
 
 ursula:
   team: test_city
@@ -250,7 +250,7 @@ ursula:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[3,3]]"
 
 victoria:
   team: test_city
@@ -262,7 +262,7 @@ victoria:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[4,3]]"
 
 wendy:
   team: test_city
@@ -274,7 +274,7 @@ wendy:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[1,1]]"
 
 xena:
   team: test_city
@@ -286,7 +286,7 @@ xena:
   tackling: 5
   handling: 5
   speed: 5
-  positions: "[[2,6]]"
+  positions: "[[3,1]]"
 
 yybqzl:
   team: test_city

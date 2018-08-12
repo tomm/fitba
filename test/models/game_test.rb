@@ -23,4 +23,23 @@ class GameTest < ActiveSupport::TestCase
     puts "Final score: #{game.home_goals}:#{game.away_goals}"
 =end
   end
+
+  test "simulation_internals" do
+    game = games(:seven)
+    sim = MatchSimHelper::GameSimulator.new(game)
+    amy = players(:amy)
+    assert_equal 6, amy.speed
+    assert_equal 6 + MatchSimHelper::BASE_SKILL,
+                 sim.skill(0, amy, :speed, MatchSimHelper::PitchPos.new(2,4))
+    # position bonus
+    assert_equal 8 + MatchSimHelper::BASE_SKILL,
+                 sim.skill(0, amy, :speed, MatchSimHelper::PitchPos.new(2,5))
+    assert_equal 8 + MatchSimHelper::BASE_SKILL,
+                 sim.skill(0, amy, :speed, MatchSimHelper::PitchPos.new(2,6))
+    # other side of pitch
+    assert_equal 6 + MatchSimHelper::BASE_SKILL,
+                 sim.skill(1, amy, :speed, MatchSimHelper::PitchPos.new(2,6))
+    assert_equal 8 + MatchSimHelper::BASE_SKILL,
+                 sim.skill(1, amy, :speed, MatchSimHelper::PitchPos.new(2,0))
+  end
 end
