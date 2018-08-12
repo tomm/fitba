@@ -17,12 +17,12 @@ module TransferMarketHelper
   def self.player_iterested_in_transfer(team, player)
     # don't let a team buy a player way out of their league
     # starting 11
-    players = team.formation.formation_pos.map {|f| f.player}
+    players = team.player_positions.limit(11).all.map(&:player).sort_by!(&:skill)
+    puts players.map(&:skill)
     num_players = players.length
-    total_skill = players.inject(0){|sum,x|sum + x.skill} # is sum(players.skill)
-    avg_skill = total_skill / num_players.to_f
-    can_do = player.skill <= avg_skill * 1.25
-    puts "Attempt to buy player of skill #{player.skill} by team avg skill #{avg_skill}. Can do? #{can_do}"
+    median_skill = players[num_players / 2].skill
+    can_do = player.skill <= median_skill * 1.25
+    puts "Attempt to buy player of skill #{player.skill} by team median skill #{median_skill}. Can do? #{can_do}"
     can_do
   end
 

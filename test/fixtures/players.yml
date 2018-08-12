@@ -17,11 +17,11 @@ barbara:
   age: 25
   name: Barbara
   forename: x
-  shooting: 5
-  passing: 5
-  tackling: 5
-  handling: 5
-  speed: 5
+  shooting: 6
+  passing: 6
+  tackling: 6
+  handling: 6
+  speed: 6
   positions: "[[2,6]]"
 
 carla:
@@ -29,11 +29,11 @@ carla:
   age: 25
   name: Carla
   forename: x
-  shooting: 5
-  passing: 5
-  tackling: 5
-  handling: 5
-  speed: 5
+  shooting: 7
+  passing: 7
+  tackling: 7
+  handling: 7
+  speed: 7
   positions: "[[2,6]]"
 
 denise:
@@ -41,11 +41,11 @@ denise:
   age: 25
   name: Denise
   forename: x
-  shooting: 5
-  passing: 5
-  tackling: 5
-  handling: 5
-  speed: 5
+  shooting: 4
+  passing: 4
+  tackling: 4
+  handling: 4
+  speed: 4
   positions: "[[2,6]]"
 
 ellen:
