@@ -10,7 +10,7 @@ DAYS_REST_BETWEEN_SEASONS = 1
 five_minutely_tasks_last = nil
 
 def daily_task
-  puts "Executing daily tasks..."
+  puts Time.now.to_s + ": executing daily tasks..."
   if SeasonHelper.is_end_of_season? then
     if Date.today - SeasonHelper.last_game_date >= DAYS_REST_BETWEEN_SEASONS then
       SeasonHelper.handle_end_of_season
@@ -26,7 +26,7 @@ def daily_task
 end
 
 def five_minutely_task
-  puts "Executing five-minutely tasks..."
+  puts Time.now.to_s + ": executing five-minutely tasks..."
   TransferMarketHelper.update_transfer_market
   InjuryHelper.spawn_injuries
 end
