@@ -154,3 +154,16 @@ t2p11:
   position_x: 3
   position_y: 1
 
+t2p12:
+  formation: two
+  player: yybqzl
+  position_num: 12
+  position_x: 0
+  position_y: 0
+
+t2p13:
+  formation: two
+  player: zuzana
+  position_num: 13
+  position_x: 0
+  position_y: 0

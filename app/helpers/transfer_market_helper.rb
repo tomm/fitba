@@ -18,7 +18,6 @@ module TransferMarketHelper
     # don't let a team buy a player way out of their league
     # starting 11
     players = team.player_positions.limit(11).all.map(&:player).sort_by!(&:skill)
-    puts players.map(&:skill)
     num_players = players.length
     median_skill = players[num_players / 2].skill
     can_do = player.skill <= median_skill * 1.25
@@ -59,9 +58,7 @@ module TransferMarketHelper
           bid.update(status: "YouWon")
           t.update(status: 'Sold')
           buyer_team.update(money: buyer_team.money - bid.amount)
-          if seller_team != nil then
-            seller_team.update(money: seller_team.money + bid.amount)
-          end
+          seller_team&.update(money: seller_team.money + bid.amount)
           player.update(team_id: buyer_team.id)
           FormationPo.where(player_id: player.id).delete_all
           # update listing, marking sold
@@ -74,10 +71,10 @@ module TransferMarketHelper
 
       if sold == false then
         # always sell to someone ;)
-        puts "Transfer listing #{t} sold to outside team."
         if seller_team != nil then
-          seller_team.update(money: seller_team.money + t.min_price)
+          puts "#{seller_team&.name} sold #{player.name} to outside team"
         end
+        seller_team&.update(money: seller_team.money + t.min_price)
         FormationPo.where(player_id: player.id).delete_all
         player.update(team_id: nil)
         t.update(status: 'Sold')

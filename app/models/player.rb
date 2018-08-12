@@ -23,6 +23,10 @@ class Player < ActiveRecord::Base
     }
   end
 
+  def can_play?
+    self.injury == 0
+  end
+
   def skill
     shooting + passing + tackling + handling + speed
   end

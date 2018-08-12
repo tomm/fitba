@@ -6,10 +6,7 @@ class TeamTest < ActiveSupport::TestCase
   # end
   test "team has_many players" do
     assert_equal 12, teams(:test_utd).players.count
+    # one player hasn't been given a position...
     assert_equal 11, teams(:test_utd).player_positions.size
-    assert_equal 11, teams(:test_utd).player_positions_can_play.size
-    players(:amy).update(injury: 1)
-    assert_equal 11, teams(:test_utd).player_positions.size
-    assert_equal 10, teams(:test_utd).player_positions_can_play.size
   end
 end

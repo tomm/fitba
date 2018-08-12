@@ -111,18 +111,41 @@ module MatchSimHelper
     end
 
     def dup_starting_formation(team)
-      players_pos = team.player_positions_can_play.limit(11 + PLAYERS_ON_BENCH).all
+      players_pos = team.player_positions.all
       formation = team.formation.dup
       formation.save
 
-      players_pos.each_index do |i|
-        new_p = players_pos[i].dup
+      # note that starting11 may contain ineligible players
+      starting11 = players_pos.take(11)
+      possible_subs = players_pos.drop(11).select{|pos| pos.player.can_play?}
+
+      # copy starting 11 positions, replacing ineligible players if possible
+      starting11.each_index do |i|
+        new_p = starting11[i].dup
         new_p.formation_id = formation.id
-        if i == 0 and not (new_p.position_x == GK[0] and new_p.position_y == GK[1]) then
-          new_p.position_x = GK[0]
-          new_p.position_y = GK[1]
+        if not new_p.player.can_play? then
+          sub = possible_subs.shift  # we aren't picky
+          if sub != nil then
+            new_p.player = sub.player
+            new_p.save
+          else
+            # don't save. we couldn't replace the player so we are short a player in the starting 11
+          end
+        else
+          new_p.save
         end
+      end
+
+      possible_subs.take(PLAYERS_ON_BENCH).each do |s|
+        new_p = s.dup
+        new_p.formation_id = formation.id
         new_p.save
+      end
+
+      # goalkeeper has to exist :)
+      gk = formation.positions_ordered.first
+      if gk.position_x != GK[0] or gk.position_y != GK[1] then
+        gk.update(position_x: GK[0], position_y: GK[1])
       end
 
       formation
