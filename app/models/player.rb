@@ -45,6 +45,7 @@ class Player < ActiveRecord::Base
         self.method(which_skill + "=").call(v-1)
       end
     end
+    self.save
   end
 
   def self.random(player_spawn_quality)
