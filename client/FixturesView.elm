@@ -185,8 +185,9 @@ drawPlayers game =
         drawTeam side team = List.map (drawPlayer side) (playerPos team)
         drawPlayer side (player,pos) = 
             let (xpos, ypos) = playerHalfPos side pos
+                color = if side == Home then "blue" else "red"
             in [
-                Svg.circle [ cx (toString xpos), cy (toString ypos), r "20", fill "white", fillOpacity "0.2" ] [],
+                Svg.circle [ cx (toString xpos), cy (toString ypos), r "20", fill color, fillOpacity "0.2" ] [],
                 Svg.text_ [Svg.Attributes.x <| toString xpos, Svg.Attributes.y <| toString (ypos + 32),
                            Svg.Attributes.textAnchor "middle",
                            Svg.Attributes.class "match-player-label",
