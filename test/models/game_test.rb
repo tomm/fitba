@@ -2,6 +2,8 @@ require 'test_helper'
 
 class GameTest < ActiveSupport::TestCase
   test "simulate" do
+    # make goalkeeper injured, so we test logic of assigning a new one
+    players(:amy).update(injury: 1)
     game = games(:seven)
     assert_equal "Scheduled", game.status
     game.simulate(game.start - 10)

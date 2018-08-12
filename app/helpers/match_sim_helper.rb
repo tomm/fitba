@@ -98,8 +98,8 @@ module MatchSimHelper
       @game = game
       @teams = [game.home_team, game.away_team]
       @team_pos = [
-        TeamPos.new(team0_players),
-        TeamPos.new(team1_players)
+        TeamPos.new(team0_players.take(11)),
+        TeamPos.new(team1_players.take(11))
       ]
       @team_pids = [
         team0_players.map(&:player_id),
@@ -115,9 +115,13 @@ module MatchSimHelper
       formation = team.formation.dup
       formation.save
 
-      players_pos.each do |p|
-        new_p = p.dup
+      players_pos.each_index do |i|
+        new_p = players_pos[i].dup
         new_p.formation_id = formation.id
+        if i == 0 and not (new_p.position_x == GK[0] and new_p.position_y == GK[1]) then
+          new_p.position_x = GK[0]
+          new_p.position_y = GK[1]
+        end
         new_p.save
       end
 
