@@ -67,17 +67,17 @@ module MatchSimHelper
       @by_string_lookup.to_a.map{|i| [i[0].to_s, i[1]]}.to_s
     end
 
-    def position_probability(pos)
+    def position_probability(pos, allow_nobody: false)
       RngHelper.normalize_probability_list(
         @by_pos_lookup.to_a.map {|p|
-          ppos, player_id = p
+          ppos, player_id_or_nil = p
           if ppos.to_a == GK then
             # don't want to consider goalkeepers for random player selection
-            [player_id, 0]
-          else
-            [player_id, 1.0 / (1.0+PitchPos.dist(ppos, pos)**2)]
+            [player_id_or_nil, 0]
+          elsif player_id_or_nil != nil or allow_nobody == true then
+            [player_id_or_nil, 1.0 / (1.0+PitchPos.dist(ppos, pos)**2)]
           end
-        }
+        }.compact
       )
     end
   end
@@ -187,7 +187,7 @@ module MatchSimHelper
 
     def maybe_player_near(pos, side, tries=1)
       if side == 1 then pos = pos.flip end
-      prob = @team_pos[side].position_probability(pos)
+      prob = @team_pos[side].position_probability(pos, allow_nobody: true)
 
       result = nil
       for _ in 0...tries do
@@ -200,18 +200,10 @@ module MatchSimHelper
       result
     end
 
-    def player_near(pos, side, tries=1)
-      p = maybe_player_near(pos, side, tries)
-      if p then
-        return p
-      else
-        gk = get_goalkeeper(side)
-        while p == nil || p == gk
-          # fall back to random player (but not GK)
-          p = @player_by_id[@team_pids[side].sample]
-        end
-        return p
-      end
+    def player_near(pos, side)
+      if side == 1 then pos = pos.flip end
+      prob = @team_pos[side].position_probability(pos, allow_nobody: false)
+      @player_by_id[RngHelper.sample_prob(prob)]
     end
 
     def simulate_tick()
@@ -244,10 +236,8 @@ module MatchSimHelper
       )
     end
 
-    TRIES = 5
-
     def normal_play
-      on_ball = player_near(self.ball_pos, @last_event.side, TRIES)
+      on_ball = player_near(self.ball_pos, @last_event.side)
       defender = maybe_player_near(self.ball_pos, 1 - @last_event.side)
 
       if defender then
@@ -348,13 +338,8 @@ module MatchSimHelper
     def skill(side, player, type, position)
       if side == 1 then position = position.flip end
       s = player.method(type).call() + BASE_SKILL
-      if player.get_positions.any?{|p|
-        PitchPos.dist(
-          PitchPos.new(p[0],p[1]),
-          position
-        ) <= 1.5
-      } then
-       # puts "#{player.name} in position! bonus"
+      if player.get_positions.include? position.to_a then
+        #puts "#{player.name} in position! bonus"
         s += 2
       else
         #puts "#{player.name} out of position :( #{player.get_positions} vs #{position}"
@@ -364,7 +349,8 @@ module MatchSimHelper
 
     def action_shoot(striker)
       side = @last_event.side
-      dist_to_goals = PitchPos.dist(pos_of_goals(1 - side), ball_pos)
+      goals_pos = pos_of_goals(1 - side)
+      dist_to_goals = PitchPos.dist(goals_pos, ball_pos)
       # in attack position. try shot
       goalkeeper = get_goalkeeper(1 - side)
 
@@ -374,7 +360,7 @@ module MatchSimHelper
       emit_event("ShotTry", side, ball_pos, msg_shoots(striker, goalkeeper), striker.id)
 
       if RngHelper.dice(1, skill(side, striker, :shooting, ball_pos) - dist_to_goals) >
-         RngHelper.dice(1, skill(1-side, goalkeeper, :handling, ball_pos) + skill(1-side, goalkeeper, :speed, ball_pos))
+         RngHelper.dice(1, skill(1-side, goalkeeper, :handling, goals_pos) + skill(1-side, goalkeeper, :speed, goals_pos))
         emit_event("Goal", side, ball_pos, msg_goal(striker, goalkeeper), striker.id)
         if side == 0
           @game.home_goals += 1
@@ -392,7 +378,7 @@ module MatchSimHelper
     end
 
     def clamp_y(y)
-      y > 0 ? (y < 6 ? y : 6) : 0
+      y > 1 ? (y < 5 ? y : 5) : 1
     end
     
     def action_pass(on_ball)

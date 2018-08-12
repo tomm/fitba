@@ -32,7 +32,7 @@ class GameTest < ActiveSupport::TestCase
     assert_equal 6 + MatchSimHelper::BASE_SKILL,
                  sim.skill(0, amy, :speed, MatchSimHelper::PitchPos.new(2,4))
     # position bonus
-    assert_equal 8 + MatchSimHelper::BASE_SKILL,
+    assert_equal 6 + MatchSimHelper::BASE_SKILL,
                  sim.skill(0, amy, :speed, MatchSimHelper::PitchPos.new(2,5))
     assert_equal 8 + MatchSimHelper::BASE_SKILL,
                  sim.skill(0, amy, :speed, MatchSimHelper::PitchPos.new(2,6))
