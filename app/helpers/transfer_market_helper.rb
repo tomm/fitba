@@ -48,12 +48,20 @@ module TransferMarketHelper
         if sold == true then
           # already sold
           bid.update(status: "OutBid")
+          buyer_team.send_message("The Chairman", "Lost bid for #{player.name}",
+                                  "Our offer to sign #{player.name} was rejected because there was a higher bidder.", Time.now)
         elsif not player_iterested_in_transfer(buyer_team, player) then
           bid.update(status: "PlayerRejected")
+          buyer_team.send_message("The Chairman", "Lost bid for #{player.name}",
+                                  "Our offer to sign #{player.name} was rejected because the player was not interested in moving to our club.", Time.now)
         elsif bid.amount < t.min_price then
           bid.update(status: "TeamRejected")
+          buyer_team.send_message("The Chairman", "Lost bid for #{player.name}",
+                                  "Our offer to sign #{player.name} was rejected by the seller.", Time.now)
         elsif not buyer_team.money >= bid.amount then
           bid.update(status: "InsufficientMoney")
+          buyer_team.send_message("The Chairman", "Lost bid for #{player.name}",
+                                  "Our bid to sign #{player.name} fell through because we did not have sufficient funds.", Time.now)
         else
           bid.update(status: "YouWon")
           t.update(status: 'Sold')
@@ -64,8 +72,8 @@ module TransferMarketHelper
           # update listing, marking sold
           sold = true
           puts "Team #{buyer_team.name} bought #{player.name} for #{bid.amount}"
-          Message.send_message(buyer_team, "The Chairman", "New signing",
-                               "You have signed #{player.name} for €#{bid.amount}", Time.now)
+          buyer_team.send_message("The Chairman", "New signing", "We have signed #{player.name} for €#{bid.amount}", Time.now)
+          seller_team&.send_message("The Chairman", "Player sold", "We have sold #{player.name} to #{buyer_team.name} for €#{bid.amount}", Time.now)
         end
       end
 
@@ -73,6 +81,7 @@ module TransferMarketHelper
         # always sell to someone ;)
         if seller_team != nil then
           puts "#{seller_team&.name} sold #{player.name} to outside team"
+          seller_team.send_message("The Chairman", "Player sold", "We have sold #{player.name} for €#{t.min_price}", Time.now)
         end
         seller_team&.update(money: seller_team.money + t.min_price)
         FormationPo.where(player_id: player.id).delete_all

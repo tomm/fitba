@@ -13,6 +13,10 @@ class Team < ActiveRecord::Base
     })
   }
 
+  def send_message(from, subject, body, date)
+    Message.send_message(self, from, subject, body, date)
+  end
+
   def has_user?
     User.where(team_id: self.id).count > 0
   end
