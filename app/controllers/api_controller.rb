@@ -10,11 +10,13 @@ class ApiController < ApplicationController
 
   private def get_team_json(team)
     squad = team.squad
+    manager = User.where(team_id: team.id).first
     {
       id: team.id,
       name: team.name,
       players: squad[:players],
       formation: squad[:formation],
+      manager: if manager != nil then manager.name else nil end,
       inbox: []
     }
   end

@@ -5,7 +5,7 @@ import Array exposing (Array)
 import Time exposing (Time)
 
 type alias TeamId = Int
-type alias Team = { id: TeamId, name: String, players: Array Player,
+type alias Team = { id: TeamId, name: String, manager: Maybe String, players: Array Player,
     formation: Array (Int, Int), money: Maybe Int, inbox: List InboxMessage }
 type alias SeasonRecord = { teamId: TeamId, name: String, played: Int, won: Int, drawn: Int, lost: Int, goalsFor: Int, goalsAgainst: Int }
 type alias LeagueTable = { name: String, record: List SeasonRecord }

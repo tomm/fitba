@@ -161,9 +161,10 @@ jsonDecodeGameEventSide =
 
 jsonDecodeTeam : Json.Decoder Team
 jsonDecodeTeam =
-    Json.map6 Team
+    Json.map7 Team
         (Json.field "id" Json.int)
         (Json.field "name" Json.string)
+        (Json.field "manager" (Json.string |> Json.maybe))
         (Json.field "players" (Json.array jsonDecodePlayer))
         (Json.field "formation" (Json.array jsonDecodePlayerPosition))
         (Json.field "money" Json.int |> Json.maybe)

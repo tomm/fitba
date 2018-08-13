@@ -103,8 +103,11 @@ view state =
                                         )
                                         movablePitchPositions
                                     )
+                title = case state.team.manager of
+                    Nothing -> state.team.name ++ " (A.I. Manager)"
+                    Just name -> state.team.name ++ " (" ++ name ++ ")"
             in
-                Uitk.view Nothing state.team.name [
+                Uitk.view Nothing title [
                     Uitk.row [
                         Uitk.responsiveColumn 12 [
                             Html.h3 [] [text "Squad"],

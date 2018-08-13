@@ -16,6 +16,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal user.team_id, body['id']
     assert_equal "Test Utd", body['name']
     assert_equal 12345, body['money']
+    assert_equal "Tom", body['manager']
   end
 
   test "team_messages" do
