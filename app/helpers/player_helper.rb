@@ -52,8 +52,9 @@ module PlayerHelper
 
   def self._generate_form_report_message_for_team(team)
     player_evaluations = Player
-      .where(team_id: team.id)
-      .order(:forename, :name)
+      .joins(:formation_pos)
+      .where(team_id: team.id, formation_pos: {formation_id: team.formation_id})
+      .order("formation_pos.position_num")
       .pluck(:forename, :name, :form)
       .map{|forename,name,form|
         form_evaluation = ["Poor", "Good", "Very Good", "Excellent"][form + RngHelper.int_range(0,1)]
