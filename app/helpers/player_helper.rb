@@ -15,7 +15,7 @@ module PlayerHelper
     injure_player_id = Player.where(team_id: team_id).pluck(:id).sample
     player = Player.find(injure_player_id)
     if player.injury == 0 then
-      player.update(injury: RngHelper.dice(1,15))
+      player.update(injury: RngHelper.dice(1,15), form: 0)
       team = Team.find(team_id)
       puts "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
       Message.send_message(team, "Head Coach", "Player injury",
@@ -28,7 +28,7 @@ module PlayerHelper
   def self.daily_cure_injury
     #ActiveRecord::Base.connection.execute("update players set injury=injury-1 where injury > 0")
     Player.where.not(injury: 0).all.each do |p|
-      p.update(injury: p.injury-1)
+      p.update(injury: p.injury-1, form: 0)
       if p.injury == 0 and p.team_id != nil then
         Message.send_message(Team.find(p.team_id), "Head Coach", "Player recovery",
                              "#{p.name} has fully recovered from injury and is fit to play", Time.now)
@@ -55,9 +55,10 @@ module PlayerHelper
       .joins(:formation_pos)
       .where(team_id: team.id, formation_pos: {formation_id: team.formation_id})
       .order("formation_pos.position_num")
-      .pluck(:forename, :name, :form)
-      .map{|forename,name,form|
-        form_evaluation = ["Poor", "Good", "Very Good", "Excellent"][form + RngHelper.int_range(0,1)]
+      .pluck(:forename, :name, :form, :injury)
+      .map{|forename,name,form,injury|
+        form_evaluation = injury > 0 ? "Injured" :
+                          ["Poor", "Good", "Very Good", "Excellent"][form + RngHelper.int_range(0,1)]
         "<tr><td>#{forename} #{name}</td><td>#{form_evaluation}</td></tr>"
     }
 
