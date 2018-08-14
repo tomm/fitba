@@ -31,7 +31,7 @@ view ownTeamId state = case state.view of
                 ]
             ]
             withdrawButton = div [] [ Uitk.actionButton WithdrawBid "Withdraw bid" ]
-        in Uitk.view (Just <| Uitk.backButton ViewAll) "Transfer Listing" [
+        in Uitk.view (Just <| Uitk.backButton ViewAll) (text "Transfer Listing") [
             Uitk.row [
                 Uitk.column 11 [ PlayerDetailedView.view pvstate.listing.player ],
                 Uitk.column 2 [],
@@ -94,7 +94,7 @@ view ownTeamId state = case state.view of
                     Html.td [] [text <| toString <| listing.player.speed]
                 ]
         in
-            Uitk.view Nothing "Transfer Market" [
+            Uitk.view Nothing (text "Transfer Market") [
                 Html.table [class "transfer-listings"] (
                     (Html.tr [] [
                         Html.th [] [text "Name"]

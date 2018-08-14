@@ -244,7 +244,7 @@ view model =
 clubTab : Model -> Html Msg
 clubTab model =
     let numMsgs = "(" ++ toString (List.length model.ourTeam.inbox) ++ ")"
-    in Uitk.view Nothing "Club" [
+    in Uitk.view Nothing (text "Club") [
         Html.p [class "center"] [
             text <| "You have " ++ (Utils.moneyFormat <| Maybe.withDefault 0 model.ourTeam.money) ++ " available for transfers."
         ],
@@ -275,7 +275,7 @@ leagueTableTab model league =
               , Html.td [] [calcPoints record |> toString |> text]
             ]
     in
-        Uitk.view Nothing league.name [
+        Uitk.view Nothing (text league.name) [
             Html.table [class "league-table"] (
                 (Html.tr [] [
                     Html.th [] [text "Pos."]

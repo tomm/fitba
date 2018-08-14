@@ -9,10 +9,11 @@ import List
 import Array
 import Svg.Attributes exposing (..)
 import Time exposing (Time)
+import Dict
 
 import Model exposing (..)
+import TeamView
 import Utils
-import Dict
 import RootMsg
 import FixturesViewMsg exposing (Msg, Msg(..))
 import ClientServer
@@ -25,25 +26,8 @@ match_length_seconds = 270.0  -- make sure this matches app/helpers/match_sim_he
 view : Model -> Maybe WatchingGame -> Html Msg
 view model maybeWatchingGame =
     case maybeWatchingGame of
-        Nothing -> Uitk.view Nothing "Fixtures" [ fixturesTable model ]
-        Just watching ->
-            let status = case watching.game.status of
-                    Scheduled -> "Live match"
-                    InProgress -> "Live match"
-                    Played _ -> "Match replay"
-                button = Uitk.row (
-                    case watching.game.status of
-                        Played _ -> 
-                            if watching.timePoint < match_length_seconds * Time.second then
-                                [
-                                    Uitk.column 9 [],
-                                    Uitk.column 6 [ Uitk.actionButton ShowFinalScore "Show final score" ],
-                                    Uitk.column 9 []
-                                ]
-                            else []
-                        _ -> []
-                    )
-            in Uitk.view Nothing status [matchView watching, button]
+        Nothing -> Uitk.view Nothing (text "Fixtures") [ fixturesTable model ]
+        Just watching -> matchView watching
 
 eventsUpToTimepoint : Game -> Time -> List GameEvent
 eventsUpToTimepoint game time =
@@ -75,7 +59,7 @@ goalSummary game time =
                   Html.Attributes.class <| "game-summary-" ++ toString side]
                  <| List.map summarizeEvent (allGoals side)
     in div [] [
-        Html.h4 [Html.Attributes.class "game-summary-title"] [text "Goal Summary:"],
+        Html.h3 [Html.Attributes.class "game-summary-title"] [text "Goal Summary"],
         Uitk.row [
             Uitk.column 12 [ goalSummary Home ],
             Uitk.column 12 [ goalSummary Away ]
@@ -83,66 +67,101 @@ goalSummary game time =
     ]
 
 teamColorClass side = Html.Attributes.class <| if side == Home then "home-team" else "away-team"
+matchStarted game = List.length game.events > 0
 
 matchView : WatchingGame -> Html Msg
 matchView watching =
     let game = watching.game
-        maybeEv = latestGameEventAtTimepoint game (game.start + watching.timePoint)
-        matchMinute = case maybeEv of
-            Nothing -> secondsToMatchMinute watching.timePoint
-            Just ev -> secondsToMatchMinute (ev.timestamp - game.start)
-        matchTimeDisplay = if matchStarted then
-                div [Html.Attributes.class "game-time"] [text <| (++) "Time: " <| matchMinute ++ ":00"]
-            else
-                div [] []
         all_goals = eventsUpToTimepoint game (game.start + watching.timePoint)
                         |> List.filter (\e -> e.kind == Goal)
         goals = (List.filter (\e -> e.side == Home) all_goals |> List.length,
                  List.filter (\e -> e.side == Away) all_goals |> List.length)
-        matchStarted = List.length game.events > 0
-        matchEventMessage e = Html.div [Html.Attributes.class "game-message",
-                                        teamColorClass e.side]
-                                       [text e.message]
-
-    in
-        div []
-            [
-                Html.h3 [] [
-                    Html.span [teamColorClass Home] [text game.homeTeam.name],
-                    text (" (" ++ (toString <| Tuple.first goals) ++ " : " ++ (toString <| Tuple.second goals) ++ ") "),
-                    Html.span [teamColorClass Away] [text game.awayTeam.name]
-                ],
-                (case latestGameEventAtTimepoint game (game.start + watching.timePoint) of
-                    Nothing -> div [] [
-                        text <| "The match has not started: kick-off on " ++ Utils.timeFormat game.start,
-                        drawPitch game Nothing
-                        ]
-                    Just ev ->
-                        div [] [
-                            Uitk.row [
-                                Uitk.column 18 [matchEventMessage ev ],
-                                Uitk.column 6  [ matchTimeDisplay ]
-                            ],
-                            drawPitch game <| Just ev
-                        ]
-                ),
-                goalSummary game (game.start + watching.timePoint)
+        status = case watching.game.status of
+            Scheduled -> "Live match"
+            InProgress -> "Live match"
+            Played _ -> "Match replay"
+        showFinalScoreButton = Uitk.row (
+                case watching.game.status of
+                    Played _ -> 
+                        if watching.timePoint < match_length_seconds * Time.second then
+                            [
+                                Uitk.column 9 [],
+                                Uitk.column 6 [ Uitk.actionButton ShowFinalScore "Show final score" ],
+                                Uitk.column 9 []
+                            ]
+                        else []
+                    _ -> []
+            )
+        title = Html.h3 [] [
+                Html.span [teamColorClass Home] [text game.homeTeam.name],
+                text (" (" ++ (toString <| Tuple.first goals) ++ " : " ++ (toString <| Tuple.second goals) ++ ") "),
+                Html.span [teamColorClass Away] [text game.awayTeam.name]
             ]
+        maybeLatestEvent = latestGameEventAtTimepoint game (game.start + watching.timePoint)
+
+    in Uitk.view Nothing title [
+            drawPitch game maybeLatestEvent,
+            showFinalScoreButton,
+            goalSummary game (game.start + watching.timePoint),
+            Uitk.row [
+                Uitk.responsiveColumn 12 [
+                    Html.h3 [] [text <| TeamView.teamTitle game.homeTeam],
+                    Uitk.row [
+                        Uitk.column 1 [],
+                        Uitk.column 22 [ Html.map (\_ -> NoOp) <| TeamView.squadList False game.homeTeam.players Nothing ],
+                        Uitk.column 1 []
+                    ]
+                ],
+                Uitk.responsiveColumn 12 [
+                    Html.h3 [] [text <| TeamView.teamTitle game.awayTeam],
+                    Uitk.row [
+                        Uitk.column 1 [],
+                        Uitk.column 22 [ Html.map (\_ -> NoOp) <| TeamView.squadList False game.awayTeam.players Nothing ],
+                        Uitk.column 1 []
+                    ]
+                ]
+            ]
+        ]
+
+matchMinute game event = secondsToMatchMinute (event.timestamp - game.start) ++ ":00"
 
 drawPitch : Game -> (Maybe GameEvent) -> Svg.Svg Msg
 drawPitch game maybeEv =
-    Svg.svg
+    let matchMessage m color = 
+            Svg.text_ [Svg.Attributes.x "406", Svg.Attributes.y "32",
+                       Svg.Attributes.textAnchor "middle",
+                       Svg.Attributes.class "match-event-message",
+                       fill color,
+                       fillOpacity "1.0"]
+                      [Svg.text m]
+        gameTime event = 
+            Svg.text_ [Svg.Attributes.x "750", Svg.Attributes.y "32",
+                       Svg.Attributes.textAnchor "middle",
+                       Svg.Attributes.class "match-event-message",
+                       fill "white",
+                       fillOpacity "1.0"]
+                      [Svg.text <| matchMinute game event]
+    in Svg.svg
         [Svg.Attributes.width "100%", Svg.Attributes.height "100%", viewBox "0 0 812 515" ]
         ([ 
             Svg.image
                 [Svg.Attributes.width "100%", Svg.Attributes.height "100%", Svg.Attributes.xlinkHref "/pitch_h.png" ]
-                []
-            ,
+                [],
             drawPlayers game
         ] ++
             (case maybeEv of
-                Nothing -> []
-                Just ev -> [drawBall ev]
+                Nothing -> [
+                    Svg.g [] [
+                        matchMessage ("The match has not started: kick-off on " ++ Utils.timeFormat game.start) "white"
+                    ]
+                ]
+                Just ev -> [
+                    drawBall ev,
+                    Svg.g [] [
+                        matchMessage ev.message (if ev.side == Home then "blue" else "red"),
+                        gameTime ev
+                    ]
+                ]
             )
             {- show all positions. useful for debug
             ++
@@ -268,6 +287,7 @@ update msg model =
             Just event -> Just event.id
     in
         case msg of
+            NoOp -> (model, Cmd.none)
             Watch gameId ->
                 (model, Cmd.batch [ClientServer.loadGame gameId])
             ShowFinalScore -> case model.tab of

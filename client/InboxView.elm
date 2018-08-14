@@ -35,7 +35,7 @@ view model =
                 ]
             ]
         ]
-    in  Uitk.view Nothing "Inbox"
+    in  Uitk.view Nothing (text "Inbox")
             <| case List.length(model.ourTeam.inbox) of
                 0 -> emptyMsg
                 _ -> List.map inboxItem model.ourTeam.inbox

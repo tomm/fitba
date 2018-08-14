@@ -1,4 +1,4 @@
-module TeamView exposing (view, update)
+module TeamView exposing (view, update, squadList, teamTitle)
 
 import Array exposing (Array)
 import Dict exposing (Dict)
@@ -25,55 +25,22 @@ pitchY = 1280
 movablePitchPositions : List (Int, Int)
 movablePitchPositions = List.concat <| List.map (\x -> List.map (\y -> (x,y)) [1,2,3,4,5]) [0,1,2,3,4]
 
+teamTitle team = case team.manager of
+    Nothing -> team.name ++ " (A.I. Manager)"
+    Just name -> team.name ++ " (" ++ name ++ ")"
+
 view : State -> Html Msg
 view state =
     case state.view of
         PlayerView player ->
-            Uitk.view (Just <| Uitk.backButton ViewSquad) (player.forename ++ " " ++ player.name) [
+            Uitk.view (Just <| Uitk.backButton ViewSquad) (text <| player.forename ++ " " ++ player.name) [
                 Uitk.row [
                     Uitk.column 12 [PlayerDetailedView.view player],
                     Uitk.column 12 [Uitk.actionButton (SellPlayer player) "Sell this player"]
                 ]
             ]
         SquadView squadViewState -> 
-            let isActive i =
-                    case squadViewState.selectedPlayer of
-                        Just j -> j == i
-                        Nothing -> False
-                rowStyle p i =
-                    if isActive i then [Html.Attributes.class "active-table-row-style"] else []
-                    ++
-                    if p.injury > 0 then [Html.Attributes.class "player-row-injury"] else []
-                playerToDiv i p =
-                    let selectAction = onClick (SelectPlayer <| Just i)
-                        infoAction = onClick (ViewPlayer p)
-                    in Html.tr (rowStyle p i) [
-                         Html.td [selectAction] [text <| toString <| i + 1 ]
-                       , Html.td [selectAction] [Uitk.playerPositionBadge p, Uitk.playerInjuryBadge p]
-                       , Html.td [selectAction] [text <| p.name]
-                       , Html.td [selectAction] [text <| Types.playerAvgSkill p]
-                       , Html.td [selectAction] [text <| toString <| p.shooting]
-                       , Html.td [selectAction] [text <| toString <| p.passing]
-                       , Html.td [selectAction] [text <| toString <| p.tackling]
-                       , Html.td [selectAction] [text <| toString <| p.handling]
-                       , Html.td [selectAction] [text <| toString <| p.speed]
-                       , Html.td [infoAction, Html.Attributes.style [("padding", "0"), ("font-size", "200%")]] [text "ⓘ"]
-                    ]
-                squadList = Html.table [Html.Attributes.class "squad-list"] <|
-                    (Html.tr [] [
-                        Html.th [] [text "No."],
-                        Html.th [] [text "Pos."],
-                        Html.th [] [text "Name"],
-                        Html.th [] [text "Avg."],
-                        Html.th [] [text "Sh"],
-                        Html.th [] [text "Pa"],
-                        Html.th [] [text "Ta"],
-                        Html.th [] [text "Ha"],
-                        Html.th [] [text "Sp"],
-                        Html.th [] []
-                    ]) ::
-                    (List.indexedMap playerToDiv (Array.toList state.team.players))
-                formationWidget = Svg.svg
+            let formationWidget = Svg.svg
                             [Svg.Attributes.width "100%", Svg.Attributes.height "95%", viewBox "0 0 812 1280" ]
                             ([ 
                                 Svg.image
@@ -103,15 +70,12 @@ view state =
                                         )
                                         movablePitchPositions
                                     )
-                title = case state.team.manager of
-                    Nothing -> state.team.name ++ " (A.I. Manager)"
-                    Just name -> state.team.name ++ " (" ++ name ++ ")"
             in
-                Uitk.view Nothing title [
+                Uitk.view Nothing (text <| teamTitle state.team) [
                     Uitk.row [
                         Uitk.responsiveColumn 12 [
                             Html.h3 [] [text "Squad"],
-                            squadList
+                            squadList True state.team.players squadViewState.selectedPlayer
                         ],
                         Uitk.responsiveColumn 12 [
                             Html.h3 [] [text "Formation"],
@@ -119,6 +83,47 @@ view state =
                         ]
                     ]
                 ]
+
+squadList : Bool -> Array Player -> (Maybe Int) -> Html Msg
+squadList infoIconEnabled players selectedPlayerIdx =
+    let isActive i =
+            case selectedPlayerIdx of
+                Just j -> j == i
+                Nothing -> False
+        rowStyle p i =
+            if isActive i then [Html.Attributes.class "active-table-row-style"] else []
+            ++
+            if p.injury > 0 then [Html.Attributes.class "player-row-injury"] else []
+        playerToDiv i p =
+            let selectAction = onClick (SelectPlayer <| Just i)
+                infoAction = onClick (ViewPlayer p)
+            in Html.tr (rowStyle p i) <| [
+                 Html.td [selectAction] [text <| toString <| i + 1 ]
+               , Html.td [selectAction] [Uitk.playerPositionBadge p, Uitk.playerInjuryBadge p]
+               , Html.td [selectAction] [text <| p.name]
+               , Html.td [selectAction] [text <| Types.playerAvgSkill p]
+               , Html.td [selectAction] [text <| toString <| p.shooting]
+               , Html.td [selectAction] [text <| toString <| p.passing]
+               , Html.td [selectAction] [text <| toString <| p.tackling]
+               , Html.td [selectAction] [text <| toString <| p.handling]
+               , Html.td [selectAction] [text <| toString <| p.speed]
+            ] ++ if infoIconEnabled then
+                [ Html.td [infoAction, Html.Attributes.style [("padding", "0"), ("font-size", "200%")]] [text Uitk.infoIcon] ] else []
+    in
+        Html.table [Html.Attributes.class "squad-list"] <|
+            (Html.tr [] <| [
+                Html.th [] [text "No."],
+                Html.th [] [text "Pos."],
+                Html.th [] [text "Name"],
+                Html.th [] [text "Avg."],
+                Html.th [] [text "Sh"],
+                Html.th [] [text "Pa"],
+                Html.th [] [text "Ta"],
+                Html.th [] [text "Ha"],
+                Html.th [] [text "Sp"]
+                ] ++ if infoIconEnabled then [Html.th [] []] else []
+            ) ::
+            (List.indexedMap playerToDiv (Array.toList players))
 
 positionCircleRadius = 75
 

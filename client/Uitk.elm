@@ -1,7 +1,7 @@
 -- This file uses purecss.io classes.
 -- The aim is to avoid putting css-framework-specific stuff anywhere except this file.
 module Uitk exposing (view, actionButton, backButton, playerPositionBadge, playerInjuryBadge,
-    row, column, responsiveColumn, blockButton, blockButtonRow, crossButton)
+    row, column, responsiveColumn, blockButton, blockButtonRow, crossButton, infoIcon)
 
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -27,17 +27,17 @@ crossButton : a -> Html a
 crossButton action = button [class "icon-button", onClick action]
     [span [ class "cross-icon", property "innerHTML" (Json.Encode.string "&#x2716;") ] []]
 
-view : Maybe (Html a) -> String -> List (Html a) -> Html a
+view : Maybe (Html a) -> Html a -> List (Html a) -> Html a
 view maybeButton title content =
     div [class "view"] [
         div [class "view-content"] [
             case maybeButton of
                 Just b -> row [
                     column 4 [b],
-                    column 20 [Html.h2 [] [text title]]
+                    column 20 [Html.h2 [] [title]]
                 ]
                 Nothing -> row [
-                    column 24 [Html.h2 [] [text title]]
+                    column 24 [Html.h2 [] [title]]
                 ]
             ,
             mainContent content
@@ -63,6 +63,9 @@ playerInjuryBadge player =
 type RowColumn a = RowColumn (Html a)
 
 unpackRowColumn (RowColumn r) = r
+
+infoIcon : String
+infoIcon = "ⓘ"
 
 row : List (RowColumn a) -> Html a
 row columns = Html.div [class "pure-g"] (List.map unpackRowColumn columns)

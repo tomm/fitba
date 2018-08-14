@@ -81,6 +81,11 @@ tr.fixture-own { font-weight: bold; }
 .inbox-message-date { font-weight: bold; text-align: right; }
 .inbox-message-body { margin-top: 10px; }
 
+.match-event-message {
+	font-size: 180%;
+	font-weight: bold;
+}
+
 .match-ball-label {
 	font-size: 150%;
 	font-weight: bold;

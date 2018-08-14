@@ -8,8 +8,12 @@ class ApiController < ApplicationController
     User.joins(:sessions).where(sessions: {identifier: cookies[:session]}).first
   end
 
-  private def get_team_json(team)
-    squad = team.squad
+  private def get_team_json(team, override_squad: nil)
+    if override_squad == nil then
+      squad = team.squad
+    else
+      squad = override_squad
+    end
     manager = User.where(team_id: team.id).first
     {
       id: team.id,
@@ -145,10 +149,14 @@ class ApiController < ApplicationController
                              .order(:time)
                              .all
                              #.where('time >= ?', params[:from_time])
+      # if the game has started then formations for each team exist referenced by the Game table,
+      # otherwise use normal team formation
+      home_squad = if game.home_formation != nil then game.home_formation.squad else nil end
+      away_squad = if game.away_formation != nil then game.away_formation.squad else nil end
       render json: {
         id: game.id,
-        homeTeam: get_team_json(Team.find(game.home_team_id)),
-        awayTeam: get_team_json(Team.find(game.away_team_id)),
+        homeTeam: get_team_json(game.home_team, override_squad: home_squad),
+        awayTeam: get_team_json(game.away_team, override_squad: away_squad),
         start: game.start,
         status: game.status,
         homeGoals: game.home_goals,
