@@ -158,7 +158,7 @@ drawPitch game maybeEv =
                 Just ev -> [
                     drawBall ev,
                     Svg.g [] [
-                        matchMessage ev.message (if ev.side == Home then "blue" else "red"),
+                        matchMessage ev.message (if ev.side == Home then "blue" else "#c00"),
                         gameTime ev
                     ]
                 ]
