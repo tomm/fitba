@@ -84,6 +84,7 @@ class Player < ActiveRecord::Base
       tackling: rand_skill.call(),
       handling: rand_skill.call(),
       speed: rand_skill.call(),
+      form: RngHelper.dice(1,3) - 1,
       positions: "[]"
     )
 

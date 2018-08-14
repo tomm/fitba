@@ -337,7 +337,7 @@ module MatchSimHelper
 
     def skill(side, player, type, position)
       if side == 1 then position = position.flip end
-      s = player.method(type).call() + BASE_SKILL
+      s = player.method(type).call() + BASE_SKILL + player.form
       if player.get_positions.include? position.to_a then
         #puts "#{player.name} in position! bonus"
         s += 2

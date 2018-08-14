@@ -3,6 +3,7 @@ module InboxView exposing (view)
 import Html.Attributes exposing (class)
 import Html.Events
 import Html exposing (..)
+import Json.Encode
 
 import Model exposing (..)
 import RootMsg exposing (..)
@@ -28,7 +29,9 @@ view model =
                             div [class "inbox-message-date"] [text <| "Date: " ++ Utils.timeFormat msg.date]
                         ]
                     ],
-                    div [class "inbox-message-body"] [text msg.body]
+                    div [class "inbox-message-body"] [
+                        span [Html.Attributes.property "innerHTML" (Json.Encode.string msg.body)] []
+                    ]
                 ]
             ]
         ]

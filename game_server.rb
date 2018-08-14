@@ -17,7 +17,8 @@ def daily_task
     end
   end
 
-  InjuryHelper.daily_cure_injury
+  PlayerHelper.daily_cure_injury
+  PlayerHelper.daily_maybe_change_player_form
 
   # AI update
   Team.all.each do |t|
@@ -28,7 +29,7 @@ end
 def five_minutely_task
   puts Time.now.to_s + ": executing five-minutely tasks..."
   TransferMarketHelper.update_transfer_market
-  InjuryHelper.spawn_injuries
+  PlayerHelper.spawn_injuries
 end
 
 def per_second_task(now)

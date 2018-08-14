@@ -1,4 +1,8 @@
 module RngHelper
+  def self.int_range(min, max)
+    min + (rand*(1+max-min)).to_i
+  end
+
   def self.dice(n,s)
     x=0
     (1..n).each do |_|
