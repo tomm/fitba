@@ -180,6 +180,17 @@ module AiManagerHelper
     freqs
   end
 
+  # used to estimate how good a formation is
+  def self.player_value_at(player, position)
+    if position[1] == 6 then
+      5 * (player.handling + player.speed) / 2
+    elsif position[1] == 1 then
+      player.shooting * 5
+    else
+      player.skill
+    end
+  end
+
   def self.pick_team_formation(team)
     if team.has_user? then
       # don't help human players ;)
@@ -188,15 +199,13 @@ module AiManagerHelper
 
     _players = Player.where(team_id: team.id, injury: 0).all.to_a
 
-    # sort players by skill
-    _players.sort! {|a,b| a.skill > b.skill ? -1 : (a.skill < b.skill ? 1 : 0)}
-
     formation_viability = (FORMATIONS.map do |formation|
       players = _players.dup
       goodness = 0
 
       positions = []
       formation.each do |f|
+        players.sort_by! {|a| -self.player_value_at(a, f)}
         can_play_there = players.select {|p| p.get_positions.include? f}
         if can_play_there.size == 0 then
           # FUCK. nobody can play there. try someone who can play near
@@ -215,17 +224,17 @@ module AiManagerHelper
             # FUCK. there's really nobody. pick at random
             picked = players.sample
             if picked != nil then
-              goodness += picked.skill + 5
+              goodness += player_value_at(picked, f) + 5
             end
           else
             # take a random bad match ;)
             picked = can_play_almost_there.sample
-            goodness += picked.skill
+            goodness += player_value_at(picked, f)
           end
         else
           # take best player
           picked = can_play_there[0]
-          goodness += picked.skill + 10
+          goodness += player_value_at(picked, f) + 10
         end
 
         if picked != nil then
@@ -233,6 +242,11 @@ module AiManagerHelper
           positions << [picked.id, f]
         end
       end
+
+      # finally add the remaining players (not chosen for starting 11)
+      # in order of skill
+      players.sort_by {|p| -p.skill}.each {|p| positions << [p.id, [0,0]]}
+
       { positions: positions, goodness: goodness }
     end)
 
