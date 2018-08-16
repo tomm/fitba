@@ -1,8 +1,4 @@
 class ApiController < ApplicationController
-  skip_before_filter :verify_authenticity_token, :only => [
-      :save_formation, :transfer_bid, :sell_player, :delete_message
-    ]
-
   # () -> User | nil
   private def get_user
     User.joins(:sessions).where(sessions: {identifier: cookies[:session]}).first

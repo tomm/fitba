@@ -1,4 +1,4 @@
-class GameEvent < ActiveRecord::Base
+class GameEvent < ApplicationRecord
   belongs_to :game
 
   # type: KickOff | Goal | Boring | ShotTry | ShotMiss | ShotSaved | EndOfGame XXX TODO use this

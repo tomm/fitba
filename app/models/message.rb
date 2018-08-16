@@ -1,4 +1,4 @@
-class Message < ActiveRecord::Base
+class Message < ApplicationRecord
   belongs_to :team
 
   def self.send_message(team, from, subject, body, date)

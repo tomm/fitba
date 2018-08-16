@@ -93,7 +93,7 @@ module SeasonHelper
   end
 
   def self.create_fixtures_for_league_season(league_id, season)
-    teams = Team.in_league_season(league_id, season).all
+    teams = Team.in_league_season(league_id, season).all.to_a
     raise "No teams in league!" unless teams.size > 0
 
     now = Time.now

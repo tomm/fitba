@@ -1,8 +1,8 @@
 require 'json'
 require './app/name_gen.rb'
 
-class Player < ActiveRecord::Base
-  belongs_to :team
+class Player < ApplicationRecord
+  belongs_to :team, optional: true
   has_many :formation_pos, dependent: :delete_all
       
   ALL_SKILLS = [:shooting, :passing, :tackling, :handling, :speed]

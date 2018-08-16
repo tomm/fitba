@@ -1,4 +1,4 @@
-class Formation < ActiveRecord::Base
+class Formation < ApplicationRecord
   has_many :formation_pos
 
   def positions_ordered

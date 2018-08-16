@@ -34,7 +34,7 @@ class ApiControllerTest < ActionController::TestCase
     body = JSON.parse(response.body)
     assert_equal "Hello", body['inbox'][0]['subject']
 
-    post :delete_message, {message_id: body['inbox'][0]['id']}.to_json, :format => "json"
+    post :delete_message, body: {message_id: body['inbox'][0]['id']}.to_json, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal "SUCCESS", body['status']
@@ -53,7 +53,7 @@ class ApiControllerTest < ActionController::TestCase
     body = JSON.parse(response.body)
     assert_equal 0, body.size
 
-    post :sell_player, {player_id: players(:carla).id}.to_json, :format => "json"
+    post :sell_player, body: {player_id: players(:carla).id}.to_json, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal "SUCCESS", body['status']
@@ -64,7 +64,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 1, body.size
 
     # idempotent
-    post :sell_player, {player_id: players(:carla).id}.to_json, :format => "json"
+    post :sell_player, body: {player_id: players(:carla).id}.to_json, :format => "json"
     assert_response :success
 
     get :transfer_listings, :format => "json"
@@ -73,7 +73,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 1, body.size
 
     # not our player
-    post :sell_player, {player_id: players(:zuzana).id}.to_json, :format => "json"
+    post :sell_player, body: {player_id: players(:zuzana).id}.to_json, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal "ERROR", body['status']
@@ -86,7 +86,7 @@ class ApiControllerTest < ActionController::TestCase
                            deadline: Time.now+60)
     tid = tl.id
     login
-    post :transfer_bid, {amount: 200, transfer_listing_id: tid}.to_json, :format => "json"
+    post :transfer_bid, body: {amount: 200, transfer_listing_id: tid}.to_json, :format => "json"
     assert_response :success
 
     tl.update(deadline: Time.now-60)
@@ -120,7 +120,7 @@ class ApiControllerTest < ActionController::TestCase
     tl2 = TransferListing.create(player_id: pl2.id, min_price: 123, status: 'Active', team_id: nil, deadline: Time.now+60)
     login
 
-    post :transfer_bid, {amount: 200, transfer_listing_id: tl1.id}.to_json, :format => "json"
+    post :transfer_bid, body: {amount: 200, transfer_listing_id: tl1.id}.to_json, :format => "json"
     assert_response :success
 
     tl1.update(deadline: Time.now-60)
@@ -148,10 +148,10 @@ class ApiControllerTest < ActionController::TestCase
     body = JSON.parse(response.body)
     assert_equal 1, body.size
     assert_equal 123, body[0]["minPrice"]
-    assert_equal nil, body[0]["youBid"]
+    assert_nil body[0]["youBid"]
     assert_equal "OnSale", body[0]["status"]
 
-    post :transfer_bid, {amount: 200, transfer_listing_id: tid}.to_json, :format => "json"
+    post :transfer_bid, body: {amount: 200, transfer_listing_id: tid}.to_json, :format => "json"
     assert_response :success
 
     get :transfer_listings, :format => "json"
@@ -162,7 +162,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 200, body[0]["youBid"]
     assert_equal "OnSale", body[0]["status"]
     
-    post :transfer_bid, {amount: 300, transfer_listing_id: tid}.to_json, :format => "json"
+    post :transfer_bid, body: {amount: 300, transfer_listing_id: tid}.to_json, :format => "json"
     assert_response :success
 
     get :transfer_listings, :format => "json"
@@ -173,7 +173,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 300, body[0]["youBid"]
     assert_equal "OnSale", body[0]["status"]
     
-    post :transfer_bid, {amount: nil, transfer_listing_id: tid}.to_json, :format => "json"
+    post :transfer_bid, body: {amount: nil, transfer_listing_id: tid}.to_json, :format => "json"
     assert_response :success
 
     get :transfer_listings, :format => "json"
@@ -181,7 +181,7 @@ class ApiControllerTest < ActionController::TestCase
     body = JSON.parse(response.body)
     assert_equal 1, body.size
     assert_equal 123, body[0]["minPrice"]
-    assert_equal nil, body[0]["youBid"]
+    assert_nil body[0]["youBid"]
     assert_equal "OnSale", body[0]["status"]
 
     tl.update(deadline: Time.now-60)
@@ -200,14 +200,14 @@ class ApiControllerTest < ActionController::TestCase
 
   test "/squad/:id needs login" do
     team = teams(:test_utd)
-    get :view_team, { 'id' => team.id }, :format => "json"
+    get :view_team, params: { 'id' => team.id }, :format => "json"
     assert_response 403
   end
 
   test "GET /squad/:id" do
     login
     team = teams(:test_utd)
-    get :view_team, { 'id' => team.id }, :format => "json"
+    get :view_team, params: { 'id' => team.id }, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal team.id, body['id']
@@ -296,7 +296,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal "InProgress", game.status
 
     login
-    get :game_events, { 'id' => game.id }, :format => "json"
+    get :game_events, params: { 'id' => game.id }, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
 
@@ -327,7 +327,7 @@ class ApiControllerTest < ActionController::TestCase
 
     login
 
-    get :game_events_since, { 'id' => game.id, }, :format => "json"
+    get :game_events_since, params: { 'id' => game.id, }, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal 4, body.size
@@ -336,7 +336,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal game_events(:three).id, body[2]['id']
     assert_equal game_events(:four).id, body[3]['id']
 
-    get :game_events_since, { 'id' => game.id, 'event_id' => body[0]['id'] }, :format => "json"
+    get :game_events_since, params: { 'id' => game.id, 'event_id' => body[0]['id'] }, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal 3, body.size
@@ -359,7 +359,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal AiManagerHelper::FORMATION_442, body['formation']
     assert_equal 12, body['players'].size
 
-    post :save_formation, [[amy.id, [1,2]], [barbara.id, [2,3]]].to_json, :format => "json"
+    post :save_formation, body: [[amy.id, [1,2]], [barbara.id, [2,3]]].to_json, :format => "json"
     assert_response :success
 
     expected_formation = [[1, 2], [2, 3], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
@@ -376,7 +376,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal [2,3], body['formation'][1]
 
     # reorder amy & barbara. molly should be ignored because she is not on this team
-    post :save_formation, [[barbara.id, [4,1]], [amy.id, [3,2], [molly.id, [2,3]]]].to_json, :format => "json"
+    post :save_formation, body: [[barbara.id, [4,1]], [amy.id, [3,2], [molly.id, [2,3]]]].to_json, :format => "json"
     assert_response :success
 
     get :load_world, :format => "json"
