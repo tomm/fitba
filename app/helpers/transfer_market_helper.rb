@@ -74,6 +74,7 @@ module TransferMarketHelper
           Rails.logger.info "Team #{buyer_team.name} bought #{player.name} for #{bid.amount}"
           buyer_team.send_message("The Chairman", "New signing", "We have signed #{player.name} for €#{bid.amount}", Time.now)
           seller_team&.send_message("The Chairman", "Player sold", "We have sold #{player.name} to #{buyer_team.name} for €#{bid.amount}", Time.now)
+          make_transfer_news(buyer_team, seller_team, player, bid.amount)
         end
       end
 
@@ -87,11 +88,25 @@ module TransferMarketHelper
         FormationPo.where(player_id: player.id).delete_all
         player.update(team_id: nil)
         t.update(status: 'Sold')
+        make_transfer_news(buyer_team, seller_team, player, t.min_price)
       end
     end
 
     # nuke ancient transfer listings
     TransferListing.where("deadline < ?", Time.now - 60*60*24).destroy_all
+  end
+
+  def self.make_transfer_news(buyer_team, seller_team, player, amount)
+    if buyer_team != nil then
+      seller_clause = if seller_team != nil then "from #{seller_team.name}" else "" end
+      NewsArticle.create(title: "#{buyer_team.name} sign #{player.name}",
+                         body: "#{buyer_team.name} have signed the #{player.age} year old for €#{amount} #{seller_clause}",
+                         date: Time.now)
+    elsif seller_team != nil then
+      NewsArticle.create(title: "#{seller_team.name} sell #{player.name}",
+                         body: "#{seller_team.name} have sold the #{player.age} year old for €#{amount}",
+                         date: Time.now)
+    end
   end
 
   def self.update_transfer_market()

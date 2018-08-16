@@ -49,11 +49,6 @@ end
 
 if __FILE__ == $0 then
   Rails.logger.info "Fitba server up!"
-  1000.times do
-    daily_task
-    five_minutely_task
-    per_second_task
-  end
 
   while sleep 1 do
     now = Time.now

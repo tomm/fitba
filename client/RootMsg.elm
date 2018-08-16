@@ -26,6 +26,8 @@ type Msg
   | ViewTeam TeamId | ViewTeamLoaded (Result Http.Error Team)
   | ViewTransferMarket
   | ViewInbox
+  | ViewNews
+  | GotNews (Result Http.Error (List News))
   | GotTransferListings (Result Http.Error (List Types.TransferListing))
   | SellPlayerResponse (Result Http.Error String)
   | NoOp

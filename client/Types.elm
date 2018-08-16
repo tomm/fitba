@@ -28,6 +28,7 @@ type FixtureStatus = Scheduled | InProgress | Played FixtureStatusPlayed
 type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus }
 type alias InboxMessageId = Int
 type alias InboxMessage = { id: InboxMessageId, from: String, subject: String, body: String, date: Time }
+type alias News = { title: String, body: String, time: Time }
 
 playerPositionFormat : List (Int, Int) -> String
 playerPositionFormat ps =

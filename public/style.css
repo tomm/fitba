@@ -17,6 +17,18 @@ table {
 	margin-bottom: 1em;
 }
 
+.news-article-title {
+	font-size: 200%;
+	font-weight: bold;
+	margin-top: 0;
+	text-transform: uppercase;
+}
+.news-article-date {
+	font-weight: bold;
+}
+.news-article-body {
+	margin-top: 10px;
+}
 .cross-icon {
   font-size: 2.0rem;
 }

@@ -1,0 +1,6 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: Stuff happened!
+  body: Oh yeah
+  date: 2018-08-16 11:03:10

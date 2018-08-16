@@ -175,10 +175,37 @@ module MatchSimHelper
           ball_pos_x: @last_event.ball_pos_x,
           ball_pos_y: @last_event.ball_pos_y
         )
+        media_response
       else
         @game.status = 'InProgress'
       end
       @game.save
+    end
+
+    def media_response
+      raise "media_response called when game not ended" unless @game.status == 'Played'
+      goal_diff = @game.home_goals - @game.away_goals
+      if goal_diff.abs > 3 then
+        loser = if goal_diff < 0 then @game.home_team else @game.away_team end
+        winner = if goal_diff > 0 then @game.home_team else @game.away_team end
+        loser_goals = if goal_diff < 0 then @game.home_goals else @game.away_goals end
+        winner_goals = if goal_diff > 0 then @game.home_goals else @game.away_goals end
+
+        participle = ["spanked", "crushed", "humiliated", "destroyed", "trounced"]
+        game_descriptions = ["drubbing", "whipping", "meltdown", "shambles", "thrashing"]
+
+        if RngHelper.dice(1,2) == 1 then
+          # focus on loser
+          NewsArticle.create(title: "#{loser.name} #{participle.sample} by #{winner.name} in #{winner_goals}:#{loser_goals} #{game_descriptions.sample}",
+                             body: "",
+                             date: Time.now)
+        else
+          # focus on winner
+          NewsArticle.create(title: "#{winner.name} in #{winner_goals}:#{loser_goals} #{game_descriptions.sample} of #{loser.name}",
+                             body: "",
+                             date: Time.now)
+        end
+      end
     end
 
     def ball_pos

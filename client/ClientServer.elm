@@ -1,5 +1,5 @@
 module ClientServer exposing (loadGame, loadTeam, saveFormation, sellPlayer, pollGameEvents, getStartGameData, getFixtures, getLeagueTables,
-    loadTransferListings, makeTransferBid, deleteInboxMessage)
+    loadTransferListings, makeTransferBid, deleteInboxMessage, loadNews)
 
 import Array exposing (Array)
 import Date
@@ -77,6 +77,18 @@ getFixtures =
 getLeagueTables : Cmd Msg
 getLeagueTables =
     Http.send UpdateLeagueTables (Http.get "/tables" jsonDecodeLeagueTables)
+
+loadNews : Cmd Msg
+loadNews = Http.send GotNews (Http.get "/news_articles" jsonDecodeNews)
+
+jsonDecodeNews : Json.Decoder (List News)
+jsonDecodeNews =
+    Json.list (
+        Json.map3 News
+            (Json.field "title" Json.string)
+            (Json.field "body" Json.string)
+            (Json.field "date" jsonDecodeTime)
+    )
 
 jsonDecodeTransferListings : Json.Decoder (List TransferListing)
 jsonDecodeTransferListings =

@@ -276,4 +276,20 @@ class ApiController < ApplicationController
       head 403
     end
   end
+
+  def news_articles
+    if get_user != nil then
+      news = NewsArticle.order(:date).reverse_order.limit(10).all
+      render json: news.map{|item|
+        {
+          id: item.id,
+          title: item.title,
+          body: item.body,
+          date: item.date
+        }
+      }
+    else
+      head 403
+    end
+  end
 end

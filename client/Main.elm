@@ -26,6 +26,7 @@ import FixturesView
 import FixturesViewMsg
 import TeamViewTypes
 import InboxView
+import NewsView
 import Model exposing (..)
 import Types exposing (..)
 import RootMsg exposing (..)
@@ -104,8 +105,9 @@ update msg model =
                     Ok team -> ({model | state=GameData {ourTeamId = team.id,
                                  tab = TabTeam { team = team, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } },
                                  ourTeam = team,
-                                 currentTime = Nothing,
+                                 currentTime = 0.0, -- would be better not to wait for tick to resolve this...
                                  fixtures = [],
+                                 news = [],
                                  leagueTables = []
                                 }}, Cmd.batch [getFixtures, getLeagueTables])
                     Err error -> handleHttpError error model
@@ -124,7 +126,11 @@ update msg model =
                         _ -> Cmd.none
                     in updateStateCmd { m | tab = tab } cmd
                 ViewInbox -> updateState { m | tab = TabInbox }
+                ViewNews -> updateStateCmd { m | tab = TabNews } ClientServer.loadNews
                 ViewTransferMarket -> (model, ClientServer.loadTransferListings)
+                GotNews result -> case result of
+                    Ok news -> updateState { m | news = news }
+                    Err error -> handleHttpError error model
                 GotTransferListings result -> case result of
                     Ok listings -> updateState { m | tab = TabTransferMarket {
                         view=TransferMarketTypes.ListView, listings=listings } }
@@ -138,7 +144,7 @@ update msg model =
                     Err error -> handleHttpError error model
                 SecondTick t ->
                     let (state, cmd) = FixturesView.update FixturesViewMsg.GameTick m
-                        state2 = { state | currentTime = Just t }
+                        state2 = { state | currentTime = t }
                     in ({ model | state = GameData state2}, cmd)
                 MinuteTick t ->
                     (model, maybeNotifyGameStarting m t)
@@ -238,6 +244,7 @@ view model =
                         TabClub -> clubTab m
                         TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view m.ourTeamId state
                         TabInbox -> InboxView.view m
+                        TabNews -> NewsView.view m
                 ]
     ]
 
@@ -249,10 +256,11 @@ clubTab model =
             text <| "You have " ++ (Utils.moneyFormat <| Maybe.withDefault 0 model.ourTeam.money) ++ " available for transfers."
         ],
         Uitk.blockButtonRow [
-            Uitk.column 4 [],
+            --Uitk.column 0 [],
             Uitk.blockButton 8 ViewTransferMarket "Transfer Market",
             Uitk.blockButton 8 ViewInbox (numMsgs ++ " Inbox"),
-            Uitk.column 4 []
+            Uitk.blockButton 8 ViewNews "News"
+            --Uitk.column 0 []
             --Uitk.blockButton 8 NoOp "Something else"
         ]
     ]

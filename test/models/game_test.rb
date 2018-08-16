@@ -42,4 +42,17 @@ class GameTest < ActiveSupport::TestCase
     assert_equal 8 + MatchSimHelper::BASE_SKILL,
                  sim.skill(1, amy, :speed, MatchSimHelper::PitchPos.new(2,0))
   end
+
+  test "media_response" do
+    game = games(:seven)
+    game.home_goals = 7
+    game.away_goals = 1
+    game.status = 'Played'
+    num_news = NewsArticle.count
+    sim = MatchSimHelper::GameSimulator.new(game)
+    10.times do
+      sim.media_response
+    end
+    assert_equal num_news+10, NewsArticle.count
+  end
 end

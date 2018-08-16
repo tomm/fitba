@@ -270,11 +270,8 @@ fixturesTable model =
                 ]
     in
         div [] [
-            case model.currentTime of
-                Nothing -> span [] []
-                Just now -> 
-                    fixtureTable "Today's Matches"
-                        (List.filter (\f -> Utils.dateEq (Date.fromTime f.start) (Date.fromTime now)) model.fixtures)
+            fixtureTable "Today's Matches"
+                (List.filter (\f -> Utils.dateEq (Date.fromTime f.start) (Date.fromTime model.currentTime)) model.fixtures)
             ,
             fixtureTable "Season Fixtures" model.fixtures
         ]
@@ -300,14 +297,11 @@ update msg model =
                 TabFixtures (Just watchingGame) ->
                     let cmds = case List.head <| List.reverse watchingGame.game.events of
                         Nothing ->
-                            case model.currentTime of
-                                Just now ->
-                                    if now >= watchingGame.game.start then
-                                        -- game should have started. poll for events
-                                        Cmd.batch [ClientServer.pollGameEvents watchingGame.game.id Nothing]
-                                    else
-                                        Cmd.none
-                                Nothing -> Cmd.none
+                            if model.currentTime >= watchingGame.game.start then
+                                -- game should have started. poll for events
+                                Cmd.batch [ClientServer.pollGameEvents watchingGame.game.id Nothing]
+                            else
+                                Cmd.none
                         Just e -> 
                             if e.kind == EndOfGame then
                                 -- game ended. stop polling

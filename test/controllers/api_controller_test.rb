@@ -389,4 +389,15 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal [4,1], body['formation'][0]
     assert_equal [3,2], body['formation'][1]
   end
+
+  test "news_articles" do
+    login
+    get :news_articles, :format => 'json'
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 1, body.size
+    assert_equal "Stuff happened!", body[0]['title']
+    assert_equal "Oh yeah", body[0]['body']
+    assert (body[0].include? 'date')
+  end
 end

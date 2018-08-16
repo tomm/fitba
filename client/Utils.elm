@@ -1,4 +1,4 @@
-module Utils exposing (dateEq, timeEqYYMMDDHHMM, dateFormat, timeFormat, moneyFormat, timeFormatShort)
+module Utils exposing (dateEq, timeEqYYMMDDHHMM, dateFormat, timeFormat, moneyFormat, timeFormatShort, dateTimeFormat)
 
 import Time
 import Date
@@ -27,6 +27,14 @@ dateFormat d =
     (Date.day d |> toString)
     ++ " " ++
     (Date.month d |> toString)
+
+dateTimeFormat : Date.Date -> String
+dateTimeFormat d =
+    (Date.dayOfWeek d |> toString)
+    ++ " " ++
+    (Date.day d |> toString)
+    ++ " " ++
+    (Date.month d |> toString)
     ++ " " ++
     (Date.hour d |> toString)
     ++ ":" ++
@@ -35,7 +43,7 @@ dateFormat d =
 
 
 timeFormat : Time.Time -> String
-timeFormat t = Date.fromTime t |> dateFormat
+timeFormat t = Date.fromTime t |> dateTimeFormat
 
 timeFormatShort : Time.Time -> String
 timeFormatShort t =
