@@ -16,11 +16,11 @@ class GameTest < ActiveSupport::TestCase
 
 =begin
     events = GameEvent.where(game_id: game.id).order(:time).all
-    puts "GAME ======================+"
+    Rails.logger.info "GAME ======================+"
     events.each do |e|
-      puts "#{game.event_minutes e} #{e.kind} InPossession:#{e.side} #{e.ball_pos_x},#{e.ball_pos_y} #{e.message}"
+      Rails.logger.info "#{game.event_minutes e} #{e.kind} InPossession:#{e.side} #{e.ball_pos_x},#{e.ball_pos_y} #{e.message}"
     end
-    puts "Final score: #{game.home_goals}:#{game.away_goals}"
+    Rails.logger.info "Final score: #{game.home_goals}:#{game.away_goals}"
 =end
   end
 

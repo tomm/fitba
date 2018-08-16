@@ -40,7 +40,7 @@ module PopulateDbHelper
   def self.go
     TransferMarketHelper.update_transfer_market
 
-    puts "Creating leagues..."
+    Rails.logger.info "Creating leagues..."
     l1 = League.create(rank: 1, name: "First Division")
     l2 = League.create(rank: 2, name: "Second Division")
 
@@ -75,7 +75,7 @@ module PopulateDbHelper
   end
 
   def self.populate_league(league)
-    puts "Populating league: " + league.name
+    Rails.logger.info "Populating league: " + league.name
     (0...TEAMS_PER_LEAGUE).to_a.map do |i|
       team = make_team(TEAM_PREDEF[@@next_team_idx])
       @@next_team_idx += 1
@@ -83,7 +83,7 @@ module PopulateDbHelper
       team
     end
 
-    puts "Populating league fixtures..."
+    Rails.logger.info "Populating league fixtures..."
     SeasonHelper.create_fixtures_for_league_season(league.id, 1)
   end
 
@@ -118,7 +118,7 @@ module PopulateDbHelper
 
   def self.make_team(name: nil, player_spawn_quality: 5)
     formation = Formation.create()
-    puts "Creating team " + name
+    Rails.logger.info "Creating team " + name
     team = Team.create(name: name,
                        player_spawn_quality: player_spawn_quality,
                        formation_id: formation.id)

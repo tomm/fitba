@@ -282,7 +282,7 @@ module MatchSimHelper
       when :pass
         action_pass(on_ball)
       else
-        puts "ERROR: Unknown action in attacking_move: #{action.inspect}. Shouldn't happen..."
+        Rails.logger.error "ERROR: Unknown action in attacking_move: #{action.inspect}. Shouldn't happen..."
         emit_event("Boring", side, ball_pos, nil)
       end
     end

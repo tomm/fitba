@@ -21,14 +21,14 @@ module TransferMarketHelper
     num_players = players.length
     median_skill = players[num_players / 2].skill
     can_do = player.skill <= median_skill * 1.25
-    puts "Attempt to buy player of skill #{player.skill} by team median skill #{median_skill}. Can do? #{can_do}"
+    Rails.logger.info "Attempt to buy player of skill #{player.skill} by team median skill #{median_skill}. Can do? #{can_do}"
     can_do
   end
 
   def self.spawn_transfer_listing()
     player = Player.random(RngHelper.dice(1,9))
     list_player(player)
-    puts "Created new transfer market listing: #{player.name}"
+    Rails.logger.info "Created new transfer market listing: #{player.name}"
   end
 
   def self.decide_transfer_market_bids()
@@ -71,7 +71,7 @@ module TransferMarketHelper
           FormationPo.where(player_id: player.id).delete_all
           # update listing, marking sold
           sold = true
-          puts "Team #{buyer_team.name} bought #{player.name} for #{bid.amount}"
+          Rails.logger.info "Team #{buyer_team.name} bought #{player.name} for #{bid.amount}"
           buyer_team.send_message("The Chairman", "New signing", "We have signed #{player.name} for €#{bid.amount}", Time.now)
           seller_team&.send_message("The Chairman", "Player sold", "We have sold #{player.name} to #{buyer_team.name} for €#{bid.amount}", Time.now)
         end
@@ -80,7 +80,7 @@ module TransferMarketHelper
       if sold == false then
         # always sell to someone ;)
         if seller_team != nil then
-          puts "#{seller_team&.name} sold #{player.name} to outside team"
+          Rails.logger.info "#{seller_team&.name} sold #{player.name} to outside team"
           seller_team.send_message("The Chairman", "Player sold", "We have sold #{player.name} for €#{t.min_price}", Time.now)
         end
         seller_team&.update(money: seller_team.money + t.min_price)

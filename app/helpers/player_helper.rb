@@ -17,7 +17,7 @@ module PlayerHelper
     if player.injury == 0 then
       player.update(injury: RngHelper.dice(1,15), form: 0)
       team = Team.find(team_id)
-      puts "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
+      Rails.logger.info "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
       Message.send_message(team, "Head Coach", "Player injury",
                            "#{player.name} has suffered an injury during training", Time.now)
       # AI can update formation after injury

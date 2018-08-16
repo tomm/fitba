@@ -125,7 +125,7 @@ module AiManagerHelper
     p.team_id = team.id
     p.save
     pick_team_formation(team)
-    puts "Team #{team.name} signed new player #{p.name}"
+    Rails.logger.info "Team #{team.name} signed new player #{p.name}"
   end
 
   def self.maybe_sell_player(team)
@@ -162,7 +162,7 @@ module AiManagerHelper
   def self._sell_player_in_position(team, pos)
     matching = team.players.select {|p| p.get_positions.include? pos}
     to_sell = matching.sort_by!(&:skill).first
-    puts "Team #{team.name} has listed #{to_sell.name} on the transfer market."
+    Rails.logger.info "Team #{team.name} has listed #{to_sell.name} on the transfer market."
     TransferMarketHelper.list_player(to_sell)
   end
 
