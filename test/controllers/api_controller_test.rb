@@ -5,7 +5,7 @@ class ApiControllerTest < ActionController::TestCase
 
   test "/load_world needs login" do
     get :load_world, :format => "json"
-    assert_response 403
+    assert_response 302
   end
 
   test "GET /load_world" do
@@ -201,7 +201,7 @@ class ApiControllerTest < ActionController::TestCase
   test "/squad/:id needs login" do
     team = teams(:test_utd)
     get :view_team, params: { 'id' => team.id }, :format => "json"
-    assert_response 403
+    assert_response 302
   end
 
   test "GET /squad/:id" do
