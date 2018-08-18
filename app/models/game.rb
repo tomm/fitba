@@ -4,6 +4,20 @@ class Game < ApplicationRecord
   belongs_to :away_team, :class_name => 'Team'
   belongs_to :home_formation, :class_name => 'Formation', optional: true
   belongs_to :away_formation, :class_name => 'Formation', optional: true
+
+  def winner_loser
+    if status == "Played" then
+      if self.home_goals > self.away_goals then
+        [self.home_team_id, self.away_team_id]
+      elsif self.home_goals < self.away_goals then
+        [self.away_team_id, self.home_team_id]
+      else
+        nil
+      end
+    else
+      raise "Called winner_loser on game not yet played"
+    end
+  end
   
   def attending
     Attendance.joins(:user).where(game: self).pluck("users.name")
