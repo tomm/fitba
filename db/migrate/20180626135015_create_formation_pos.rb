@@ -1,4 +1,4 @@
-class CreateFormationPos < ActiveRecord::Migration
+class CreateFormationPos < ActiveRecord::Migration[4.2]
   def change
     create_table :formation_pos do |t|
       t.references :formation, index: true, foreign_key: true

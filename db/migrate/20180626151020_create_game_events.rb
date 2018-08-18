@@ -1,4 +1,4 @@
-class CreateGameEvents < ActiveRecord::Migration
+class CreateGameEvents < ActiveRecord::Migration[4.2]
   def change
     create_table :game_events do |t|
       t.references :game, index: true, foreign_key: true

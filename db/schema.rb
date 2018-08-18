@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_16_100310) do
+ActiveRecord::Schema.define(version: 2018_08_18_201846) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "attendances", force: :cascade do |t|
+    t.bigint "game_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id", "user_id"], name: "index_attendances_on_game_id_and_user_id", unique: true
+    t.index ["game_id"], name: "index_attendances_on_game_id"
+    t.index ["user_id"], name: "index_attendances_on_user_id"
+  end
 
   create_table "formation_pos", id: :serial, force: :cascade do |t|
     t.integer "formation_id"
@@ -169,6 +179,8 @@ ActiveRecord::Schema.define(version: 2018_08_16_100310) do
     t.index ["team_id"], name: "index_users_on_team_id"
   end
 
+  add_foreign_key "attendances", "games"
+  add_foreign_key "attendances", "users"
   add_foreign_key "formation_pos", "formations"
   add_foreign_key "formation_pos", "players"
   add_foreign_key "game_events", "games"

@@ -1,4 +1,4 @@
-class CreateTransferBids < ActiveRecord::Migration
+class CreateTransferBids < ActiveRecord::Migration[4.2]
   def change
     create_table :transfer_bids do |t|
       t.references :team, index: true, foreign_key: true

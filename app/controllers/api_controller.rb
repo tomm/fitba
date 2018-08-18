@@ -160,6 +160,12 @@ class ApiController < ApplicationController
                              .order(:time)
                              .all
     end
+
+    # remember this user 'attended' the live game
+    if game.status == 'InProgress' then
+      Attendance.find_or_create_by(game: game, user: @user)
+    end
+
     render json: game_events.map {|e| game_event_to_json(e)}
   end
 

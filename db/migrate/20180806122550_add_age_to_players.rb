@@ -1,4 +1,4 @@
-class AddAgeToPlayers < ActiveRecord::Migration
+class AddAgeToPlayers < ActiveRecord::Migration[4.2]
   def change
     add_column :players, :age, :integer
     execute "UPDATE players SET age=18+FLOOR(RANDOM()*12)"

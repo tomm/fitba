@@ -1,4 +1,4 @@
-class CreateTransferListings < ActiveRecord::Migration
+class CreateTransferListings < ActiveRecord::Migration[4.2]
   def change
     create_table :transfer_listings do |t|
       t.references :player, index: true, foreign_key: true
