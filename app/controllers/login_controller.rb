@@ -16,7 +16,7 @@ class LoginController < ApplicationController
       Session.create(user_id: user.id, identifier: session_hash)
       redirect_to '/'
     else
-      redirect_to :back, notice: "Your username or password was wrong!"
+      redirect_to '/login', notice: "Your username or password was wrong!"
     end
   end
 end
