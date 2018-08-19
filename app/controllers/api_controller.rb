@@ -140,6 +140,7 @@ class ApiController < ApplicationController
       status: game.status,
       homeGoals: game.home_goals,
       awayGoals: game.away_goals,
+      attending: game.attending,
       events: game_events.map {|e| game_event_to_json(e)}
     }
   end
@@ -166,7 +167,10 @@ class ApiController < ApplicationController
       Attendance.find_or_create_by(game: game, user: @user)
     end
 
-    render json: game_events.map {|e| game_event_to_json(e)}
+    render json: {
+      attending: game.attending,
+      events: game_events.map {|e| game_event_to_json(e)}
+    }
   end
 
   def transfer_listings

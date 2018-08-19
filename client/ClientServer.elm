@@ -65,7 +65,7 @@ pollGameEvents gameId lastEventId =
         case lastEventId of
             Just eventId -> toString eventId
             Nothing -> ""
-    in Http.send UpdateGame (Http.get url <| Json.list jsonDecodeGameEvent)
+    in Http.send UpdateGame (Http.get url jsonDecodeGameEventUpdate)
 
 getStartGameData : Cmd Msg
 getStartGameData = Http.send GotStartGameData (Http.get "/load_world" jsonDecodeTeam)
@@ -118,7 +118,7 @@ jsonDecodeTransferListings =
 
 jsonDecodeGame : Json.Decoder Game
 jsonDecodeGame =
-    Json.map6 Game
+    Json.map7 Game
         (Json.field "id" Json.int)
         (Json.field "homeTeam" jsonDecodeTeam)
         (Json.field "awayTeam" jsonDecodeTeam)
@@ -135,6 +135,13 @@ jsonDecodeGame =
                     )
                 _ -> Json.fail <| "Unexpected fixture status: " ++ val
         ))
+        (Json.field "attending" (Json.list Json.string))
+
+jsonDecodeGameEventUpdate : Json.Decoder GameEventUpdate
+jsonDecodeGameEventUpdate =
+    Json.map2 GameEventUpdate
+        (Json.field "attending" (Json.list Json.string))
+        (Json.field "events" (Json.list jsonDecodeGameEvent))
 
 jsonDecodeGameEvent : Json.Decoder GameEvent
 jsonDecodeGameEvent =

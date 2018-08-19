@@ -98,11 +98,20 @@ matchView watching =
                 Html.span [teamColorClass Away] [text game.awayTeam.name]
             ]
         maybeLatestEvent = latestGameEventAtTimepoint game (game.start + watching.timePoint)
+        attendanceSummary = div [] [
+            Html.h3 [] [text "Managers Attending"],
+            if List.isEmpty game.attending then
+                Html.p [Html.Attributes.class "center"] [text "None"]
+            else
+                Html.p [Html.Attributes.class "managers-attending"]
+                       [text <| String.join ", " game.attending]
+        ]
 
     in Uitk.view Nothing title [
             drawPitch game maybeLatestEvent,
             showFinalScoreButton,
             goalSummary game (game.start + watching.timePoint),
+            attendanceSummary,
             Uitk.row [
                 Uitk.responsiveColumn 12 [
                     Html.h3 [] [text <| TeamView.teamTitle game.homeTeam],

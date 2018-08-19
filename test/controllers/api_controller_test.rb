@@ -322,27 +322,31 @@ class ApiControllerTest < ActionController::TestCase
   end
 
   test "GET api#game_events_since" do
+    user = users(:user_tom)
     game = games(:in_progress_game)
     assert_equal "InProgress", game.status
+
+    Attendance.create(game: game, user: user)
 
     login
 
     get :game_events_since, params: { 'id' => game.id, }, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 4, body.size
-    assert_equal game_events(:one).id, body[0]['id']
-    assert_equal game_events(:two).id, body[1]['id']
-    assert_equal game_events(:three).id, body[2]['id']
-    assert_equal game_events(:four).id, body[3]['id']
+    assert_equal ["Tom"], body['attending']
+    assert_equal 4, body['events'].size
+    assert_equal game_events(:one).id, body['events'][0]['id']
+    assert_equal game_events(:two).id, body['events'][1]['id']
+    assert_equal game_events(:three).id, body['events'][2]['id']
+    assert_equal game_events(:four).id, body['events'][3]['id']
 
-    get :game_events_since, params: { 'id' => game.id, 'event_id' => body[0]['id'] }, :format => "json"
+    get :game_events_since, params: { 'id' => game.id, 'event_id' => body['events'][0]['id'] }, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 3, body.size
-    assert_equal game_events(:two).id, body[0]['id']
-    assert_equal game_events(:three).id, body[1]['id']
-    assert_equal game_events(:four).id, body[2]['id']
+    assert_equal 3, body['events'].size
+    assert_equal game_events(:two).id, body['events'][0]['id']
+    assert_equal game_events(:three).id, body['events'][1]['id']
+    assert_equal game_events(:four).id, body['events'][2]['id']
   end
 
   test "POST /save_formation" do

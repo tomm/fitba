@@ -19,7 +19,7 @@ type Msg
   | UpdateFixtures (Result Http.Error (List Fixture))
   | UpdateLeagueTables (Result Http.Error (List LeagueTable))
   | LoadGame (Result Http.Error Game)
-  | UpdateGame (Result Http.Error (List GameEvent))
+  | UpdateGame (Result Http.Error GameEventUpdate)
   | GotStartGameData (Result Http.Error Team)
   | SavedFormation (Result Http.Error String)
   | SavedBid (Result Http.Error String)

@@ -5,6 +5,10 @@ class Game < ApplicationRecord
   belongs_to :home_formation, :class_name => 'Formation', optional: true
   belongs_to :away_formation, :class_name => 'Formation', optional: true
   
+  def attending
+    Attendance.joins(:user).where(game: self).pluck("users.name")
+  end
+
   def event_minutes(game_event)
     (90 * (game_event.time - self.start) / MatchSimHelper::MATCH_LENGTH_SECONDS).to_i
   end

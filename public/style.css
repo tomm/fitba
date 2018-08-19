@@ -85,6 +85,7 @@ tr.fixture-own { font-weight: bold; }
 .game-summary-Home { text-align: right; margin-right: 10px; }
 .game-summary-Away { text-align: left; margin-left: 10px; }
 .center { text-align: center; }
+.managers-attending { text-align: center; font-weight: bold; }
 .game-time { text-align: center; }
 .game-message { font-weight: bold; float: left; margin-left: 5px; }
 .inbox-message { background-color: rgba(255,255,255,0.5); padding: 10px; margin: 0 10px 10px 10px;}

@@ -96,9 +96,10 @@ update : Msg -> RootModel -> (RootModel, Cmd Msg)
 update msg model =
     let updateState newState = ({ model | state = GameData newState, errorMsg = Nothing }, Cmd.none)
         updateStateCmd newState cmd = ({ model | state = GameData newState, errorMsg = Nothing }, cmd)
-        updateWatchingGame watchingGame newEvents =
+        updateWatchingGame watchingGame update =
             let game = watchingGame.game
-            in {watchingGame | game = {game | events = List.append game.events newEvents} }
+            in {watchingGame | game = {game | events = List.append game.events update.events,
+                                              attending = update.attending } }
         handleLoadingStateMsgs =
             case msg of
                 GotStartGameData result -> case result of
@@ -180,9 +181,9 @@ update msg model =
                             updateState { m | tab = TabFixtures (Just { game=game, timePoint=0.0}) }
                     Err error -> handleHttpError error model
                 UpdateGame result -> case result of
-                    Ok events -> case m.tab of
+                    Ok update -> case m.tab of
                         TabFixtures (Just watchingGame) -> updateState {
-                            m | tab=TabFixtures (Just <| updateWatchingGame watchingGame events)
+                            m | tab=TabFixtures (Just <| updateWatchingGame watchingGame update)
                         }
                         _ -> (model, Cmd.none)
                     Err error -> handleHttpError error model
