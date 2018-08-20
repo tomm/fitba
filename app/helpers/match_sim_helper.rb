@@ -51,15 +51,20 @@ module MatchSimHelper
 
   class PlayerPos
     attr_reader :player, :pos
-    def initialize(position_po)
+    def initialize(position_po, side)
       @player = position_po.player
       @pos = PitchPos.new(position_po.position_x, position_po.position_y)
+      @side = side
 
       if not (@pos.x == GK[0] and @pos.y == GK[1]) then
         # random jiggle to player positions
         @pos.x += RngHelper.int_range(-1,1)
         @pos.y += RngHelper.int_range(-1,1)
         @pos.clamp_outfield
+      end
+
+      if side == 1 then
+        @pos = @pos.flip
       end
     end
   end
@@ -83,8 +88,8 @@ module MatchSimHelper
       @game = game
       @teams = [game.home_team, game.away_team]
       @squad = [
-        team0_players.take(11).map{|p| PlayerPos.new(p)},
-        team1_players.take(11).map{|p| PlayerPos.new(p)}
+        team0_players.take(11).map{|p| PlayerPos.new(p, 0)},
+        team1_players.take(11).map{|p| PlayerPos.new(p, 1)}
       ]
       @team_pids = [
         team0_players.map(&:player_id),
@@ -293,8 +298,8 @@ module MatchSimHelper
         options << [:pass, 5.0 ]
       end
 
-      if (side == 0 and ball_pos.y < 1) ||
-         (side == 1 and ball_pos.y > 5) then
+      if (side == 0 && ball_pos.y > 1) ||
+         (side == 1 && ball_pos.y < 5) then
         options << [:run, 5.0 ]
       end
 
@@ -369,9 +374,15 @@ module MatchSimHelper
 
     def msg_pass(from, to)
       ["%{from} passes to %{to}",
-       "Good ball to %{to}",
        "%{from} finds %{to}"
       ].sample % {from: from.name, to: to.name}
+    end
+
+    def msg_interception(victim, interceptor)
+      ["%{i} intercepts %{v}'s pass",
+       "%{i} reads %{v}'s pass",
+       "%{i} picks up a sloppy pass by %{v}"
+      ].sample % {i: interceptor.name, v: victim.name}
     end
 
     def skill(side, player, type, position)
@@ -476,7 +487,7 @@ module MatchSimHelper
            RngHelper.dice(1, skill(1-side, defender, :handling, new_pos)) +
            RngHelper.dice(1, skill(1-side, defender, :speed, new_pos))
         then
-          msg = "#{defender.name} intercepts #{on_ball.name}'s pass"
+          msg = msg_interception(on_ball, defender)
           emit_event("Boring", side,     old_pos, msg, on_ball.id)
           emit_event("Boring", 1 - side, new_pos, msg, defender.id)
           return
