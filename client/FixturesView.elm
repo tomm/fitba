@@ -197,9 +197,10 @@ playerHalfPos side (x, y) =
         ypadding = 50.0
         xinc = (pitchX - 2*xpadding) / 12
         yinc = (pitchY - 2*ypadding) / 4
-        sideFlip = toFloat <| if side == Home then 6-y else y+6
+        xSideFlip = toFloat <| if side == Home then 6-y else y+6
+        ySideFlip = toFloat <| if side == Home then x else 4-x
     in
-        (xpadding + sideFlip*xinc, ypadding + (toFloat x)*yinc)
+        (xpadding + xSideFlip*xinc, ypadding + ySideFlip*yinc)
 
 zip : List a -> List b -> List (a,b)
 zip aa bb = case (aa, bb) of
