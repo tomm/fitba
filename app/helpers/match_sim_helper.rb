@@ -11,7 +11,7 @@ module MatchSimHelper
       [0, 1], [1, 1], [2, 1], [3, 1], [4, 1], # a
   ]
   # added to skill rolls
-  BASE_SKILL = 9  # this means skill 1 relative to skill 9 is: 1+BASE_SKILL vs 9+BASE_SKILL
+  BASE_SKILL = 5  # this means skill 1 relative to skill 9 is: 1+BASE_SKILL vs 9+BASE_SKILL
 
   MATCH_LENGTH_SECONDS = 270
 
