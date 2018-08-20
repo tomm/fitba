@@ -1,4 +1,5 @@
 module MatchSimHelper
+  SECONDS_PER_TICK = 1
   PLAYERS_ON_BENCH = 5
   GK = [2, 6]
   ALL_POS = [
@@ -15,7 +16,7 @@ module MatchSimHelper
   MATCH_LENGTH_SECONDS = 270
 
   class PitchPos
-    attr_reader :x, :y
+    attr_accessor :x, :y
     def initialize(x, y)
       @x = x
       @y = y
@@ -25,66 +26,50 @@ module MatchSimHelper
       [@x, @y]
     end
 
+    def ==(other)
+      @x == other.x && @y == other.y
+    end
+
     # Flip home coords to away coords
     def flip
       PitchPos.new(4 - @x, 6 - @y)
     end
 
     def self.dist(a,b)
-      return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2)
+      return [(a.x-b.x).abs, (a.y-b.y).abs].max
     end
 
     def to_s
       "#{@x},#{@y}"
     end
+
+    def clamp_outfield
+      @y = y > 1 ? (y < 5 ? y : 5) : 1
+      @x = x > 0 ? (x < 5 ? x : 4) : 0
+    end
   end
 
-  class TeamPos
-    def initialize(positions)
-      pos_pid_tuples = ALL_POS.map {|p|
-        pitch_pos = PitchPos.new(p[0], p[1])
-        pos = positions.find {|q| q.position_x == pitch_pos.x and q.position_y == pitch_pos.y }
-        [pitch_pos, pos == nil ? nil : pos.player_id]
-      }
+  class PlayerPos
+    attr_reader :player, :pos
+    def initialize(position_po)
+      @player = position_po.player
+      @pos = PitchPos.new(position_po.position_x, position_po.position_y)
 
-      @by_string_lookup = pos_pid_tuples.map{|p| [p[0].to_s, p[1]]}.to_h
-      @by_pos_lookup = pos_pid_tuples.to_h
-    end
-
-    def whos_at(pitch_pos)
-      @by_string_lookup[pitch_pos.to_s]
-    end
-
-    def whos_at_exclude_gk(pitch_pos)
-      if pitch_pos.x == 2 and pitch_pos.y == 6
-        nil
-      else
-        @by_string_lookup[pitch_pos.to_s]
+      if not (@pos.x == GK[0] and @pos.y == GK[1]) then
+        # random jiggle to player positions
+        @pos.x += RngHelper.int_range(-1,1)
+        @pos.y += RngHelper.int_range(-1,1)
+        @pos.clamp_outfield
       end
     end
-
-    def to_s
-      @by_string_lookup.to_a.map{|i| [i[0].to_s, i[1]]}.to_s
-    end
-
-    def position_probability(pos, allow_nobody: false)
-      RngHelper.normalize_probability_list(
-        @by_pos_lookup.to_a.map {|p|
-          ppos, player_id_or_nil = p
-          if ppos.to_a == GK then
-            # don't want to consider goalkeepers for random player selection
-            [player_id_or_nil, 0]
-          elsif player_id_or_nil != nil or allow_nobody == true then
-            [player_id_or_nil, 1.0 / (1.0+PitchPos.dist(ppos, pos)**2)]
-          end
-        }.compact
-      )
-    end
   end
+
+  KICKOFF_POS = PitchPos.new(2,3)
 
   class GameSimulator
     def initialize(game)
-      @last_event = GameEvent.where(game_id: game.id).order(:time).reverse_order.first
+      @last_event = GameEvent.where(game_id: game.id)
+                             .order(:time).reverse_order.first
 
       if @last_event == nil then
         # start of match. copy starting formation from teams
@@ -97,9 +82,9 @@ module MatchSimHelper
 
       @game = game
       @teams = [game.home_team, game.away_team]
-      @team_pos = [
-        TeamPos.new(team0_players.take(11)),
-        TeamPos.new(team1_players.take(11))
+      @squad = [
+        team0_players.take(11).map{|p| PlayerPos.new(p)},
+        team1_players.take(11).map{|p| PlayerPos.new(p)}
       ]
       @team_pids = [
         team0_players.map(&:player_id),
@@ -166,15 +151,7 @@ module MatchSimHelper
 
       if @last_event.time >= @game.start + MATCH_LENGTH_SECONDS
         @game.status = 'Played'
-        @last_event = GameEvent.create(
-          game_id: @game.id,
-          kind: 'EndOfGame',
-          side: RngHelper.dice(1,2) - 1,
-          time: @last_event.time + 1,
-          message: 'Full time!',
-          ball_pos_x: @last_event.ball_pos_x,
-          ball_pos_y: @last_event.ball_pos_y
-        )
+        emit_event('EndOfGame', @last_event.side, ball_pos, "Full time!", @last_event.player_id)
         media_response
       else
         @game.status = 'InProgress'
@@ -212,29 +189,33 @@ module MatchSimHelper
       PitchPos.new(@last_event.ball_pos_x, @last_event.ball_pos_y)
     end
 
-    def maybe_player_near(pos, side, tries=1)
-      if side == 1 then pos = pos.flip end
-      prob = @team_pos[side].position_probability(pos, allow_nobody: true)
-
-      result = nil
-      for _ in 0...tries do
-        p = RngHelper.sample_prob(prob)
-        if p != nil then
-          result = @player_by_id[p]
-          break
-        end
-      end
-      result
+    def players_at(pos, side)
+      @squad[side].select{|p| p.pos == pos}.map(&:player)
     end
 
-    def player_near(pos, side)
-      if side == 1 then pos = pos.flip end
-      prob = @team_pos[side].position_probability(pos, allow_nobody: false)
-      @player_by_id[RngHelper.sample_prob(prob)]
+    def random_player(side)
+      # not GK
+      @squad[side].drop(1).sample.player
+    end
+
+    def must_have_player_here(side, pos)
+      random_player(side)
+    end
+
+    #: () -> [side, player]
+    def any_team_receiver(pos)
+      players = players_at(pos, 0).map{|p| [0, p]} +
+                players_at(pos, 1).map{|p| [1, p]}
+
+      if players.size == 0 then
+        players << [0, random_player(0)]
+        players << [1, random_player(1)]
+      end
+
+      players.sample
     end
 
     def simulate_tick()
-      @interesting_action = nil
       # kick off
       if @last_event == nil
         kick_off([0,1].sample)
@@ -243,7 +224,8 @@ module MatchSimHelper
           kick_off(1 - @last_event.side)
         elsif @last_event.kind == 'ShotMiss'
           goal_kick()
-        elsif @last_event.kind == 'ShotSaved' and RngHelper.dice(1,2) == 1
+        elsif @last_event.kind == 'ShotSaved'
+          # goalkeeper controls it
           goal_kick()
         else
           normal_play()
@@ -252,29 +234,36 @@ module MatchSimHelper
     end
 
     def kick_off(side)
-      @last_event = GameEvent.create(
-        game_id: @game.id,
-        kind: 'KickOff',
-        side: side,
-        time: @last_event == nil ? @game.start : @last_event.time + 1,
-        message: 'Kick off!',
-        ball_pos_x: 2,
-        ball_pos_y: 3
-      )
+      pos = PitchPos.new(2,3)
+      player = must_have_player_here(side, pos)
+      if @last_event == nil then
+        # kickoff at beginning of game
+        @last_event = GameEvent.create(
+          game_id: @game.id,
+          kind: 'KickOff',
+          side: side,
+          time: @last_event == nil ? @game.start : @last_event.time + SECONDS_PER_TICK,
+          player_id: player.id,
+          message: 'Kick off!',
+          ball_pos_x: pos.x,
+          ball_pos_y: pos.y
+        )
+      else
+        emit_event('KickOff', side, pos, 'Kick off!', player.id)
+      end
     end
 
     def normal_play
-      on_ball = player_near(self.ball_pos, @last_event.side)
-      defender = maybe_player_near(self.ball_pos, 1 - @last_event.side)
+      on_ball = @player_by_id[@last_event.player_id]
 
-      if defender then
+      defenders = players_at(self.ball_pos, 1 - @last_event.side)
+
+      defenders.each{|defender|
         if defense_success?(on_ball, defender) then
           emit_event("Boring", 1 - @last_event.side, self.ball_pos, msg_won_tackle(defender, on_ball), defender.id)
           return
-        else
-          @interesting_action = "evades #{defender.name}'s tackle"
         end
-      end
+      }
 
       attacking_move(on_ball)
     end
@@ -293,12 +282,21 @@ module MatchSimHelper
     def attacking_move(on_ball)
       side = @last_event.side
       dist_to_goals = 1.0 + PitchPos.dist(pos_of_goals(1 - side), ball_pos)
+      pass_to = ai_pass_target(on_ball)
 
       options = []
       if dist_to_goals < 4.0 then
-        options << [:shoot, 10 / dist_to_goals**2 ]
+        options << [:shoot, 20 / dist_to_goals**2 ]
       end
-      options << [:pass, 5.0 ]
+
+      if pass_to != nil then
+        options << [:pass, 5.0 ]
+      end
+
+      if (side == 0 and ball_pos.y < 1) ||
+         (side == 1 and ball_pos.y > 5) then
+        options << [:run, 5.0 ]
+      end
 
       options = RngHelper.normalize_probability_list(options)
       action = RngHelper.sample_prob(options)
@@ -307,19 +305,21 @@ module MatchSimHelper
       when :shoot
         action_shoot(on_ball)
       when :pass
-        action_pass(on_ball)
+        action_pass(on_ball, pass_to)
+      when :run
+        action_run(on_ball)
       else
         Rails.logger.error "ERROR: Unknown action in attacking_move: #{action.inspect}. Shouldn't happen..."
-        emit_event("Boring", side, ball_pos, nil)
+        emit_event("Boring", side, ball_pos, nil, on_ball.id)
       end
     end
 
-    def emit_event(kind, side, pos, msg, player_id=nil)
+    def emit_event(kind, side, pos, msg, player_id)
       @last_event = GameEvent.create(
         game_id: @game.id,
         kind: kind,
         side: side,
-        time: @last_event.time + 1,
+        time: @last_event.time + SECONDS_PER_TICK,
         message: msg,
         ball_pos_x: pos.x,
         ball_pos_y: pos.y,
@@ -329,18 +329,22 @@ module MatchSimHelper
 
     def msg_won_tackle(defender, victim)
       ["%{d} wins the ball from %{v}",
+       "Good tackle from %{d}",
        "Great tackle by %{d} to dispossess %{v}"]
       .sample % {d: defender.name, v: victim.name}
     end
 
     def msg_shoots(striker, goalkeeper)
-      ["%{s} shoots!", "%{s} takes a shot!"]
-      .sample % {s: striker.name, g: goalkeeper.name}
+      ["%{s} shoots!",
+       "%{s} takes a shot!",
+       "%{s} fires one at %{g}!"
+      ].sample % {s: striker.name, g: goalkeeper.name}
     end
 
     def msg_goal(striker, goalkeeper)
       ["Goal!! Great strike by %{s}!",
        "Goal!! %{s} scores a fantastic goal!",
+       "Goal!! Incredible strike by %{s}!",
       ].sample % {s: striker.name, g: goalkeeper.name}
     end
 
@@ -349,6 +353,7 @@ module MatchSimHelper
        "Blasted over the bar!",
        "They'll be disappointed with that one",
        "It skims the crossbar!",
+       "It soars into the stands",
        "Off the post!"
       ].sample % {s: striker.name, g: goalkeeper.name}
     end
@@ -360,6 +365,13 @@ module MatchSimHelper
        "Nothing is getting past %{g} today!",
        "Comfortable save from %{g}"
       ].sample % {s: striker.name, g: goalkeeper.name}
+    end
+
+    def msg_pass(from, to)
+      ["%{from} passes to %{to}",
+       "Good ball to %{to}",
+       "%{from} finds %{to}"
+      ].sample % {from: from.name, to: to.name}
     end
 
     def skill(side, player, type, position)
@@ -376,6 +388,7 @@ module MatchSimHelper
 
     def action_shoot(striker)
       side = @last_event.side
+      shot_from = ball_pos
       goals_pos = pos_of_goals(1 - side)
       dist_to_goals = PitchPos.dist(goals_pos, ball_pos)
       # in attack position. try shot
@@ -388,7 +401,7 @@ module MatchSimHelper
 
       if RngHelper.dice(1, skill(side, striker, :shooting, ball_pos) - dist_to_goals) >
          RngHelper.dice(1, skill(1-side, goalkeeper, :handling, goals_pos) + skill(1-side, goalkeeper, :speed, goals_pos))
-        emit_event("Goal", side, ball_pos, msg_goal(striker, goalkeeper), striker.id)
+         emit_event("Goal", side, goals_pos, msg_goal(striker, goalkeeper), striker.id)
         if side == 0
           @game.home_goals += 1
         else
@@ -396,55 +409,96 @@ module MatchSimHelper
         end
       else
         if RngHelper.dice(1,2) == 1 then
-          emit_event("ShotMiss", side, ball_pos, msg_shot_miss(striker, goalkeeper), striker.id)
+          emit_event("ShotMiss", 1 - side, goals_pos, msg_shot_miss(striker, goalkeeper), striker.id)
         else
-          # note that side = striker's team, not GK's team
-          emit_event("ShotSaved", side, ball_pos, msg_shot_saved(striker, goalkeeper), striker.id)
+          emit_event("ShotSaved", 1 - side, goals_pos, msg_shot_saved(striker, goalkeeper), goalkeeper.id)
         end
       end
     end
 
-    def clamp_y(y)
-      y > 1 ? (y < 5 ? y : 5) : 1
+    # () -> PlayerPos
+    def ai_pass_target(on_ball)
+      side = @last_event.side
+
+      # pass to anyone upfield
+      @squad[side].drop(1).select{|p|
+        p.player.id != on_ball.id &&
+        (
+          (side == 0 && p.pos.y <= ball_pos.y) ||
+          (side == 1 && p.pos.y >= ball_pos.y)
+        )
+      }.sample
+    end
+
+    def action_run(on_ball)
+      side = @last_event.side
+      old_pos = ball_pos
+
+      new_pos = PitchPos.new(
+        old_pos.x + RngHelper.int_range(-1,1),
+        if side == 0 then old_pos.y - 1 else old_pos.y + 1 end)
+      new_pos.clamp_outfield
+      defenders = players_at(new_pos, 1 - side)
+
+      defenders.each {|defender|
+        if RngHelper.dice(1, skill(side, on_ball, :handling, new_pos)) +
+           RngHelper.dice(1, skill(side, on_ball, :speed,    new_pos)) <
+           RngHelper.dice(1, skill(1-side, defender, :tackling, new_pos)) +
+           RngHelper.dice(1, skill(1-side, defender, :speed, new_pos)) 
+        then
+          msg = "#{defender.name} puts a stop to #{on_ball.name}'s run"
+          emit_event("Boring", side, old_pos, msg, on_ball.id)
+          emit_event("Boring", 1 - side, new_pos, msg, defender.id)
+          return
+        end
+      }
+      #msg = "#{on_ball.name} makes a forward run"
+      msg = nil
+      emit_event("Boring", side, old_pos, msg, on_ball.id)
+      emit_event("Boring", side, new_pos, msg, on_ball.id)
     end
     
-    def action_pass(on_ball)
+    def action_pass(on_ball, pass_to)
       side = @last_event.side
 
-      dir = side == 0 ? [-2,-1,0,1].sample : [-1,0,1,2].sample
+      old_pos = ball_pos
+      new_pos = pass_to.pos
+      receiver = pass_to.player
+      defenders = players_at(new_pos, 1 - side)
+      dist = PitchPos.dist(old_pos, new_pos)
 
-      # find new position
-      new_pos = PitchPos.new((0..4).to_a.sample, clamp_y(ball_pos.y + dir))
+      raise "can't pass to self" unless on_ball != receiver
 
-      defender = maybe_player_near(new_pos, 1 - side, 2)
-      
-      if defender != nil && interception_success?(on_ball, defender) then
-        emit_event("Boring", 1 - side, new_pos, "#{defender.name} intercepts #{on_ball.name}'s pass", defender.id)
-      else
-        if @interesting_action != nil then
-          msg = "#{on_ball.name} #{@interesting_action}"
-        else
-          msg = nil
+      defenders.each {|defender|
+        if RngHelper.dice(2, skill(side, on_ball, :passing, old_pos)) +
+           RngHelper.dice(1, skill(side, receiver, :handling, new_pos)) -
+           dist*dist <
+           RngHelper.dice(1, skill(1-side, defender, :handling, new_pos)) +
+           RngHelper.dice(1, skill(1-side, defender, :speed, new_pos))
+        then
+          msg = "#{defender.name} intercepts #{on_ball.name}'s pass"
+          emit_event("Boring", side,     old_pos, msg, on_ball.id)
+          emit_event("Boring", 1 - side, new_pos, msg, defender.id)
+          return
         end
-        emit_event("Boring", side, new_pos, msg, on_ball.id)
-      end
-    end
-
-    def interception_success?(on_ball, defender)
-      side = @last_event.side
-      RngHelper.dice(1, skill(side, on_ball, :passing, ball_pos)) <
-      RngHelper.dice(1, skill(1-side, defender, :handling, ball_pos))
+      }
+      
+      msg = msg_pass(on_ball, receiver)
+      emit_event("Boring", side, old_pos, msg, on_ball.id)
+      emit_event("Boring", side, new_pos, msg, receiver.id)
     end
 
     def get_goalkeeper(side)
-      @player_by_id[@team_pos[side].whos_at(PitchPos.new(GK[0], GK[1]))]
+      @squad[side][0].player
     end
 
     def goal_kick
-      side = 1 - @last_event.side
+      side = @last_event.side
       goalkeeper = get_goalkeeper(side)
       pos = PitchPos.new((0..4).to_a.sample, 3)
-      emit_event("Boring", side, pos, "Goal kick by #{goalkeeper.name}")
+      new_side, player = any_team_receiver(pos)
+      emit_event("Boring", side, pos, "Goal kick by #{goalkeeper.name}", goalkeeper.id)
+      emit_event("Boring", new_side, pos, "#{player.name} in possession", player.id)
     end
   end
 end
