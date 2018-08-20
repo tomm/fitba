@@ -167,7 +167,7 @@ module MatchSimHelper
     def media_response
       raise "media_response called when game not ended" unless @game.status == 'Played'
       goal_diff = @game.home_goals - @game.away_goals
-      if goal_diff.abs > 3 then
+      if goal_diff.abs > 4 then
         loser = if goal_diff < 0 then @game.home_team else @game.away_team end
         winner = if goal_diff > 0 then @game.home_team else @game.away_team end
         loser_goals = if goal_diff < 0 then @game.home_goals else @game.away_goals end
@@ -275,7 +275,7 @@ module MatchSimHelper
 
     def defense_success?(on_ball, defender)
       side = @last_event.side
-      RngHelper.dice(1, skill(side, on_ball, :handling, ball_pos)) <
+      RngHelper.dice(1, skill(side, on_ball, :handling, ball_pos)) <=
       RngHelper.dice(1, skill(1-side, defender, :tackling, ball_pos))
     end
 
@@ -337,6 +337,30 @@ module MatchSimHelper
        "Good tackle from %{d}",
        "Great tackle by %{d} to dispossess %{v}"]
       .sample % {d: defender.name, v: victim.name}
+    end
+
+    def msg_dispossession(defender, victim)
+      ["Strong challenge from %{d}",
+       "%{d} outpaces %{v}",
+       "%{v} can't find a way past %{d}",
+       "%{d} puts a stop to %{v}'s run"
+      ].sample % {d: defender.name, v: victim.name}
+    end
+
+    def msg_run(on_ball, from, to)
+      if (from.x == 0 and to.x == 0) ||
+         (from.x == 4 and to.x == 4) then
+        # run down the wing
+        ["%{p} makes a run down the wing",
+         "%{p} charges down the wing",
+         "%{p} takes it down the wing"
+        ].sample % {p: on_ball.name}
+      else
+        ["%{p} makes a forward run",
+         "%{p} runs at the defence",
+         "%{p} find a way through",
+        ].sample % {p: on_ball.name}
+      end
     end
 
     def msg_shoots(striker, goalkeeper)
@@ -457,14 +481,13 @@ module MatchSimHelper
            RngHelper.dice(1, skill(1-side, defender, :tackling, new_pos)) +
            RngHelper.dice(1, skill(1-side, defender, :speed, new_pos)) 
         then
-          msg = "#{defender.name} puts a stop to #{on_ball.name}'s run"
+          msg = msg_dispossession(defender, on_ball)
           emit_event("Boring", side, old_pos, msg, on_ball.id)
           emit_event("Boring", 1 - side, new_pos, msg, defender.id)
           return
         end
       }
-      #msg = "#{on_ball.name} makes a forward run"
-      msg = nil
+      msg = msg_run(on_ball, old_pos, new_pos)
       emit_event("Boring", side, old_pos, msg, on_ball.id)
       emit_event("Boring", side, new_pos, msg, on_ball.id)
     end
