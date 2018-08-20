@@ -110,6 +110,25 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 0, body.size
   end
 
+  test "cant_sell_injured_players" do
+    login
+    TransferListing.delete_all
+    tl = TransferListing.create(player_id: players(:amy).id, min_price: 123,
+                           status: 'Active', team_id: teams(:test_utd).id,
+                           deadline: Time.now+60)
+    players(:amy).update(injury: 10)
+    tid = tl.id
+
+    tl.update(deadline: Time.now-60)
+    TransferMarketHelper.decide_transfer_market_bids()
+
+    get :transfer_listings, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal 1, body.size
+    assert_equal "Unsold", body[0]["status"]
+  end
+
   test "transfer_listing_from_no_team" do
     TransferListing.delete_all
     pl1 = Player.random(1)

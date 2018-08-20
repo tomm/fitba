@@ -79,16 +79,20 @@ module TransferMarketHelper
       end
 
       if sold == false then
-        # always sell to someone ;)
-        if seller_team != nil then
-          Rails.logger.info "#{seller_team&.name} sold #{player.name} to outside team"
-          seller_team.send_message("The Chairman", "Player sold", "We have sold #{player.name} for €#{t.min_price}", Time.now)
-          make_transfer_news(nil, seller_team, player, t.min_price)
+        # always sell to someone if human player is selling, and player is uninjured ;)
+        if player.injury == 0 then
+          if seller_team != nil then
+            Rails.logger.info "#{seller_team&.name} sold #{player.name} to outside team"
+            seller_team.send_message("The Chairman", "Player sold", "We have sold #{player.name} for €#{t.min_price}", Time.now)
+            make_transfer_news(nil, seller_team, player, t.min_price)
+          end
+          seller_team&.update(money: seller_team.money + t.min_price)
+          FormationPo.where(player_id: player.id).delete_all
+          player.update(team_id: nil)
+          t.update(status: 'Sold')
+        else
+          t.update(status: 'Unsold')
         end
-        seller_team&.update(money: seller_team.money + t.min_price)
-        FormationPo.where(player_id: player.id).delete_all
-        player.update(team_id: nil)
-        t.update(status: 'Sold')
       end
     end
 
