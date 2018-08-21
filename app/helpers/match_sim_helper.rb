@@ -266,7 +266,10 @@ module MatchSimHelper
       defenders.each{|defender|
         if defense_success?(on_ball, defender) then
           emit_event("Boring", 1 - @last_event.side, self.ball_pos, msg_won_tackle(defender, on_ball), defender.id)
-          return
+          # allow normal_play to continue with other side in control. this prevents loops
+          # of tackling on one pitch position
+          on_ball = defender
+          break
         end
       }
 
