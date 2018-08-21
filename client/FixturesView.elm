@@ -183,7 +183,7 @@ pitchY = 515
 pitchPosPixelPos : (Int, Int) -> (Float, Float)
 pitchPosPixelPos (x, y) =
     let
-        xpadding = 100.0
+        xpadding = 50.0
         ypadding = 50.0
         xinc = (pitchX - 2*xpadding) / 6
         yinc = (pitchY - 2*ypadding) / 4
