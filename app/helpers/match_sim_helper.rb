@@ -278,8 +278,8 @@ module MatchSimHelper
 
     def defense_success?(on_ball, defender)
       side = @last_event.side
-      RngHelper.dice(1, skill(side, on_ball, :handling, ball_pos)) <=
-      RngHelper.dice(1, skill(1-side, defender, :tackling, ball_pos))
+      RngHelper.dice(4, skill(side, on_ball, :handling, ball_pos)) <=
+      RngHelper.dice(4, skill(1-side, defender, :tackling, ball_pos))
     end
 
     # position of side's own goals
@@ -437,8 +437,11 @@ module MatchSimHelper
 
       emit_event("ShotTry", side, ball_pos, msg_shoots(striker, goalkeeper), striker.id)
 
-      if RngHelper.dice(1, skill(side, striker, :shooting, ball_pos) - dist_to_goals) >
-         RngHelper.dice(1, skill(1-side, goalkeeper, :handling, goals_pos) + skill(1-side, goalkeeper, :speed, goals_pos))
+      # this is carefully tuned so simulate before fucking with it
+      if RngHelper.dice(3, skill(side, striker, :shooting, ball_pos)) >
+         RngHelper.dice(3, 5 + 5*dist_to_goals) +
+         RngHelper.dice(1, skill(1-side, goalkeeper, :handling, goals_pos)) +
+         RngHelper.dice(1, skill(1-side, goalkeeper, :speed, goals_pos)) then
          emit_event("Goal", side, goals_pos, msg_goal(striker, goalkeeper), striker.id)
         if side == 0
           @game.home_goals += 1
@@ -479,10 +482,10 @@ module MatchSimHelper
       defenders = players_at(new_pos, 1 - side)
 
       defenders.each {|defender|
-        if RngHelper.dice(1, skill(side, on_ball, :handling, new_pos)) +
-           RngHelper.dice(1, skill(side, on_ball, :speed,    new_pos)) <
-           RngHelper.dice(1, skill(1-side, defender, :tackling, new_pos)) +
-           RngHelper.dice(1, skill(1-side, defender, :speed, new_pos)) 
+        if RngHelper.dice(4, skill(side, on_ball, :handling, new_pos)) +
+           RngHelper.dice(4, skill(side, on_ball, :speed,    new_pos)) <
+           RngHelper.dice(4, skill(1-side, defender, :tackling, new_pos)) +
+           RngHelper.dice(4, skill(1-side, defender, :speed, new_pos)) 
         then
           msg = msg_dispossession(defender, on_ball)
           emit_event("Boring", side, old_pos, msg, on_ball.id)
@@ -507,11 +510,11 @@ module MatchSimHelper
       raise "can't pass to self" unless on_ball != receiver
 
       defenders.each {|defender|
-        if RngHelper.dice(2, skill(side, on_ball, :passing, old_pos)) +
-           RngHelper.dice(1, skill(side, receiver, :handling, new_pos)) -
+        if RngHelper.dice(8, skill(side, on_ball, :passing, old_pos)) +
+           RngHelper.dice(4, skill(side, receiver, :handling, new_pos)) -
            dist*dist <
-           RngHelper.dice(1, skill(1-side, defender, :handling, new_pos)) +
-           RngHelper.dice(1, skill(1-side, defender, :speed, new_pos))
+           RngHelper.dice(4, skill(1-side, defender, :handling, new_pos)) +
+           RngHelper.dice(4, skill(1-side, defender, :speed, new_pos))
         then
           msg = msg_interception(on_ball, defender)
           emit_event("Boring", side,     old_pos, msg, on_ball.id)
