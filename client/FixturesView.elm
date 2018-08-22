@@ -41,6 +41,10 @@ secondsToMatchMinute : Float -> String
 secondsToMatchMinute s =
     (toString << round) (90.0 * s / (match_length_seconds * Time.second))
 
+summary side = div [Html.Attributes.class "game-summary",
+               teamColorClass side,
+               Html.Attributes.class <| "game-summary-" ++ toString side]
+
 goalSummary : Game -> Time -> Html Msg
 goalSummary game time =
     let allGoals side = List.filter (\a -> a.timestamp <= time) game.events
@@ -53,18 +57,49 @@ goalSummary game time =
                     Home -> scorer ++ " " ++ when
                     Away -> when ++ " " ++ scorer
                 ]
-        goalSummary side =
-            div [Html.Attributes.class "game-summary",
-                  teamColorClass side,
-                  Html.Attributes.class <| "game-summary-" ++ toString side]
-                 <| List.map summarizeEvent (allGoals side)
+        goalSummary side = summary side <| List.map summarizeEvent (allGoals side)
     in div [] [
-        Html.h3 [Html.Attributes.class "game-summary-title"] [text "Goal Summary"],
+        Html.h4 [Html.Attributes.class "game-summary-title"] [text "Goal Summary"],
         Uitk.row [
             Uitk.column 12 [ goalSummary Home ],
             Uitk.column 12 [ goalSummary Away ]
         ]
     ]
+
+shotSummary : Game -> Time -> Html Msg
+shotSummary game time =
+    let numShots side = List.filter (\e -> e.timestamp <= time && e.side == side) game.events
+                |> List.filter (\e -> e.kind == ShotTry)
+                |> List.length
+        shotsSummary side = summary side [div [] [ text <| toString <| numShots side ]]
+    in div [] [
+        Html.h4 [Html.Attributes.class "game-summary-title"] [text "Shots"],
+        Uitk.row [
+            Uitk.column 12 [ shotsSummary Home ],
+            Uitk.column 12 [ shotsSummary Away ]
+        ]
+    ]
+
+possessionSummary : Game -> Time -> Html Msg
+possessionSummary game time =
+    let tot_events = List.length <| List.filter (\e -> e.timestamp <= time) game.events
+        num_events side = List.length (List.filter (\e ->
+            e.timestamp <= time && e.side == side) game.events)
+        possession side = summary side [div [] 
+            (case tot_events of
+                0 -> []
+                n -> [text <| toString <| round <| 100.0 * toFloat (num_events side) /
+                                                  toFloat tot_events
+                    , text "%"]
+              )]
+    in div [] [
+        Html.h4 [Html.Attributes.class "game-summary-title"] [text "Possession"],
+        Uitk.row [
+            Uitk.column 12 [ possession Home ],
+            Uitk.column 12 [ possession Away ]
+        ]
+    ]
+    
 
 teamColorClass side = Html.Attributes.class <| if side == Home then "home-team" else "away-team"
 matchStarted game = List.length game.events > 0
@@ -80,18 +115,13 @@ matchView watching =
             Scheduled -> "Live match"
             InProgress -> "Live match"
             Played _ -> "Match replay"
-        showFinalScoreButton = Uitk.row (
+        showFinalScoreButton =
                 case watching.game.status of
                     Played _ -> 
                         if watching.timePoint < match_length_seconds * Time.second then
-                            [
-                                Uitk.column 9 [],
-                                Uitk.column 6 [ Uitk.actionButton ShowFinalScore "Show final score" ],
-                                Uitk.column 9 []
-                            ]
-                        else []
-                    _ -> []
-            )
+                            Uitk.actionButton ShowFinalScore "Show final score"
+                        else Html.span [] []
+                    _ -> Html.span [] []
         title = Html.h3 [] [
                 Html.span [teamColorClass Home] [text game.homeTeam.name],
                 text (" (" ++ (toString <| Tuple.first goals) ++ " : " ++ (toString <| Tuple.second goals) ++ ") "),
@@ -99,7 +129,7 @@ matchView watching =
             ]
         maybeLatestEvent = latestGameEventAtTimepoint game (game.start + watching.timePoint)
         attendanceSummary = div [] [
-            Html.h3 [] [text "Managers Attending"],
+            Html.h4 [] [text "Managers Attending"],
             if List.isEmpty game.attending then
                 Html.p [Html.Attributes.class "center"] [text "None"]
             else
@@ -109,9 +139,17 @@ matchView watching =
 
     in Uitk.view Nothing title [
             drawPitch game maybeLatestEvent,
-            showFinalScoreButton,
-            goalSummary game (game.start + watching.timePoint),
-            attendanceSummary,
+            Uitk.row [
+                Uitk.column 12 [
+                    goalSummary game (game.start + watching.timePoint),
+                    showFinalScoreButton
+                ],
+                Uitk.column 12 [
+                    shotSummary game (game.start + watching.timePoint),
+                    possessionSummary game (game.start + watching.timePoint),
+                    attendanceSummary
+                ]
+            ],
             Uitk.row [
                 Uitk.responsiveColumn 12 [
                     Html.h3 [] [text <| TeamView.teamTitle game.homeTeam],
