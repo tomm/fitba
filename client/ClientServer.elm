@@ -161,6 +161,7 @@ jsonDecodeGameEventKind =
         case val of
             "KickOff" -> Json.succeed KickOff
             "Goal" -> Json.succeed Goal
+            "Corner" -> Json.succeed Corner
             "Boring" -> Json.succeed Boring
             "ShotTry" -> Json.succeed ShotTry
             "ShotMiss" -> Json.succeed ShotMiss

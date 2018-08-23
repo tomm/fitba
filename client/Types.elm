@@ -18,7 +18,7 @@ type alias TransferListing = { id: TransferListingId, minPrice: Int, deadline: T
                                player: Player, youBid: Maybe Int, status: TransferStatus }
 type alias GameId = Int
 type alias GameEventId = Int
-type GameEventKind = KickOff | Goal | Boring | ShotTry | ShotMiss | ShotSaved | EndOfGame
+type GameEventKind = KickOff | Goal | Boring | ShotTry | ShotMiss | ShotSaved | Corner | EndOfGame
 type GameEventSide = Home | Away
 type alias GameEvent = { id: GameEventId, gameId: GameId, kind: GameEventKind, side: GameEventSide,
                          timestamp: Time, message: String, ballPos: (Int, Int), playerName: Maybe String }
