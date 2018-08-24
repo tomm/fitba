@@ -336,10 +336,34 @@ module MatchSimHelper
       side == 0 ? PitchPos.new(2,6) : PitchPos.new(2,0)
     end
 
+    def is_attacking_wing(side, pos)
+      if pos.x != 0 and pos.x != 4 then
+        false
+      elsif side == 0 and pos.y == 1 then
+        true
+      elsif side == 1 and pos.y == 5 then
+        true
+      else
+        false
+      end
+    end
+
+    def ai_cross_targets(on_ball, pos)
+      side = @last_event.side
+      if not is_attacking_wing(side, pos) then
+        []
+      else
+        players_at(PitchPos.new(1,pos.y), side) +
+        players_at(PitchPos.new(2,pos.y), side) +
+        players_at(PitchPos.new(3,pos.y), side)
+      end
+    end
+
     def attacking_move(on_ball)
       side = @last_event.side
       dist_to_goals = 1.0 + PitchPos.dist(pos_of_goals(1 - side), ball_pos)
       pass_to = ai_pass_target(on_ball)
+      cross_to = ai_cross_targets(on_ball, ball_pos)
 
       options = []
       if dist_to_goals < 4.0 then
@@ -348,6 +372,10 @@ module MatchSimHelper
 
       if pass_to != nil then
         options << [:pass, 5.0 ]
+      end
+
+      if cross_to != [] then
+        options << [:cross, 40 ]
       end
 
       if (side == 0 && ball_pos.y > 1) ||
@@ -365,9 +393,46 @@ module MatchSimHelper
         action_pass(on_ball, pass_to)
       when :run
         action_run(on_ball)
+      when :cross
+        action_cross(on_ball, cross_to)
       else
         Rails.logger.error "ERROR: Unknown action in attacking_move: #{action.inspect}. Shouldn't happen..."
         emit_event("Boring", side, ball_pos, nil, on_ball.id)
+      end
+    end
+
+    def action_cross(on_ball, cross_targets)
+      side = @last_event.side
+      target = cross_targets.sample
+      kick_quality = RngHelper.dice(2, skill(side, on_ball, :passing, ball_pos))
+
+      msg = msg_cross(on_ball, target.player)
+      emit_event("Boring", side, ball_pos, msg, on_ball.id)
+      emit_event("Boring", side, target.pos, msg, on_ball.id)
+      
+      players = players_at(target.pos, 1-side)
+      players << target
+
+      winner = players.sort_by{|p|
+        if p.side == side then
+          -kick_quality - 
+            (RngHelper.dice(3, skill(p.side, p.player, :handling, target.pos)) +
+             RngHelper.dice(3, skill(p.side, p.player, :speed, target.pos)))
+        else
+          -(RngHelper.dice(4, skill(p.side, p.player, :handling, target.pos)) +
+            RngHelper.dice(4, skill(p.side, p.player, :speed, target.pos)))
+        end
+      }.first
+
+      if winner.side == side then
+        # shoot
+        action_shoot(winner.player, in_air: true)
+      else
+        # clearance
+        msg = msg_clearance(winner.player)
+        emit_event("Boring", 1-side, target.pos, msg, winner.player.id)
+        anyone_grab_ball(PitchPos.new(RngHelper.int_range(0,4),
+                                      side == 0 ?  target.pos.y + 1 : target.pos.y - 1))
       end
     end
 
@@ -480,6 +545,13 @@ module MatchSimHelper
        "%{i} reads %{v}'s pass",
        "%{i} picks up a sloppy pass by %{v}"
       ].sample % {i: interceptor.name, v: victim.name}
+    end
+
+    def msg_cross(kicker, target)
+      ["%{k} crosses it in towards %{t}",
+       "Clever cross from %{k}",
+       "%{k} with a cross into the box"
+      ].sample % {k: kicker.name, t: target.name}
     end
 
     def msg_corner_won()
