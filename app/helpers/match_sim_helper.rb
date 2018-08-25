@@ -174,16 +174,17 @@ module MatchSimHelper
         winner_goals = if goal_diff > 0 then @game.home_goals else @game.away_goals end
 
         participle = ["spanked", "crushed", "humiliated", "destroyed", "trounced"]
-        game_descriptions = ["drubbing", "whipping", "meltdown", "shambles", "thrashing"]
+        lose_game_descriptions = ["drubbing", "whipping", "meltdown", "shambles", "thrashing"]
+        win_gerund = ["drubbing", "whipping", "thrashing", "humiliation"]
 
         if RngHelper.dice(1,2) == 1 then
           # focus on loser
-          NewsArticle.create(title: "#{loser.name} #{participle.sample} by #{winner.name} in #{winner_goals}:#{loser_goals} #{game_descriptions.sample}",
+          NewsArticle.create(title: "#{loser.name} #{participle.sample} by #{winner.name} in #{winner_goals}:#{loser_goals} #{lose_game_descriptions.sample}",
                              body: "",
                              date: Time.now)
         else
           # focus on winner
-          NewsArticle.create(title: "#{winner.name} in #{winner_goals}:#{loser_goals} #{game_descriptions.sample} of #{loser.name}",
+          NewsArticle.create(title: "#{winner.name} in #{winner_goals}:#{loser_goals} #{win_gerund.sample} of #{loser.name}",
                              body: "",
                              date: Time.now)
         end
@@ -234,7 +235,7 @@ module MatchSimHelper
           kick_off(1 - @last_event.side)
         elsif @last_event.kind == 'Corner'
           corner()
-        elsif @last_event.kind == 'ShotMiss'
+        elsif @last_event.kind == 'GoalKick'
           goal_kick()
         elsif @last_event.kind == 'ShotSaved'
           # goalkeeper controls it
@@ -590,26 +591,31 @@ module MatchSimHelper
       emit_event("ShotTry", side, ball_pos, msg_shoots(striker, goalkeeper, in_air: in_air), striker.id)
 
       # this is carefully tuned so simulate before fucking with it
-      if RngHelper.dice(3, skill(side, striker, :shooting, ball_pos)) >
-         RngHelper.dice(3, 5 + 5*dist_to_goals) +
-         RngHelper.dice(1, skill(1-side, goalkeeper, :handling, goals_pos)) +
-         RngHelper.dice(1, skill(1-side, goalkeeper, :speed, goals_pos)) then
-         emit_event("Goal", side, goals_pos, msg_goal(striker, goalkeeper, in_air: in_air), striker.id)
-        if side == 0
-          @game.home_goals += 1
+      if RngHelper.dice(2, skill(side, striker, :shooting, ball_pos)) >
+         RngHelper.dice(1+dist_to_goals, 8) then
+        # on target
+        if RngHelper.dice(4, skill(side, striker, :shooting, ball_pos)) >
+           RngHelper.dice(1+dist_to_goals, skill(1-side, goalkeeper, :handling, goals_pos)) +
+           RngHelper.dice(1+2*dist_to_goals, skill(1-side, goalkeeper, :speed, goals_pos)) then
+           emit_event("Goal", side, goals_pos, msg_goal(striker, goalkeeper, in_air: in_air), striker.id)
+          # beat keeper
+          if side == 0
+            @game.home_goals += 1
+          else
+            @game.away_goals += 1
+          end
         else
-          @game.away_goals += 1
-        end
-      else
-        if RngHelper.dice(1,2) == 1 then
-          emit_event("ShotMiss", 1 - side, goals_pos, msg_shot_miss(striker, goalkeeper), striker.id)
-        else
+          # keeper saved
           emit_event("ShotSaved", 1 - side, goals_pos, msg_shot_saved(striker, goalkeeper), goalkeeper.id)
           if RngHelper.dice(1, skill(1 - side, goalkeeper, :handling, goals_pos)) <
              RngHelper.dice(1, skill(1 - side, goalkeeper, :speed, goals_pos)) then
              emit_event("Corner", side, goals_pos, msg_corner_won(), nil)
           end
         end
+      else
+        # missed
+        emit_event("ShotMiss", side, goals_pos, msg_shot_miss(striker, goalkeeper), striker.id)
+        emit_event("GoalKick", 1-side, goals_pos, msg_shot_miss(striker, goalkeeper), goalkeeper.id)
       end
     end
 

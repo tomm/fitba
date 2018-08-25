@@ -14,14 +14,21 @@ class GameTest < ActiveSupport::TestCase
     game.simulate(game.start + 300)
     assert_equal "Played", game.status
 
-=begin
+#=begin
     events = GameEvent.where(game_id: game.id).order(:time).all
-    Rails.logger.info "GAME ======================+"
+    puts "GAME ======================+"
     events.each do |e|
-      Rails.logger.info "#{game.event_minutes e} #{e.kind} InPossession:#{e.side} #{e.ball_pos_x},#{e.ball_pos_y} #{e.message}"
+      puts "#{game.event_minutes e} #{e.time} #{e.kind} InPossession:#{e.side} #{e.ball_pos_x},#{e.ball_pos_y} #{e.message}"
     end
-    Rails.logger.info "Final score: #{game.home_goals}:#{game.away_goals}"
-=end
+    puts "Final score: #{game.home_goals}:#{game.away_goals}."
+    home_shots_missed = GameEvent.where(game: game, side: 0, kind: "ShotMiss").count
+    away_shots_missed = GameEvent.where(game: game, side: 1, kind: "ShotMiss").count
+    home_shots_total = GameEvent.where(game: game, side: 0, kind: "ShotTry").count
+    away_shots_total = GameEvent.where(game: game, side: 1, kind: "ShotTry").count
+    puts "Shots total: #{home_shots_total}:#{away_shots_total}"
+    puts "Missed: #{home_shots_missed}:#{away_shots_missed}"
+    puts "On target: #{home_shots_total - home_shots_missed}:#{away_shots_total - away_shots_missed}"
+#=end
   end
 
   test "simulation_internals" do

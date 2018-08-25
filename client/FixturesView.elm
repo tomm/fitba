@@ -71,12 +71,21 @@ shotSummary game time =
     let numShots side = List.filter (\e -> e.timestamp <= time && e.side == side) game.events
                 |> List.filter (\e -> e.kind == ShotTry)
                 |> List.length
+        numMisses side = List.filter (\e -> e.timestamp <= time && e.side == side) game.events
+                |> List.filter (\e -> e.kind == ShotMiss)
+                |> List.length
         shotsSummary side = summary side [div [] [ text <| toString <| numShots side ]]
+        onTargetSummary side = summary side [div [] [ text <| toString <| numShots side  - numMisses side ]]
     in div [] [
-        Html.h4 [Html.Attributes.class "game-summary-title"] [text "Shots"],
+        Html.h4 [Html.Attributes.class "game-summary-title"] [text "Total Shots"],
         Uitk.row [
             Uitk.column 12 [ shotsSummary Home ],
             Uitk.column 12 [ shotsSummary Away ]
+        ],
+        Html.h4 [Html.Attributes.class "game-summary-title"] [text "On Target"],
+        Uitk.row [
+            Uitk.column 12 [ onTargetSummary Home ],
+            Uitk.column 12 [ onTargetSummary Away ]
         ]
     ]
 
@@ -221,7 +230,7 @@ pitchY = 515
 pitchPosPixelPos : (Int, Int) -> (Float, Float)
 pitchPosPixelPos (x, y) =
     let
-        xpadding = 50.0
+        xpadding = if y == 0 || y == 6 then 50.0 else 5.0
         ypadding = 50.0
         xinc = (pitchX - 2*xpadding) / 6
         yinc = (pitchY - 2*ypadding) / 4
