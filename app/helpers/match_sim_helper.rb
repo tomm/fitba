@@ -614,8 +614,9 @@ module MatchSimHelper
         end
       else
         # missed
-        emit_event("ShotMiss", side, goals_pos, msg_shot_miss(striker, goalkeeper), striker.id)
-        emit_event("GoalKick", 1-side, goals_pos, msg_shot_miss(striker, goalkeeper), goalkeeper.id)
+        msg = msg_shot_miss(striker, goalkeeper)
+        emit_event("ShotMiss", side, goals_pos, msg, striker.id)
+        emit_event("GoalKick", 1-side, goals_pos, msg, goalkeeper.id)
       end
     end
 
