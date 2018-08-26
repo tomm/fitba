@@ -1,5 +1,5 @@
 module ClientServer exposing (loadGame, loadTeam, saveFormation, sellPlayer, pollGameEvents, getStartGameData, getFixtures, getLeagueTables,
-    loadTransferListings, makeTransferBid, deleteInboxMessage, loadNews)
+    loadTransferListings, makeTransferBid, deleteInboxMessage, loadNews, getTopScorers)
 
 import Array exposing (Array)
 import Date
@@ -77,6 +77,10 @@ getFixtures =
 getLeagueTables : Cmd Msg
 getLeagueTables =
     Http.send UpdateLeagueTables (Http.get "/tables" jsonDecodeLeagueTables)
+
+getTopScorers : Cmd Msg
+getTopScorers =
+    Http.send UpdateTopScorers (Http.get "/top_scorers" jsonDecodeTopScorers)
 
 loadNews : Cmd Msg
 loadNews = Http.send GotNews (Http.get "/news_articles" jsonDecodeNews)
@@ -252,6 +256,22 @@ jsonDecodeFixtures =
                         )
                     _ -> Json.fail <| "Unexpected fixture status: " ++ val
             ))
+    )
+
+jsonDecodeTopScorers : Json.Decoder (List TournamentTopScorers)
+jsonDecodeTopScorers =
+    Json.list (
+        Json.map2 TournamentTopScorers
+            (Json.field "tournamentName" Json.string)
+            (Json.field "topScorers" (
+                Json.list (
+                    Json.map3 TopScorer
+                        (Json.field "teamname" Json.string |> Json.maybe)
+                        (Json.field "playername" Json.string)
+                        (Json.field "goals" Json.int)
+                    )
+                )
+            )
     )
 
 jsonDecodeLeagueTables : Json.Decoder (List LeagueTable)

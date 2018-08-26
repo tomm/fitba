@@ -79,6 +79,7 @@ span.player-position-AMR, span.player-position-AML, span.player-position-AMC { b
 span.player-position-CF { background-color: #f77; }
 
 tr.fixture-own { font-weight: bold; }
+tr.scorer-own { font-weight: bold; }
 
 .player-detailed-view td:nth-child(1) { font-weight: bold; }
 

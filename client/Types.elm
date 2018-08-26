@@ -30,6 +30,8 @@ type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start
 type alias InboxMessageId = Int
 type alias InboxMessage = { id: InboxMessageId, from: String, subject: String, body: String, date: Time }
 type alias News = { title: String, body: String, time: Time }
+type alias TopScorer = { teamName: Maybe String, playerName: String, goals: Int }
+type alias TournamentTopScorers = { tournamentName: String, topScorers: List TopScorer }
 
 playerPositionFormat : List (Int, Int) -> String
 playerPositionFormat ps =

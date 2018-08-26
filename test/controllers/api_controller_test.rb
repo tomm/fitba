@@ -423,4 +423,13 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal "Oh yeah", body[0]['body']
     assert (body[0].include? 'date')
   end
+
+  test "top_scorers" do
+    login
+    get :top_scorers, :format => 'json'
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "First Division", body[0]['tournamentName']
+    assert_equal "Second Division", body[1]['tournamentName']
+  end
 end

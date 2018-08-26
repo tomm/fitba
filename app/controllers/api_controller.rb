@@ -258,4 +258,21 @@ class ApiController < ApplicationController
       }
     }
   end
+
+  def top_scorers
+    conn = ActiveRecord::Base.connection
+    render json: League.order(:rank).all.map{|l|
+      r = conn.execute(
+        "select (select name from teams where id=(select team_id from players where id=g.player_id)) as teamname,
+                (select concat(forename,' ',name) from players where id=g.player_id) as playername,
+                 count(g.*) as goals
+        from game_events g
+        join games gm on g.game_id=gm.id
+        where gm.season=#{conn.quote(SeasonHelper.current_season)} and gm.league_id=#{conn.quote(l.id)} and g.kind='Goal'
+        group by g.player_id
+        order by goals desc
+        limit 25")
+      {tournamentName: l.name, topScorers: r.to_a}
+    }
+  end
 end

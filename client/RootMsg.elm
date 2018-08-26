@@ -18,6 +18,7 @@ type Msg
   | MsgTransferMarket TransferMarketTypes.Msg
   | UpdateFixtures (Result Http.Error (List Fixture))
   | UpdateLeagueTables (Result Http.Error (List LeagueTable))
+  | UpdateTopScorers (Result Http.Error (List TournamentTopScorers))
   | LoadGame (Result Http.Error Game)
   | UpdateGame (Result Http.Error GameEventUpdate)
   | GotStartGameData (Result Http.Error Team)
@@ -25,8 +26,6 @@ type Msg
   | SavedBid (Result Http.Error String)
   | ViewTeam TeamId | ViewTeamLoaded (Result Http.Error Team)
   | ViewTransferMarket
-  | ViewInbox
-  | ViewNews
   | GotNews (Result Http.Error (List News))
   | GotTransferListings (Result Http.Error (List Types.TransferListing))
   | SellPlayerResponse (Result Http.Error String)

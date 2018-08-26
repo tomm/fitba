@@ -109,6 +109,7 @@ update msg model =
                                  currentTime = 0.0, -- would be better not to wait for tick to resolve this...
                                  fixtures = [],
                                  news = [],
+                                 topScorers = [],
                                  leagueTables = []
                                 }}, Cmd.batch [getFixtures, getLeagueTables])
                     Err error -> handleHttpError error model
@@ -122,12 +123,13 @@ update msg model =
                     let cmd = case tab of
                         -- fetch updated poop
                         TabFixtures _ -> getFixtures
-                        TabLeagueTables -> getLeagueTables
+                        TabTournaments -> getLeagueTables
+                        TabTopScorers -> getTopScorers
                         TabTeam _ -> getStartGameData
+                        TabClub -> getStartGameData
+                        TabNews -> ClientServer.loadNews
                         _ -> Cmd.none
                     in updateStateCmd { m | tab = tab } cmd
-                ViewInbox -> updateState { m | tab = TabInbox }
-                ViewNews -> updateStateCmd { m | tab = TabNews } ClientServer.loadNews
                 ViewTransferMarket -> (model, ClientServer.loadTransferListings)
                 GotNews result -> case result of
                     Ok news -> updateState { m | news = news }
@@ -190,6 +192,9 @@ update msg model =
                 UpdateLeagueTables result -> case result of
                     Ok tables -> updateState { m | leagueTables = tables }
                     Err error -> handleHttpError error model
+                UpdateTopScorers result -> case result of
+                    Ok scorers -> updateState { m | topScorers = scorers }
+                    Err error -> handleHttpError error model
                 GotStartGameData result -> case result of
                     Ok team -> updateState { m | ourTeam = team }
                     Err error -> handleHttpError error model
@@ -218,7 +223,7 @@ tabs model =
           0 -> "Club"
           n -> "(" ++ toString n ++ ") Club"
       tabLabels = [(TabTeam { team = model.ourTeam, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } }, "Squad"),
-                   (TabLeagueTables, "Tables"),
+                   (TabTournaments, "Tournaments"),
                    (TabFixtures Nothing, "Fixtures"),
                    (TabClub, clubTabLabel)]
 
@@ -240,7 +245,8 @@ view model =
                     case m.tab of
                         TabViewOtherTeam state -> Html.map (\_ -> NoOp {- can't edit -}) <| TeamView.view state
                         TabTeam state -> Html.map MsgTeamView <| TeamView.view state
-                        TabLeagueTables -> div [] (List.map (leagueTableTab m) m.leagueTables)
+                        TabTournaments -> tournamentTab m
+                        TabTopScorers -> topScorerView m
                         TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
                         TabClub -> clubTab m
                         TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view m.ourTeamId state
@@ -248,6 +254,46 @@ view model =
                         TabNews -> NewsView.view m
                 ]
     ]
+
+topScorerView : Model -> Html Msg
+topScorerView model =
+    let style scorer = if Just model.ourTeam.name == scorer.teamName then [Html.Attributes.class "scorer-own"] else []
+        topScorerTable tournamentTopScorers = Uitk.responsiveColumn 12 [
+            Uitk.row [
+                Uitk.column 1 [],
+                Uitk.column 22 [
+                    Html.h3 [] [text <| tournamentTopScorers.tournamentName ++ " Top Scorers"],
+                    Html.table [] (
+                        Html.tr [] [
+                            Html.th [] [text "Team"],
+                            Html.th [] [text "Player"],
+                            Html.th [] [text "Goals"]
+                        ] ::
+                        List.map (\scorer -> Html.tr (style scorer) [
+                            Html.td [] [text <| Maybe.withDefault "" scorer.teamName],
+                            Html.td [] [text scorer.playerName],
+                            Html.td [] [text <| toString scorer.goals]
+                        ]) tournamentTopScorers.topScorers
+                    )
+                ],
+                Uitk.column 1 []
+            ]
+        ]
+
+    in Uitk.view Nothing (text "Tournaments") [
+            Uitk.row <| List.map topScorerTable model.topScorers
+        ]
+
+tournamentTab : Model -> Html Msg
+tournamentTab model =
+    Uitk.view Nothing (text "Tournaments") <| [
+            Uitk.blockButtonRow [
+                Uitk.column 8 [],
+                Uitk.blockButton 8 (ChangeTab TabTopScorers) "Top Scorers",
+                Uitk.column 8 []
+            ],
+            div [] (List.map (leagueTableTab model) model.leagueTables)
+        ]
 
 clubTab : Model -> Html Msg
 clubTab model =
@@ -259,8 +305,8 @@ clubTab model =
         Uitk.blockButtonRow [
             --Uitk.column 0 [],
             Uitk.blockButton 8 ViewTransferMarket "Transfer Market",
-            Uitk.blockButton 8 ViewInbox (numMsgs ++ " Inbox"),
-            Uitk.blockButton 8 ViewNews "News"
+            Uitk.blockButton 8 (ChangeTab TabInbox) (numMsgs ++ " Inbox"),
+            Uitk.blockButton 8 (ChangeTab TabNews) "News"
             --Uitk.column 0 []
             --Uitk.blockButton 8 NoOp "Something else"
         ]
@@ -284,7 +330,8 @@ leagueTableTab model league =
               , Html.td [] [calcPoints record |> toString |> text]
             ]
     in
-        Uitk.view Nothing (text league.name) [
+        Html.div [] [
+            Html.h3 [] [text league.name],
             Html.table [class "league-table"] (
                 (Html.tr [] [
                     Html.th [] [text "Pos."]

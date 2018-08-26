@@ -13,12 +13,13 @@ import TeamViewTypes
 type alias WatchingGame = { timePoint: Time, game: Game }
 type alias TabTransferMarketState = { listings: List Player }
 
-type UiTab = TabTeam TeamViewTypes.State |
-             TabLeagueTables |
-             TabFixtures (Maybe WatchingGame) |
-             TabClub |
-             TabTransferMarket TransferMarketTypes.State |
-             TabViewOtherTeam TeamViewTypes.State
+type UiTab = TabTeam TeamViewTypes.State
+             | TabTournaments
+             | TabTopScorers
+             | TabFixtures (Maybe WatchingGame)
+             | TabClub
+             | TabTransferMarket TransferMarketTypes.State
+             | TabViewOtherTeam TeamViewTypes.State
              | TabInbox
              | TabNews
 
@@ -33,8 +34,9 @@ type alias Model = {
     ourTeamId: TeamId,
     currentTime: Time.Time,
     tab: UiTab,
-    ourTeam : Team,
+    ourTeam: Team,
     news: List News,
     fixtures: List Fixture,
-    leagueTables : List LeagueTable
+    leagueTables: List LeagueTable,
+    topScorers: List TournamentTopScorers
 }
