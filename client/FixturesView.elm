@@ -20,9 +20,6 @@ import ClientServer
 import Types exposing (..)
 import Uitk
 
-match_length_seconds : Float
-match_length_seconds = 270.0  -- make sure this matches app/helpers/match_sim_helper.rb:MATCH_LENGTH_SECONDS
-
 view : Model -> Maybe WatchingGame -> Html Msg
 view model maybeWatchingGame =
     case maybeWatchingGame of
@@ -37,9 +34,22 @@ eventsUpToTimepoint game time =
 latestGameEventAtTimepoint : Game -> Time -> Maybe GameEvent
 latestGameEventAtTimepoint game time = eventsUpToTimepoint game time |> List.head
 
-secondsToMatchMinute : Float -> String
-secondsToMatchMinute s =
-    (toString << round) (90.0 * s / (match_length_seconds * Time.second))
+secondsToMatchMinute : Bool -> Float -> String
+secondsToMatchMinute showSeconds time =
+    let s = time / Time.second
+        seconds = if showSeconds then ":00" else ""
+    in  if s < 3*55 then
+            let mins = round (s/3)
+            in if mins <= 45 then toString mins ++ seconds else "45+" ++ (toString (mins-45)) ++ seconds
+        else if s < 3*105 then
+            let mins = round (s/3 - 10)
+            in if mins <= 90 then toString mins ++ seconds else "90+" ++ (toString (mins-90)) ++ seconds
+        else if s < 3*125 then
+            let mins = round (s/3 - 15)
+            in if mins <= 105 then toString mins ++ seconds else "105+" ++ (toString (mins-105)) ++ seconds
+        else
+            let mins = round (s/3 - 20)
+            in if mins <= 120 then toString mins ++ seconds else "120+" ++ (toString (mins-120)) ++ seconds
 
 summary side = div [Html.Attributes.class "game-summary",
                teamColorClass side,
@@ -52,7 +62,7 @@ goalSummary game time =
             |> List.sortWith (\a b -> if a.timestamp > b.timestamp then GT else LT)
         summarizeEvent e =
             let scorer = Maybe.withDefault "" e.playerName
-                when = secondsToMatchMinute (e.timestamp - game.start)
+                when = secondsToMatchMinute False (e.timestamp - game.start)
             in div [] [text <| case e.side of
                     Home -> scorer ++ " " ++ when
                     Away -> when ++ " " ++ scorer
@@ -127,9 +137,9 @@ matchView watching =
         showFinalScoreButton =
                 case watching.game.status of
                     Played _ -> 
-                        if watching.timePoint < match_length_seconds * Time.second then
-                            Uitk.actionButton ShowFinalScore "Show final score"
-                        else Html.span [] []
+                        case maybeLatestEvent of
+                            Nothing -> Html.span [] []
+                            Just ev -> if ev.kind /= EndOfGame then Uitk.actionButton ShowFinalScore "Show final score" else Html.span [] []
                     _ -> Html.span [] []
         title = Html.h3 [] [
                 Html.span [teamColorClass Home] [text game.homeTeam.name],
@@ -179,7 +189,7 @@ matchView watching =
             ]
         ]
 
-matchMinute game event = secondsToMatchMinute (event.timestamp - game.start) ++ ":00"
+matchMinute game event = secondsToMatchMinute True (event.timestamp - game.start)
 
 drawPitch : Game -> (Maybe GameEvent) -> Svg.Svg Msg
 drawPitch game maybeEv =
@@ -191,7 +201,7 @@ drawPitch game maybeEv =
                        fillOpacity "1.0"]
                       [Svg.text m]
         gameTime event = 
-            Svg.text_ [Svg.Attributes.x "750", Svg.Attributes.y "32",
+            Svg.text_ [Svg.Attributes.x "740", Svg.Attributes.y "32",
                        Svg.Attributes.textAnchor "middle",
                        Svg.Attributes.class "match-event-message",
                        fill "white",
@@ -347,7 +357,7 @@ update msg model =
             ShowFinalScore -> case model.tab of
                 TabFixtures (Just watchingGame) ->
                     ({ model | tab = TabFixtures (Just {
-                         watchingGame | timePoint = watchingGame.timePoint + match_length_seconds*Time.second
+                         watchingGame | timePoint = watchingGame.timePoint + 500*Time.second
                         })}, Cmd.none)
                 _ -> (model, Cmd.none)
             GameTick -> case model.tab of
