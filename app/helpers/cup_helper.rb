@@ -1,7 +1,7 @@
 module CupHelper
   def self.update_cup(cup, season)
     if not is_end_of_round(cup, season) then
-      puts "nothing to do..."
+      puts "nothing to do in update_cup..."
       return
     end
 

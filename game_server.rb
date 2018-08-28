@@ -18,6 +18,9 @@ def daily_task
     end
   end
 
+  League.is_cup.each{|cup|
+    CupHelper.update_cup(cup, SeasonHelper.current_season)
+  }
   PlayerHelper.daily_cure_injury
   PlayerHelper.daily_maybe_change_player_form
 
@@ -34,7 +37,7 @@ def five_minutely_task
 end
 
 def per_second_task
-  now = Time.now
+  now = Time.now + 9*60*60*24
   games = Game.where.not(status: 'Played').where('start < ?', now).all
 
   if games.size > 0
@@ -43,9 +46,11 @@ def per_second_task
 
   games.each do |game|
     game.simulate(now)
-    Rails.logger.info "Game between #{game.home_team.name} and #{game.away_team.name}: #{game.status} (#{game.home_goals}:#{game.away_goals})"
+    pens = if game.home_penalties > 0 or game.away_penalties > 0 then " Penalties: #{game.home_penalties}:#{game.away_penalties}" else "" end
+    Rails.logger.info "#{game.league.kind} game between #{game.home_team.name} and #{game.away_team.name}: #{game.status} (#{game.home_goals}:#{game.away_goals}) #{pens}"
   end
 end
+daily_task
 
 if __FILE__ == $0 then
   Rails.logger.info "Fitba server up!"

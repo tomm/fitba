@@ -11,6 +11,10 @@ class Game < ApplicationRecord
         [self.home_team_id, self.away_team_id]
       elsif self.home_goals < self.away_goals then
         [self.away_team_id, self.home_team_id]
+      elsif self.home_penalties > self.away_penalties then
+        [self.home_team_id, self.away_team_id]
+      elsif self.home_penalties < self.away_penalties then
+        [self.away_team_id, self.home_team_id]
       else
         nil
       end

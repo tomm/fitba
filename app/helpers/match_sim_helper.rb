@@ -149,8 +149,7 @@ module MatchSimHelper
     end
 
     def match_draws_allowed
-      # should get this from tournament type. index of last period in MATCH_PERIODS
-      true
+      @game.league.kind != "Cup"
     end
 
     def period_we_are_in(time)

@@ -72,7 +72,7 @@ class ApiController < ApplicationController
 
   def league_tables
     season = SeasonHelper::current_season
-    leagues = League.order(:rank).all
+    leagues = League.is_league.order(:rank).all
     render json: (leagues.map do |l|
       {
         "name": l.name,
@@ -261,7 +261,7 @@ class ApiController < ApplicationController
 
   def top_scorers
     conn = ActiveRecord::Base.connection
-    render json: League.order(:rank).all.map{|l|
+    render json: League.is_league.order(:rank).all.map{|l|
       r = conn.execute(
         "select (select name from teams where id=(select team_id from players where id=g.player_id)) as teamname,
                 (select concat(forename,' ',name) from players where id=g.player_id) as playername,

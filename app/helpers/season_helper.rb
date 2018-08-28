@@ -28,8 +28,12 @@ module SeasonHelper
     # make all players age
     Player.all.each(&:happy_birthday)
 
+    handle_league_end_of_season
+  end
+
+  def self.handle_league_end_of_season
     last_season = current_season
-    leagues = League.order(:rank).all
+    leagues = League.is_league.order(:rank).all
     # hash<league.rank,[team ids]>
     teams_in_league = (leagues.map {|l| [l.rank,[]]}).to_h
 
@@ -58,7 +62,7 @@ module SeasonHelper
     end
 
     teams_in_league.each do |rank, teamIds|
-      leagueId = League.where(rank: rank).pluck(:id).first
+      leagueId = League.is_league.where(rank: rank).pluck(:id).first
       teamIds.each do |teamId|
         TeamLeague.create(team_id: teamId, league_id: leagueId, season: last_season + 1)
       end

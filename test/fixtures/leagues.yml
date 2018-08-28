@@ -9,3 +9,7 @@ second_division:
   rank: 2
   kind: League
   name: Second Division
+
+cup:
+  kind: Cup
+  name: Fitba Association Cup
