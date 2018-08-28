@@ -23,7 +23,7 @@ module CupHelper
     num_empty = self.next_power_of_two(num_teams) - num_teams
 
     now = Time.now
-    next_start = Time.new(now.year, now.month, now.day) + 24*3600
+    next_start = Time.new(now.year, now.month, now.day) + 24*3600 + 22*3600
 
     # if number of teams is non-power-of-two then some teams don't play this round. skip them
     num_empty.times do

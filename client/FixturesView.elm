@@ -74,6 +74,6 @@ view model subView =
             case subView of
                 TodaysFixtures -> todaysFixtures
                 AllFixtures tournamentName -> [
-                        fixtureTable False Utils.timeFormat (tournamentName ++ " Season Fixtures")
+                        fixtureTable False Utils.timeFormat (tournamentName ++ " Fixtures")
                             (List.filter (\f -> f.tournament == tournamentName) model.fixtures)
                     ]
