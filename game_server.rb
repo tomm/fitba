@@ -37,7 +37,7 @@ def five_minutely_task
 end
 
 def per_second_task
-  now = Time.now + 9*60*60*24
+  now = Time.now
   games = Game.where.not(status: 'Played').where('start < ?', now).all
 
   if games.size > 0

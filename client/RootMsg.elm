@@ -5,7 +5,7 @@ import Time
 
 import Model exposing (..)
 import TeamViewTypes
-import FixturesViewMsg
+import MatchViewMsg
 import TransferMarketTypes
 import Types exposing (..)
 import Notification
@@ -14,7 +14,7 @@ type Msg
   = ChangeTab UiTab | MsgTeamView TeamViewTypes.Msg
   | SecondTick Time.Time
   | MinuteTick Time.Time
-  | MsgFixturesView FixturesViewMsg.Msg
+  | MsgMatchView MatchViewMsg.Msg
   | MsgTransferMarket TransferMarketTypes.Msg
   | UpdateFixtures (Result Http.Error (List Fixture))
   | UpdateLeagueTables (Result Http.Error (List LeagueTable))
@@ -29,8 +29,9 @@ type Msg
   | GotNews (Result Http.Error (List News))
   | GotTransferListings (Result Http.Error (List Types.TransferListing))
   | SellPlayerResponse (Result Http.Error String)
-  | NoOp
   | RequestNotificationPermissionResult Notification.Permission
   | NotificationResult (Result Notification.Error ())
   | DeleteInboxMessage InboxMessageId
   | DeleteMessageResponse (Result Http.Error String)
+  | Watch GameId
+  | NoOp

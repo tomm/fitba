@@ -17,6 +17,12 @@ table {
 	margin-bottom: 1em;
 }
 
+.fixture-tournament {
+	font-size: 80%;
+	font-weight: bold;
+	text-transform: uppercase;
+	display: block;
+}
 .news-article-title {
 	font-size: 200%;
 	font-weight: bold;

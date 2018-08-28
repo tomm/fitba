@@ -22,6 +22,19 @@ class Game < ApplicationRecord
       raise "Called winner_loser on game not yet played"
     end
   end
+
+  def to_api
+    {
+      gameId: self.id,
+      tournament: self.league.name,
+      homeName: self.home_team.name,
+      awayName: self.away_team.name,
+      start: self.start,
+      status: self.status,
+      homeGoals: self.home_goals,
+      awayGoals: self.away_goals
+    }
+  end
   
   def attending
     Attendance.joins(:user).where(game: self).pluck("users.name")

@@ -241,7 +241,7 @@ jsonDecodeTime =
 jsonDecodeFixtures : Json.Decoder (List Fixture)
 jsonDecodeFixtures =
     Json.list (
-        Json.map5 Fixture
+        Json.map6 Fixture
             (Json.at ["gameId"] Json.int)
             (Json.at ["homeName"] Json.string)
             (Json.at ["awayName"] Json.string)
@@ -257,6 +257,7 @@ jsonDecodeFixtures =
                         )
                     _ -> Json.fail <| "Unexpected fixture status: " ++ val
             ))
+            (Json.field "tournament" Json.string)
     )
 
 jsonDecodeTopScorers : Json.Decoder (List TournamentTopScorers)

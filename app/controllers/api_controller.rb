@@ -83,21 +83,8 @@ class ApiController < ApplicationController
 
   def fixtures
     season = SeasonHelper::current_season
-    team_league = TeamLeague.find_by(team_id: @user.team_id)
-    games = Game.where(league_id: team_league.league_id, season: season).order(:start).all
-    render json: (games.map do |g|
-      t1 = Team.find(g.home_team_id)
-      t2 = Team.find(g.away_team_id)
-      {
-        gameId: g.id,
-        homeName: t1.name,
-        awayName: t2.name,
-        start: g.start,
-        status: g.status,
-        homeGoals: g.home_goals,
-        awayGoals: g.away_goals
-      }
-    end)
+    games = Game.where(season: season).order(:start).all
+    render json: games.map(&:to_api)
   end
 
   def save_formation

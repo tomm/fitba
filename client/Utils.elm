@@ -1,4 +1,4 @@
-module Utils exposing (dateEq, timeEqYYMMDDHHMM, dateFormat, timeFormat, moneyFormat, timeFormatShort, dateTimeFormat)
+module Utils exposing (dateEq, timeEqYYMMDDHHMM, onlyTimeFormat, dateFormat, timeFormat, moneyFormat, timeFormatShort, dateTimeFormat)
 
 import Time
 import Date
@@ -41,6 +41,14 @@ dateTimeFormat d =
     (if Date.minute d < 10 then "0" else "") ++
     (Date.minute d |> toString)
 
+-- uh god, i painted myself into a corner with these dumb names...
+onlyTimeFormat : Time.Time -> String
+onlyTimeFormat t = Date.fromTime t |> (\d ->
+        (Date.hour d |> toString)
+        ++ ":" ++
+        (if Date.minute d < 10 then "0" else "") ++
+        (Date.minute d |> toString)
+    )
 
 timeFormat : Time.Time -> String
 timeFormat t = Date.fromTime t |> dateTimeFormat
