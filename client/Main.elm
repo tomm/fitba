@@ -1,18 +1,11 @@
 module Main exposing (..)
 
-import Array exposing (Array)
-import Date
-import Debug
-import Dict exposing (Dict)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Html exposing (Html, Attribute, div, input, text, ul, li, button)
 import Http
-import Json.Decode as Json
-import Json.Encode as JsonEncode
 import Maybe exposing (withDefault)
 import Navigation
-import Svg
 import Task
 import Time
 import Notification
@@ -34,7 +27,7 @@ import RootMsg exposing (..)
 import TeamView
 import ClientServer exposing (..)
 
-
+main : Program Never RootModel Msg
 main =
     Html.program {
         init = init,

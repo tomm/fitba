@@ -1,15 +1,12 @@
 module MatchView exposing (view, update)
 
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput, onClick)
 import Html exposing (Html, Attribute, div, input, span, table, tr, td, th, text, ul, h3, li, button)
 import Svg
-import Date
 import List
 import Array
 import Svg.Attributes exposing (..)
 import Time exposing (Time)
-import Dict
 
 import Model exposing (..)
 import TeamView
@@ -112,6 +109,7 @@ secondsToMatchMinute showSeconds time =
             let mins = round (s/3 - 20)
             in if mins <= 120 then toString mins ++ seconds else "120+" ++ (toString (mins-120)) ++ seconds
 
+summary : GameEventSide -> List (Html a) -> Html a
 summary side = div [Html.Attributes.class "game-summary",
                teamColorClass side,
                Html.Attributes.class <| "game-summary-" ++ toString side]
@@ -181,9 +179,13 @@ possessionSummary game time =
     ]
     
 
+teamColorClass : GameEventSide -> Attribute a
 teamColorClass side = Html.Attributes.class <| if side == Home then "home-team" else "away-team"
+
+matchStarted : Game -> Bool
 matchStarted game = List.length game.events > 0
 
+matchMinute : Game -> GameEvent -> String
 matchMinute game event = secondsToMatchMinute True (event.timestamp - game.start)
 
 drawPitch : Game -> (Maybe GameEvent) -> Svg.Svg Msg
@@ -230,8 +232,11 @@ drawPitch game maybeEv =
             -}
         )
 
+pitchX : Float
 pitchX = 812
+pitchY : Float
 pitchY = 515
+
 pitchPosPixelPos : (Int, Int) -> (Float, Float)
 pitchPosPixelPos (x, y) =
     let

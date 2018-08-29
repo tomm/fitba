@@ -1,7 +1,6 @@
 module TeamView exposing (view, update, squadList, teamTitle)
 
 import Array exposing (Array)
-import Dict exposing (Dict)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Html exposing (Html, Attribute, div, input, text, ul, li, button)
@@ -9,7 +8,6 @@ import Svg
 import Svg.Events
 import Svg.Attributes exposing (..)
 
-import Model exposing (..)
 import Types exposing (..)
 import RootMsg
 import TeamViewTypes exposing (State, Msg, Msg(SellPlayer, ViewPlayer, ViewSquad, SelectPlayer, MovePosition),
@@ -18,13 +16,16 @@ import Uitk
 import PlayerDetailedView
 import ClientServer
 
+pitchX : Float
 pitchX = 812
+pitchY : Float
 pitchY = 1280
 
 -- All non-GK pitch positions. note y=0 (opposition goal line) and y=6 (own goal line) are not permitted
 movablePitchPositions : List (Int, Int)
 movablePitchPositions = List.concat <| List.map (\x -> List.map (\y -> (x,y)) [1,2,3,4,5]) [0,1,2,3,4]
 
+teamTitle : Team -> String
 teamTitle team = case team.manager of
     Nothing -> team.name ++ " (A.I. Manager)"
     Just name -> team.name ++ " (" ++ name ++ ")"
@@ -125,6 +126,7 @@ squadList infoIconEnabled players selectedPlayerIdx =
             ) ::
             (List.indexedMap playerToDiv (Array.toList players))
 
+positionCircleRadius : Float
 positionCircleRadius = 75
 
 pitchPosPixelPos : (Int, Int) -> (Float, Float)
@@ -137,7 +139,9 @@ pitchPosPixelPos (x, y) =
     in
         (xpadding + (toFloat x)*xinc, ypadding + (toFloat y)*yinc)
 
+playerGoodPositionOpacity : String
 playerGoodPositionOpacity = "0.5"
+playerBadPositionOpacity : String
 playerBadPositionOpacity = "0.1"
 
 emptyPitchPosition : (Int, Int) -> Bool -> Svg.Svg Msg

@@ -1,5 +1,4 @@
 module TransferMarketTypes exposing (..)
-import Http
 
 import Types
 

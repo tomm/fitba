@@ -3,20 +3,13 @@ module FixturesView exposing (view)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Html exposing (Html, Attribute, div, input, span, table, tr, td, th, text, ul, h3, li, button)
-import Svg
 import Date
 import List
-import Array
 import Set
-import Svg.Attributes exposing (..)
-import Time exposing (Time)
-import Dict
 
 import Model exposing (..)
-import TeamView
 import Utils
 import RootMsg exposing (Msg, Msg(..))
-import ClientServer
 import Types exposing (..)
 import Uitk
 

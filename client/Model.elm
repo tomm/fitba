@@ -1,7 +1,4 @@
 module Model exposing (..)
-import Array exposing (Array)
-import Date exposing (Date)
-import Debug
 import Time exposing (Time)
 
 import Types exposing (..)

@@ -9,7 +9,6 @@ import Json.Encode
 import Time
 import Json.Decode.Pipeline as P
 
-import Model exposing (..)
 import RootMsg exposing (Msg, Msg(..))
 import Types exposing (..)
 

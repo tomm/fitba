@@ -2,8 +2,6 @@ module Utils exposing (dateEq, timeEqYYMMDDHHMM, onlyTimeFormat, dateFormat, tim
 
 import Time
 import Date
-import String
-import List
 import FormatNumber
 import FormatNumber.Locales exposing (Locale, usLocale)
 
