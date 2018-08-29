@@ -22,20 +22,40 @@ view model subView =
                 onClick (Watch fixture.gameId)] [
                 td [] [
                     if showTournament then
-                        span [Html.Attributes.class "fixture-tournament"] [text fixture.tournament]
-                    else
-                        span [] []
+                        span [Html.Attributes.class "fixture-tournament"] [text <| tournamentText fixture]
+                    else case fixture.stage of
+                        Nothing -> span [] []
+                        Just stage -> span [Html.Attributes.class "fixture-tournament"] [text <| cupStage stage]
                     ,
                     text (fixture.homeName ++ " - " ++ fixture.awayName)
                 ],
                 td [] [text <| timeFormatter fixture.start],
                 td [] [resultText fixture ]
             ]
+
+        tournamentText fixture =
+            fixture.tournament ++ case fixture.stage of
+                Nothing -> ""
+                Just stage -> " " ++ cupStage stage
+
+        cupStage stage = case stage of
+                            1 -> "Finals"
+                            2 -> "Semi-Finals"
+                            4 -> "Quarter-Finals"
+                            8 -> "Last 16"
+                            _ -> "Preliminaries"
+
         resultText fixture =
             case fixture.status of
                 Scheduled -> text "Scheduled"
                 InProgress -> text "In Progress!"
-                Played result -> text (toString result.homeGoals ++ " : " ++ toString result.awayGoals)
+                Played result -> text (toString result.homeGoals ++ " : " ++ toString result.awayGoals
+                    ++ (
+                        if result.homePenalties > 0 || result.awayPenalties > 0 then
+                            " (" ++ toString result.homePenalties ++ " : " ++
+                                    toString result.awayPenalties ++ " P)"
+                        else ""
+                    ))
 
         fixtureTable showTournament timeFormatter title fixtures = 
             div [] [

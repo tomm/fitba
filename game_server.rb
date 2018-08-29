@@ -36,8 +36,7 @@ def five_minutely_task
   PlayerHelper.spawn_injuries
 end
 
-def per_second_task
-  now = Time.now
+def per_second_task(now)
   games = Game.where.not(status: 'Played').where('start < ?', now).all
 
   if games.size > 0
@@ -50,10 +49,15 @@ def per_second_task
     Rails.logger.info "#{game.league.kind} game between #{game.home_team.name} and #{game.away_team.name}: #{game.status} (#{game.home_goals}:#{game.away_goals}) #{pens}"
   end
 end
-daily_task
 
 if __FILE__ == $0 then
   Rails.logger.info "Fitba server up!"
+
+  if ARGV[0] == "season" then
+    puts "Simulating whole season........................"
+    daily_task
+    per_second_task(Time.now + 40*24*3600)
+  end
 
   while sleep 1 do
     now = Time.now
@@ -69,6 +73,6 @@ if __FILE__ == $0 then
       five_minutely_tasks_last = now
     end
     
-    per_second_task
+    per_second_task(Time.now)
   end
 end

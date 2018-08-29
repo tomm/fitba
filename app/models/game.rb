@@ -8,13 +8,13 @@ class Game < ApplicationRecord
   def winner_loser
     if status == "Played" then
       if self.home_goals > self.away_goals then
-        [self.home_team_id, self.away_team_id]
+        [self.home_team, self.away_team]
       elsif self.home_goals < self.away_goals then
-        [self.away_team_id, self.home_team_id]
+        [self.away_team, self.home_team]
       elsif self.home_penalties > self.away_penalties then
-        [self.home_team_id, self.away_team_id]
+        [self.home_team, self.away_team]
       elsif self.home_penalties < self.away_penalties then
-        [self.away_team_id, self.home_team_id]
+        [self.away_team, self.home_team]
       else
         nil
       end
@@ -31,8 +31,11 @@ class Game < ApplicationRecord
       awayName: self.away_team.name,
       start: self.start,
       status: self.status,
+      stage: self.stage,
       homeGoals: self.home_goals,
-      awayGoals: self.away_goals
+      awayGoals: self.away_goals,
+      homePenalties: self.home_penalties,
+      awayPenalties: self.away_penalties
     }
   end
   

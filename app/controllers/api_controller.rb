@@ -125,8 +125,11 @@ class ApiController < ApplicationController
       awayTeam: get_team_json(game.away_team, override_squad: away_squad),
       start: game.start,
       status: game.status,
+      stage: game.stage,
       homeGoals: game.home_goals,
       awayGoals: game.away_goals,
+      homePenalties: game.home_penalties,
+      awayPenalties: game.away_penalties,
       attending: game.attending,
       events: game_events.map {|e| game_event_to_json(e)}
     }

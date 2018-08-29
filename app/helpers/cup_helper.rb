@@ -7,28 +7,30 @@ module CupHelper
 
     team_ids = team_ids_still_in_cup(cup, season)
 
-    if team_ids.size == 1 then
-      # someone won this turd of a cup
-      winner = Team.find(team_ids.shift)
-      puts "#{winner.name} id=#{winner.id} won cup"
-      NewsArticle.create(title: "#{winner.name} win Fitba Association Cup!", body: "", date: Time.now)
+    if team_ids.size <= 1 then
+      # cup has ended for this season. do nothing
     else
       generate_games(cup, season, team_ids)
     end
   end
 
   def self.generate_games(cup, season, team_ids)
-    team_ids = team_ids.shuffle
     num_teams = team_ids.size
-    num_empty = self.next_power_of_two(num_teams) - num_teams
+    stage_size = self.next_power_of_two(num_teams)
+    num_empty = stage_size - num_teams
 
-    now = Time.now
-    next_start = Time.new(now.year, now.month, now.day) + 24*3600 + 22*3600
+    # when did the last cup match happen?
+    r = Game.where(league_id: cup.id, season: season).select("MAX(start) as t").to_a
+    if r[0]['t'] == nil then
+      last_start = Time.now
+    else
+      last_start = r[0]['t']
+    end
+    next_start = Time.new(last_start.year, last_start.month, last_start.day) + 2*24*3600 + 22*3600
 
     # if number of teams is non-power-of-two then some teams don't play this round. skip them
-    num_empty.times do
-      team_ids.shift
-    end
+    team_ids.shift(num_empty)
+    team_ids.shuffle!
 
     # make games
     raise "Error in CupHelper.generate_games. odd number of teams..." unless team_ids.size % 2 == 0
@@ -39,6 +41,7 @@ module CupHelper
       Game.create(league_id: cup.id, home_team_id: team1, away_team_id: team2,
                    status: "Scheduled",
                    start: next_start,
+                   stage: stage_size / 2,
                    home_goals: 0, away_goals: 0,
                    season: season)
       next_start += 24*3600
@@ -51,13 +54,16 @@ module CupHelper
 
   def self.team_ids_still_in_cup(cup, season)
     # all teams take part in cup
-    teams_in_cup = Team.pluck(:id)
+    # XXX note we have low id teams first. this means they are skipped from
+    # preliminary cup rounds if num teams is non-power-of-two (see generate_games)
+    # Would be better to do this by previous season's standing
+    teams_in_cup = Team.order(:id).pluck(:id)
     games = Game.where(league_id: cup.id, season: season, status: "Played").all
 
     # remove eliminated teams
     games.each {|g|
-      winner_id, loser_id = g.winner_loser
-      teams_in_cup.delete(loser_id)
+      winner, loser = g.winner_loser
+      teams_in_cup.delete(loser.id)
     }
     
     teams_in_cup

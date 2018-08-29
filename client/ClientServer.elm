@@ -121,7 +121,7 @@ jsonDecodeTransferListings =
 
 jsonDecodeGame : Json.Decoder Game
 jsonDecodeGame =
-    Json.map7 Game
+    Json.map8 Game
         (Json.field "id" Json.int)
         (Json.field "homeTeam" jsonDecodeTeam)
         (Json.field "awayTeam" jsonDecodeTeam)
@@ -132,13 +132,16 @@ jsonDecodeGame =
                 "Scheduled" -> Json.succeed Scheduled
                 "InProgress" -> Json.succeed InProgress
                 "Played" -> Json.map Played
-                    (Json.map2 FixtureStatusPlayed
-                        (Json.at ["homeGoals"] Json.int)
-                        (Json.at ["awayGoals"] Json.int)
+                    (Json.map4 FixtureStatusPlayed
+                        (Json.field "homeGoals" Json.int)
+                        (Json.field "awayGoals" Json.int)
+                        (Json.field "homePenalties" Json.int)
+                        (Json.field "awayPenalties" Json.int)
                     )
                 _ -> Json.fail <| "Unexpected fixture status: " ++ val
         ))
         (Json.field "attending" (Json.list Json.string))
+        (Json.field "stage" Json.int |> Json.maybe)
 
 jsonDecodeGameEventUpdate : Json.Decoder GameEventUpdate
 jsonDecodeGameEventUpdate =
@@ -240,7 +243,7 @@ jsonDecodeTime =
 jsonDecodeFixtures : Json.Decoder (List Fixture)
 jsonDecodeFixtures =
     Json.list (
-        Json.map6 Fixture
+        Json.map7 Fixture
             (Json.at ["gameId"] Json.int)
             (Json.at ["homeName"] Json.string)
             (Json.at ["awayName"] Json.string)
@@ -250,13 +253,16 @@ jsonDecodeFixtures =
                     "Scheduled" -> Json.succeed Scheduled
                     "InProgress" -> Json.succeed InProgress
                     "Played" -> Json.map Played
-                        (Json.map2 FixtureStatusPlayed
+                        (Json.map4 FixtureStatusPlayed
                             (Json.at ["homeGoals"] Json.int)
                             (Json.at ["awayGoals"] Json.int)
+                            (Json.field "homePenalties" Json.int)
+                            (Json.field "awayPenalties" Json.int)
                         )
                     _ -> Json.fail <| "Unexpected fixture status: " ++ val
             ))
             (Json.field "tournament" Json.string)
+            (Json.field "stage" Json.int |> Json.maybe)
     )
 
 jsonDecodeTopScorers : Json.Decoder (List TournamentTopScorers)

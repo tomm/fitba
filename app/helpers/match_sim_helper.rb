@@ -268,8 +268,7 @@ module MatchSimHelper
       raise "media_response called when game not ended" unless @game.status == 'Played'
       goal_diff = @game.home_goals - @game.away_goals
       if goal_diff.abs > 4 then
-        loser = if goal_diff < 0 then @game.home_team else @game.away_team end
-        winner = if goal_diff > 0 then @game.home_team else @game.away_team end
+        winner, loser = @game.winner_loser
         loser_goals = if goal_diff < 0 then @game.home_goals else @game.away_goals end
         winner_goals = if goal_diff > 0 then @game.home_goals else @game.away_goals end
 
@@ -288,6 +287,13 @@ module MatchSimHelper
                              body: "",
                              date: Time.now)
         end
+      end
+
+      if @game.stage == 1 then
+        winner, loser = @game.winner_loser
+        NewsArticle.create(title: "#{winner.name} win the #{@game.league.name}!",
+                           body: "",
+                           date: Time.now)
       end
     end
 
