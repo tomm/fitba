@@ -29,6 +29,18 @@ module SeasonHelper
     Player.all.each(&:happy_birthday)
 
     handle_league_end_of_season
+    Team.all.each {|t| spawn_youth_teamer(t)}
+  end
+
+  def self.spawn_youth_teamer(team)
+    player = Player.random(0)
+    player.age = 16
+    player.team = team
+    player.save
+    Message.send_message(team, "Youth Team Coach", "Player promoted from youth team",
+                         "#{player.forename} #{player.name} is now ready to train with the main squad. You can expect this player's skills to develop over the coming seasons.",
+                         Time.now)
+    player
   end
 
   def self.handle_league_end_of_season

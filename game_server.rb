@@ -21,6 +21,7 @@ def daily_task
   League.is_cup.each{|cup|
     CupHelper.update_cup(cup, SeasonHelper.current_season)
   }
+  PlayerHelper.daily_develop_youth_players
   PlayerHelper.daily_cure_injury
   PlayerHelper.daily_maybe_change_player_form
 

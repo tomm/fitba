@@ -85,4 +85,22 @@ module PlayerHelper
         </table>",
       Time.now)
   end
+
+  def self.daily_develop_youth_players
+    players = Player.where("age < 18").where.not(team_id: nil).all
+    players.each {|player|
+      if rand < 0.25 and player.skill / 5.0 < 8.6 then
+        # increase the player's skills by 2 points
+        2.times do
+          which_skill = Player::ALL_SKILLS.sample.to_s
+          v = player.method(which_skill).call()
+          if v < 9 then
+            player.method(which_skill + "=").call(v + 1)
+          end
+        end
+        Rails.logger.info("Youth player #{player} has improved.")
+        player.save
+      end
+    }
+  end
 end

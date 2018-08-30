@@ -2,6 +2,17 @@ require 'test_helper'
 require 'date'
 
 class PlayerHelperTest < ActiveSupport::TestCase
+  test "youth_team" do
+    team = teams(:test_utd)
+    num_players = Player.where(team: team).count
+    new_player = SeasonHelper.spawn_youth_teamer(team)
+    assert_equal num_players+1, Player.where(team: team).count
+    skill = new_player.skill
+    50.times {PlayerHelper.daily_develop_youth_players}
+    new_player.reload
+    assert new_player.skill > skill
+  end
+
   test "team has_many players" do
     assert_equal 0, Message.count
     assert_equal 1, NewsArticle.count
