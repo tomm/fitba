@@ -1,4 +1,7 @@
 module PlayerHelper
+  SILLY_WORDS = ["shocker", "nightmare", "tragedy", "debacle", "crisis"]
+  INJURY_TYPE = ["knee injury", "sprained ankle", "hamstring injury", "concussion", "calf injury", "head injury", "dislocated shoulder"]
+
   def self.spawn_injuries
     # expected to be run every 5 minutes
     Team.pluck(:id).each{|team_id|
@@ -17,9 +20,13 @@ module PlayerHelper
     if player.injury == 0 then
       player.update(injury: RngHelper.dice(1,15), form: 0)
       team = Team.find(team_id)
+      type = INJURY_TYPE.sample
       Rails.logger.info "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
       Message.send_message(team, "Head Coach", "Player injury",
-                           "#{player.name} has suffered an injury during training", Time.now)
+                           "#{player.name} has suffered a #{type} during training, and will need #{player.injury} days to recover.", Time.now)
+      NewsArticle.create(title: "#{team.name}'s #{player.name} in #{type} #{SILLY_WORDS.sample}!",
+                         body: "The player is unlikely to be fit to play for #{player.injury} days.",
+                         date: Time.now)
       # AI can update formation after injury
       AiManagerHelper.pick_team_formation(team)
     end
