@@ -42,10 +42,11 @@ four:
 
 five:
   league: second_division
+  season: 1
   home_team: test_team5
   away_team: test_team6
   status: 'Scheduled'
-  start: 2018-06-27 12:00:00
+  start: 2018-06-27 12:30:00
   home_goals: 0
   away_goals: 0
 

@@ -67,8 +67,8 @@ module TransferMarketHelper
           t.update(status: 'Sold')
           buyer_team.update(money: buyer_team.money - bid.amount)
           seller_team&.update(money: seller_team.money + bid.amount)
+          seller_team&.remove_player_from_squad(player)
           player.update(team_id: buyer_team.id)
-          FormationPo.where(player_id: player.id).delete_all
           # update listing, marking sold
           sold = true
           Rails.logger.info "Team #{buyer_team.name} bought #{player.name} for #{bid.amount}"
@@ -87,7 +87,7 @@ module TransferMarketHelper
             make_transfer_news(nil, seller_team, player, t.min_price)
           end
           seller_team&.update(money: seller_team.money + t.min_price)
-          FormationPo.where(player_id: player.id).delete_all
+          seller_team&.remove_player_from_squad(player)
           player.update(team_id: nil)
           t.update(status: 'Sold')
         else
