@@ -42,7 +42,10 @@ class Team < ApplicationRecord
     {
       # make sure there are 11 positions!
       formation: positions = ((0..10).map do |i|
-        if positions[i] == nil then
+        if i == 0 then
+          # GK mandatory!
+          [2, 6]
+        elsif positions[i] == nil then
           AiManagerHelper::FORMATION_442[i]
         else
           [positions[i].position_x, positions[i].position_y]
@@ -74,6 +77,10 @@ class Team < ApplicationRecord
     positions.each_with_index do |p,i|
       player_id = p[0]
       position_xy = p[1]
+      if i == 0 then
+        # GK mandatory
+        position_xy = [2,6]
+      end
       if position_xy == nil then position_xy = [0,0] end
       # ^^ haskell version handles this differently, saving a combined "Maybe (Int,Int) field to DB
       # first check it's our player

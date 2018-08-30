@@ -385,7 +385,8 @@ class ApiControllerTest < ActionController::TestCase
     post :save_formation, body: [[amy.id, [1,2]], [barbara.id, [2,3]]].to_json, :format => "json"
     assert_response :success
 
-    expected_formation = [[1, 2], [2, 3], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
+    # amy at [1,2] is overridden by mandatory goalkeeper position
+    expected_formation = [[2, 6], [2, 3], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
     expected_formation[0] = [1,2]
     expected_formation[1] = [2,3]
     get :load_world, :format => "json"
