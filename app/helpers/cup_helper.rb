@@ -26,7 +26,7 @@ module CupHelper
     else
       last_start = r[0]['t']
     end
-    next_start = Time.new(last_start.year, last_start.month, last_start.day) + 2*24*3600 + 22*3600
+    next_start = Time.new(last_start.year, last_start.month, last_start.day) + 24*3600 + 22*3600
 
     # if number of teams is non-power-of-two then some teams don't play this round. skip them
     team_ids.shift(num_empty)
