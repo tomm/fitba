@@ -1,6 +1,8 @@
 TRANSFER_LISTING_DURATION = 60*60*23
 
 module TransferMarketHelper
+  SALES_TAX = 0.05
+
   def self.is_listed?(player_id)
     TransferListing.where(player_id: player_id, status: "Active").count > 0
   end
@@ -66,7 +68,7 @@ module TransferMarketHelper
           bid.update(status: "YouWon")
           t.update(status: 'Sold')
           buyer_team.update(money: buyer_team.money - bid.amount)
-          seller_team&.update(money: seller_team.money + bid.amount)
+          seller_team&.update(money: seller_team.money + bid.amount*(1.0-SALES_TAX))
           seller_team&.remove_player_from_squad(player)
           player.update(team_id: buyer_team.id)
           # update listing, marking sold
@@ -83,10 +85,10 @@ module TransferMarketHelper
         if player.injury == 0 then
           if seller_team != nil then
             Rails.logger.info "#{seller_team&.name} sold #{player.name} to outside team"
-            seller_team.send_message("The Chairman", "Player sold", "We have sold #{player.name} for €#{t.min_price}", Time.now)
+            seller_team.send_message("The Chairman", "Player sold", "We have sold #{player.name} for €#{t.min_price}, which is €#{(t.min_price*(1.0-SALES_TAX)).to_i} after tax.", Time.now)
             make_transfer_news(nil, seller_team, player, t.min_price)
           end
-          seller_team&.update(money: seller_team.money + t.min_price)
+          seller_team&.update(money: seller_team.money + t.min_price*(1.0-SALES_TAX))
           seller_team&.remove_player_from_squad(player)
           player.update(team_id: nil)
           t.update(status: 'Sold')
