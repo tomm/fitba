@@ -5,10 +5,10 @@ module PlayerHelper
   def self.spawn_injuries
     # expected to be run every 5 minutes
     Team.pluck(:id).each{|team_id|
-      # to get roughly 1 unjury per week:
+      # to get roughly 1 injury per 3.5 days
       # probability of injury per 5 minutes is:
-      # 5minutes / 7days*24hrs*60minutes ~= 0.0005
-      if rand < 0.0005 then
+      # 5minutes / 3.5days*24hrs*60minutes ~= 0.001
+      if rand < 0.001 then
         spawn_injury_on(team_id)
       end
     }
@@ -18,7 +18,9 @@ module PlayerHelper
     injure_player_id = Player.where(team_id: team_id).pluck(:id).sample
     player = Player.find(injure_player_id)
     if player.injury == 0 then
-      player.update(injury: RngHelper.dice(1,15), form: 0)
+      # light injuries are common
+      duration = if RngHelper.int_range(0,1) == 0 then RngHelper.dice(1,2) else RngHelper.dice(1,15) end
+      player.update(injury: duration, form: 0)
       team = Team.find(team_id)
       type = INJURY_TYPE.sample
       Rails.logger.info "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
