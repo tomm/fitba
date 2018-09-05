@@ -23,10 +23,10 @@ type GameEventSide = Home | Away
 type alias GameEvent = { id: GameEventId, gameId: GameId, kind: GameEventKind, side: GameEventSide,
                          timestamp: Time, message: String, ballPos: (Int, Int), playerName: Maybe String }
 type alias GameEventUpdate = { attending: List String, events: List GameEvent }
-type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, events: List GameEvent, status: FixtureStatus, attending: List String }
-type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int }
+type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, events: List GameEvent, status: FixtureStatus, attending: List String, stage: Maybe Int }
+type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int, homePenalties: Int, awayPenalties: Int }
 type FixtureStatus = Scheduled | InProgress | Played FixtureStatusPlayed
-type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus }
+type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus, tournament: String, stage: Maybe Int }
 type alias InboxMessageId = Int
 type alias InboxMessage = { id: InboxMessageId, from: String, subject: String, body: String, date: Time }
 type alias News = { title: String, body: String, time: Time }

@@ -2,18 +2,33 @@ require 'test_helper'
 require 'date'
 
 class PlayerHelperTest < ActiveSupport::TestCase
+  test "youth_team" do
+    team = teams(:test_utd)
+    num_players = Player.where(team: team).count
+    new_player = SeasonHelper.spawn_youth_teamer(team)
+    assert_equal num_players+1, Player.where(team: team).count
+    skill = new_player.skill
+    50.times {PlayerHelper.daily_develop_youth_players}
+    new_player.reload
+    assert new_player.skill > skill
+  end
+
   test "team has_many players" do
     assert_equal 0, Message.count
+    assert_equal 1, NewsArticle.count
     assert_equal 12, teams(:test_utd).players.where(injury: 0).count
     PlayerHelper.spawn_injury_on(teams(:test_utd).id)
     # should have generated a message about the player's injury
     assert_equal 1, Message.count
+    assert_equal 2, NewsArticle.count
     assert_equal 11, teams(:test_utd).players.where(injury: 0).count
     50.times do
       PlayerHelper.daily_cure_injury
     end
     # should have generated a message about the player's recovery
     assert_equal 2, Message.count
+    # but not a news article
+    assert_equal 2, NewsArticle.count
     assert_equal 12, teams(:test_utd).players.where(injury: 0).count
   end
 

@@ -2,7 +2,6 @@ module PlayerDetailedView exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput, onClick)
 
 import Types exposing (..)
 import Uitk

@@ -13,6 +13,16 @@ class Team < ApplicationRecord
     })
   }
 
+  # Used when players are sold. Removes them from the team formation,
+  # but not from formations linked from games (because that's active or historic data)
+  def remove_player_from_squad(player)
+    FormationPo.where(formation_id: self.formation_id, player_id: player.id).delete_all
+  end
+
+  def to_s
+    self.name
+  end
+
   def send_message(from, subject, body, date)
     Message.send_message(self, from, subject, body, date)
   end

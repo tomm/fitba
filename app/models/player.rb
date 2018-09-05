@@ -23,6 +23,10 @@ class Player < ApplicationRecord
     }
   end
 
+  def to_s
+    "#{self.forename} #{self.name} of #{self.team}: Sh #{self.shooting}, Pa #{self.passing}, Ta #{self.tackling}, Ha #{self.handling}, Sp #{self.speed}"
+  end
+
   def can_play?
     self.injury == 0
   end
@@ -49,9 +53,13 @@ class Player < ApplicationRecord
   end
 
   def self.random(player_spawn_quality)
-    player_spawn_quality = player_spawn_quality >= 1 ? player_spawn_quality : 1
+    player_spawn_quality = player_spawn_quality > 0 ? player_spawn_quality : 0
     skill_range = (
       case player_spawn_quality
+        # youth teamer
+        when 0
+          (1..3)
+        # normal AI team qualities
         when 1
           (1..6)
         when 2

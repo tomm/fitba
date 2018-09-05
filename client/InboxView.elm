@@ -1,13 +1,11 @@
 module InboxView exposing (view)
 
 import Html.Attributes exposing (class)
-import Html.Events
 import Html exposing (..)
 import Json.Encode
 
 import Model exposing (..)
 import RootMsg exposing (..)
-import Types exposing (..)
 import Uitk
 import Utils
 

@@ -1,18 +1,11 @@
 module Main exposing (..)
 
-import Array exposing (Array)
-import Date
-import Debug
-import Dict exposing (Dict)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
 import Html exposing (Html, Attribute, div, input, text, ul, li, button)
 import Http
-import Json.Decode as Json
-import Json.Encode as JsonEncode
 import Maybe exposing (withDefault)
 import Navigation
-import Svg
 import Task
 import Time
 import Notification
@@ -23,7 +16,8 @@ import Utils
 import TransferMarket
 import TransferMarketTypes
 import FixturesView
-import FixturesViewMsg
+import MatchView
+import MatchViewMsg
 import TeamViewTypes
 import InboxView
 import NewsView
@@ -33,7 +27,7 @@ import RootMsg exposing (..)
 import TeamView
 import ClientServer exposing (..)
 
-
+main : Program Never RootModel Msg
 main =
     Html.program {
         init = init,
@@ -131,6 +125,7 @@ update msg model =
                         _ -> Cmd.none
                     in updateStateCmd { m | tab = tab } cmd
                 ViewTransferMarket -> (model, ClientServer.loadTransferListings)
+                Watch gameId -> (model, ClientServer.loadGame gameId)
                 GotNews result -> case result of
                     Ok news -> updateState { m | news = news }
                     Err error -> handleHttpError error model
@@ -146,7 +141,7 @@ update msg model =
                     } }
                     Err error -> handleHttpError error model
                 SecondTick t ->
-                    let (state, cmd) = FixturesView.update FixturesViewMsg.GameTick m
+                    let (state, cmd) = MatchView.update MatchViewMsg.GameTick m
                         state2 = { state | currentTime = t }
                     in ({ model | state = GameData state2}, cmd)
                 MinuteTick t ->
@@ -157,8 +152,8 @@ update msg model =
                         in updateStateCmd { m | tab = TabTeam newState,
                                                 ourTeam = newState.team } cmd
                     _ -> (model, Cmd.none)
-                MsgFixturesView msg ->
-                    let (state, cmd) = FixturesView.update msg m
+                MsgMatchView msg ->
+                    let (state, cmd) = MatchView.update msg m
                     in ({ model | state = GameData state}, cmd)
                 MsgTransferMarket msg -> case m.tab of
                     TabTransferMarket state -> 
@@ -174,18 +169,18 @@ update msg model =
                             -- start InProgress games from latest event
                             let timeElapsed = List.length game.events -- XXX TODO hack. will only work
                                                                       -- assuming match simulated takes 1 second per event
-                            in updateState { m | tab = TabFixtures (Just {
+                            in updateState { m | tab = TabMatch {
                                 game=game,
                                 timePoint=Time.second * (toFloat timeElapsed)
-                            })}
+                            }}
                         else
                             -- start Played and Scheduled games from beginning
-                            updateState { m | tab = TabFixtures (Just { game=game, timePoint=0.0}) }
+                            updateState { m | tab = TabMatch { game=game, timePoint=0.0} }
                     Err error -> handleHttpError error model
                 UpdateGame result -> case result of
                     Ok update -> case m.tab of
-                        TabFixtures (Just watchingGame) -> updateState {
-                            m | tab=TabFixtures (Just <| updateWatchingGame watchingGame update)
+                        TabMatch watchingGame -> updateState {
+                            m | tab=TabMatch (updateWatchingGame watchingGame update)
                         }
                         _ -> (model, Cmd.none)
                     Err error -> handleHttpError error model
@@ -224,7 +219,7 @@ tabs model =
           n -> "(" ++ toString n ++ ") Club"
       tabLabels = [(TabTeam { team = model.ourTeam, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } }, "Squad"),
                    (TabTournaments, "Tournaments"),
-                   (TabFixtures Nothing, "Fixtures"),
+                   (TabFixtures TodaysFixtures, "Fixtures"),
                    (TabClub, clubTabLabel)]
 
   in ul [class "tab-menu"]
@@ -247,7 +242,8 @@ view model =
                         TabTeam state -> Html.map MsgTeamView <| TeamView.view state
                         TabTournaments -> tournamentTab m
                         TabTopScorers -> topScorerView m
-                        TabFixtures maybeWatchingGame -> Html.map MsgFixturesView <| FixturesView.view m maybeWatchingGame
+                        TabFixtures subview -> FixturesView.view m subview
+                        TabMatch watchingGame -> Html.map MsgMatchView <| MatchView.view watchingGame
                         TabClub -> clubTab m
                         TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view m.ourTeamId state
                         TabInbox -> InboxView.view m

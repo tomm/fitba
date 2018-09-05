@@ -41,11 +41,14 @@ module PopulateDbHelper
     TransferMarketHelper.update_transfer_market
 
     Rails.logger.info "Creating leagues..."
-    l1 = League.create(rank: 1, name: "First Division")
-    l2 = League.create(rank: 2, name: "Second Division")
+    l1 = League.create(kind: "League", rank: 1, name: "First Division")
+    l2 = League.create(kind: "League", rank: 2, name: "Second Division")
 
     populate_league(l1)
     populate_league(l2)
+
+    cup = League.create(kind: "Cup", name: "Fitba Association Cup")
+    CupHelper.update_cup(cup, 1)
 
     create_user_for_team("tom", Team.find_by(name: "Cock of the North"), 10000000)
     create_user_for_team("john", Team.find_by(name: "Vag of the South"), 10000000)

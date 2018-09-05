@@ -1,7 +1,4 @@
 module Model exposing (..)
-import Array exposing (Array)
-import Date exposing (Date)
-import Debug
 import Time exposing (Time)
 
 import Types exposing (..)
@@ -11,12 +8,15 @@ import TeamViewTypes
 -- MODEL
 
 type alias WatchingGame = { timePoint: Time, game: Game }
+type alias TournamentName = String
+type FixtureSubView = TodaysFixtures | AllFixtures TournamentName
 type alias TabTransferMarketState = { listings: List Player }
 
 type UiTab = TabTeam TeamViewTypes.State
              | TabTournaments
              | TabTopScorers
-             | TabFixtures (Maybe WatchingGame)
+             | TabFixtures FixtureSubView
+             | TabMatch WatchingGame
              | TabClub
              | TabTransferMarket TransferMarketTypes.State
              | TabViewOtherTeam TeamViewTypes.State

@@ -28,8 +28,24 @@ module SeasonHelper
     # make all players age
     Player.all.each(&:happy_birthday)
 
+    handle_league_end_of_season
+    Team.all.each {|t| spawn_youth_teamer(t)}
+  end
+
+  def self.spawn_youth_teamer(team)
+    player = Player.random(0)
+    player.age = 16
+    player.team = team
+    player.save
+    Message.send_message(team, "Youth Team Coach", "Player promoted from youth team",
+                         "#{player.forename} #{player.name} is now ready to train with the main squad. You can expect this player's skills to develop over the coming seasons.",
+                         Time.now)
+    player
+  end
+
+  def self.handle_league_end_of_season
     last_season = current_season
-    leagues = League.order(:rank).all
+    leagues = League.is_league.order(:rank).all
     # hash<league.rank,[team ids]>
     teams_in_league = (leagues.map {|l| [l.rank,[]]}).to_h
 
@@ -58,7 +74,7 @@ module SeasonHelper
     end
 
     teams_in_league.each do |rank, teamIds|
-      leagueId = League.where(rank: rank).pluck(:id).first
+      leagueId = League.is_league.where(rank: rank).pluck(:id).first
       teamIds.each do |teamId|
         TeamLeague.create(team_id: teamId, league_id: leagueId, season: last_season + 1)
       end

@@ -11,7 +11,7 @@ class GameTest < ActiveSupport::TestCase
     assert_equal "Scheduled", game.status
     game.simulate(game.start + 10)
     assert_equal "InProgress", game.status
-    game.simulate(game.start + 300)
+    game.simulate(game.start + 500)
     assert_equal "Played", game.status
 
 #=begin
@@ -21,6 +21,7 @@ class GameTest < ActiveSupport::TestCase
       puts "#{game.event_minutes e} #{e.time} #{e.kind} InPossession:#{e.side} #{e.ball_pos_x},#{e.ball_pos_y} #{e.message}"
     end
     puts "Final score: #{game.home_goals}:#{game.away_goals}."
+    puts "Shootout result (if it happened...): #{game.home_penalties}:#{game.away_penalties}."
     home_shots_missed = GameEvent.where(game: game, side: 0, kind: "ShotMiss").count
     away_shots_missed = GameEvent.where(game: game, side: 1, kind: "ShotMiss").count
     home_shots_total = GameEvent.where(game: game, side: 0, kind: "ShotTry").count

@@ -13,6 +13,13 @@ module MatchSimHelper
   # added to skill rolls
   BASE_SKILL = 5  # this means skill 1 relative to skill 9 is: 1+BASE_SKILL vs 9+BASE_SKILL
 
+  MATCH_PERIODS = [
+    [0, 3*45],  # first half
+    [3*55, 3*100], # second half
+    [3*105, 3*120], # first half extra time
+    [3*125, 3*140] # second half extra time
+  ]
+
   MATCH_LENGTH_SECONDS = 270
 
   class PitchPos
@@ -141,35 +148,127 @@ module MatchSimHelper
       formation
     end
 
+    def match_draws_allowed
+      @game.league.kind != "Cup"
+    end
+
+    def period_we_are_in(time)
+      start = @game.start
+      period = 0
+      ended = true
+
+      MATCH_PERIODS.each_with_index{|p,i|
+        period = i
+        if time < start + p[0] then
+          # this period just ended
+          period = i-1
+          break
+        elsif time >= start + p[0] and time <= start + p[1] then
+          ended = false
+          break
+        end
+      }
+      [period, ended]
+    end
+
+    def end_game
+      @game.status = 'Played'
+      emit_event('EndOfGame', @last_event.side, ball_pos, "Full time!", @last_event.player_id)
+      media_response
+    end
+
     def simulate_until(until_time)
-      if until_time > @game.start + MATCH_LENGTH_SECONDS
-        until_time = @game.start + MATCH_LENGTH_SECONDS
-      end
 
       if until_time < @game.start
         return
       end
 
-      while @last_event == nil or @last_event.time < until_time do
+      while @last_event == nil or @last_event.time <= until_time do
         simulate_tick()
+
+        period, ended = period_we_are_in(@last_event.time)
+        is_level = @game.home_goals == @game.away_goals
+
+        # a period ended
+        if ended then
+          if (period == 1 and (match_draws_allowed or not is_level)) then
+            # game ends after normal time
+            end_game()
+            break
+          elsif period == 3 then
+            # game ends after extra time (maybe with penalties)
+            if is_level then
+              # penalties
+              penalty_shootout
+            end
+            end_game()
+            break
+          else
+            # end of a half
+            period_name = ["The first half", "Normal time", "The first half of extra time"][period]
+            msg = "#{period_name} ends with the teams at #{@game.home_goals}:#{@game.away_goals}"
+            emit_event('EndOfPeriod', @last_event.side, ball_pos, msg, nil)
+            emit_event('EndOfPeriod', @last_event.side, ball_pos, msg, nil)
+            @last_event.update(time: @game.start + MATCH_PERIODS[period+1][0])
+          end
+        else
+          @game.status = 'InProgress'
+        end
       end
 
-      if @last_event.time >= @game.start + MATCH_LENGTH_SECONDS
-        @game.status = 'Played'
-        emit_event('EndOfGame', @last_event.side, ball_pos, "Full time!", @last_event.player_id)
-        media_response
-      else
-        @game.status = 'InProgress'
-      end
       @game.save
+    end
+
+    def penalty_shootout
+      takers0 = @squad[0].sort_by{|p| -p.player.shooting}
+      takers1 = @squad[1].sort_by{|p| -p.player.shooting}
+      gk0 = get_goalkeeper(0)
+      gk1 = get_goalkeeper(1)
+
+      emit_event('Boring', 0, ball_pos, "It will be decided by penalties!", nil)
+
+      to_go = 5
+      scored = [0,0]
+
+      while (scored[0]-scored[1]).abs <= to_go do
+        scored[0] += penalty(0, takers0.first.player, gk1, is_shootout: true)
+        scored[1] += penalty(1, takers1.first.player, gk0, is_shootout: true)
+        takers0.rotate!
+        takers1.rotate!
+        if to_go > 0 then to_go -= 1 end
+
+        emit_event('Boring', 0, ball_pos, "Penalties: #{scored[0]}:#{scored[1]}", nil)
+      end
+
+      winner = if scored[0] > scored[1] then @game.home_team else @game.away_team end
+      emit_event('Boring', 0, ball_pos, "#{winner.name} win #{scored[0]}:#{scored[1]} on penalties!", nil)
+
+      @game.home_penalties = scored[0]
+      @game.away_penalties = scored[1]
+    end
+
+    def penalty(side, taker, gk, is_shootout: false)
+      emit_event('Boring', side, PitchPos.new(2,5), "#{taker.name} steps up to penalty spot", taker.id)
+      emit_event('Boring', side, PitchPos.new(2,5), "#{taker.name} shoots!", taker.id)
+
+      if RngHelper.dice(4, skill(0, taker, :shooting, PitchPos.new(2,1))) <=
+          RngHelper.dice(2, skill(1, gk, :speed, PitchPos.new(2,0))) +
+          RngHelper.dice(1, skill(1, gk, :handling, PitchPos.new(2,0)))
+      then
+        emit_event('Boring', 1-side, PitchPos.new(2,6), "Fantastic dive by #{gk.name} to deny #{taker.name}", gk.id)
+        0
+      else
+        kind = if is_shootout then 'Boring' else 'Goal' end
+        emit_event(kind, side, PitchPos.new(2,6), "Goal! Great penalty by #{taker.name}", taker.id)
+        1
+      end
     end
 
     def media_response
       raise "media_response called when game not ended" unless @game.status == 'Played'
       goal_diff = @game.home_goals - @game.away_goals
       if goal_diff.abs > 4 then
-        loser = if goal_diff < 0 then @game.home_team else @game.away_team end
-        winner = if goal_diff > 0 then @game.home_team else @game.away_team end
+        winner, loser = @game.winner_loser
         loser_goals = if goal_diff < 0 then @game.home_goals else @game.away_goals end
         winner_goals = if goal_diff > 0 then @game.home_goals else @game.away_goals end
 
@@ -188,6 +287,13 @@ module MatchSimHelper
                              body: "",
                              date: Time.now)
         end
+      end
+
+      if @game.stage == 1 then
+        winner, loser = @game.winner_loser
+        NewsArticle.create(title: "#{winner.name} win the #{@game.league.name}!",
+                           body: "",
+                           date: Time.now)
       end
     end
 
@@ -233,6 +339,8 @@ module MatchSimHelper
       else
         if @last_event.kind == 'Goal'
           kick_off(1 - @last_event.side)
+        elsif @last_event.kind == 'EndOfPeriod'
+          kick_off([0,1].sample)  # XXX should be alternating sides...
         elsif @last_event.kind == 'Corner'
           corner()
         elsif @last_event.kind == 'GoalKick'

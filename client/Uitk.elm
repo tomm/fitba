@@ -62,6 +62,7 @@ playerInjuryBadge player =
 
 type RowColumn a = RowColumn (Html a)
 
+unpackRowColumn : RowColumn a -> Html a
 unpackRowColumn (RowColumn r) = r
 
 infoIcon : String

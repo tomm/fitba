@@ -72,7 +72,7 @@ class ApiController < ApplicationController
 
   def league_tables
     season = SeasonHelper::current_season
-    leagues = League.order(:rank).all
+    leagues = League.is_league.order(:rank).all
     render json: (leagues.map do |l|
       {
         "name": l.name,
@@ -83,21 +83,8 @@ class ApiController < ApplicationController
 
   def fixtures
     season = SeasonHelper::current_season
-    team_league = TeamLeague.find_by(team_id: @user.team_id)
-    games = Game.where(league_id: team_league.league_id, season: season).order(:start).all
-    render json: (games.map do |g|
-      t1 = Team.find(g.home_team_id)
-      t2 = Team.find(g.away_team_id)
-      {
-        gameId: g.id,
-        homeName: t1.name,
-        awayName: t2.name,
-        start: g.start,
-        status: g.status,
-        homeGoals: g.home_goals,
-        awayGoals: g.away_goals
-      }
-    end)
+    games = Game.where(season: season).order(:start).all
+    render json: games.map(&:to_api)
   end
 
   def save_formation
@@ -138,8 +125,11 @@ class ApiController < ApplicationController
       awayTeam: get_team_json(game.away_team, override_squad: away_squad),
       start: game.start,
       status: game.status,
+      stage: game.stage,
       homeGoals: game.home_goals,
       awayGoals: game.away_goals,
+      homePenalties: game.home_penalties,
+      awayPenalties: game.away_penalties,
       attending: game.attending,
       events: game_events.map {|e| game_event_to_json(e)}
     }
@@ -261,7 +251,7 @@ class ApiController < ApplicationController
 
   def top_scorers
     conn = ActiveRecord::Base.connection
-    render json: League.order(:rank).all.map{|l|
+    render json: League.is_league.order(:rank).all.map{|l|
       r = conn.execute(
         "select (select name from teams where id=(select team_id from players where id=g.player_id)) as teamname,
                 (select concat(forename,' ',name) from players where id=g.player_id) as playername,
