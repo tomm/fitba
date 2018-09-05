@@ -60,6 +60,7 @@ module PlayerHelper
   end
 
   def self._generate_form_report_message_for_team(team)
+=begin
     player_evaluations = Player
       .joins(:formation_pos)
       .where(team_id: team.id, formation_pos: {formation_id: team.formation_id})
@@ -86,6 +87,7 @@ module PlayerHelper
         <tbody>#{player_evaluations.join}</tbody>
         </table>",
       Time.now)
+=end
   end
 
   def self.daily_develop_youth_players

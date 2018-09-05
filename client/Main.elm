@@ -236,6 +236,7 @@ view model =
             GameData m ->
                 div [] [
                     tabs m,
+                    Uitk.infoButton (ChangeTab TabInfo),
                     text <| Maybe.withDefault "" model.errorMsg,
                     case m.tab of
                         TabViewOtherTeam state -> Html.map (\_ -> NoOp {- can't edit -}) <| TeamView.view state
@@ -248,6 +249,7 @@ view model =
                         TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view m.ourTeamId state
                         TabInbox -> InboxView.view m
                         TabNews -> NewsView.view m
+                        TabInfo -> infoTab
                 ]
     ]
 
@@ -290,6 +292,64 @@ tournamentTab model =
             ],
             div [] (List.map (leagueTableTab model) model.leagueTables)
         ]
+
+infoTab : Html Msg
+infoTab = Uitk.view Nothing (text "Fitba Help!") [
+        Uitk.row [
+            Uitk.column 1 [],
+            Uitk.column 22 [
+                Html.h3 [] [text "Squad"],
+                Html.h4 [] [text "Skills"],
+                Html.p [] [
+                    Html.dl [] [
+                        Html.dt [] [text "Shooting"],
+                        Html.dd [] [text <|
+                            "Shooting is important to any player who finds themselves with a chance to score."
+                        ]
+                    ],
+                    Html.dl [] [
+                        Html.dt [] [text "Passing"],
+                        Html.dd [] [text <|
+                            "Passing allows a player to make longer and more accurate passes, crosses, goal kicks and corners."
+                        ]
+                    ],
+                    Html.dl [] [
+                        Html.dt [] [text "Tackling"],
+                        Html.dd [] [text <|
+                            "Tackling allows a player to successfully take the ball from an opposition player."
+                        ]
+                    ],
+                    Html.dl [] [
+                        Html.dt [] [text "Handling"],
+                        Html.dd [] [text <|
+                            "Handling affects an outfield player's ability to dribble, resist tackles and win aerial challenges. " ++
+                            "For goalkeepers, handling contributes to their ability to save shots and hold onto the ball."
+                        ]
+                    ],
+                    Html.dl [] [
+                        Html.dt [] [text "Speed"],
+                        Html.dd [] [text <|
+                            "Speed affects an outfield player's ability to dribble, win aerial challenges and intercept opponents' passes. " ++
+                            "For goalkeepers, speed contributes to their ability to save shots and particularly penalties."
+                        ]
+                    ],
+                    Html.dl [] [
+                        Html.dt [] [text "Form"],
+                        Html.dd [] [text <|
+                            "A player's form changes over the season. " ++
+                            "It is added to every other skill (shooting, passing, tackling, handling, speed). " ++
+                            "A player with average skill 5.4 and form +1 will effectively have an average skill of 6.4."
+                        ]
+                    ]
+                ],
+                Html.h4 [] [text "Positioning"],
+                Html.p [] [text
+                    "Players playing in their favoured position(s) will gain a +1 bonus to all skills (shooting, passing, tackling, handling, speed)."
+                ]
+            ],
+            Uitk.column 1 []
+        ]
+    ]
 
 clubTab : Model -> Html Msg
 clubTab model =

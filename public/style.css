@@ -17,6 +17,17 @@ table {
 	margin-bottom: 1em;
 }
 
+dt {
+	font-style: italic;
+}
+
+.button-info {
+	position: absolute;
+	right: 0;
+	font-size: 180%;
+	background: none;
+}
+
 .fixture-tournament {
 	font-size: 80%;
 	font-weight: bold;

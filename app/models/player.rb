@@ -19,6 +19,7 @@ class Player < ApplicationRecord
       handling: self.handling,
       speed: self.speed,
       injury: self.injury,
+      form: self.form,
       positions: self.get_positions
     }
   end

@@ -11,7 +11,7 @@ type alias SeasonRecord = { teamId: TeamId, name: String, played: Int, won: Int,
 type alias LeagueTable = { name: String, record: List SeasonRecord }
 type alias PlayerId = Int
 type alias Player = { id: PlayerId, name: String, age: Int, forename: String, shooting: Int, passing: Int, tackling: Int,
-                      handling: Int, speed: Int, injury: Int, positions: List (Int, Int) }
+                      handling: Int, speed: Int, injury: Int, form: Int, positions: List (Int, Int) }
 type alias TransferListingId = Int
 type TransferStatus = OnSale | Sold | Unsold | YouWon | OutBid | TeamRejected | PlayerRejected | InsufficientMoney
 type alias TransferListing = { id: TransferListingId, minPrice: Int, deadline: Time, sellerTeamId: TeamId,

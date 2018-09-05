@@ -22,6 +22,7 @@ type UiTab = TabTeam TeamViewTypes.State
              | TabViewOtherTeam TeamViewTypes.State
              | TabInbox
              | TabNews
+             | TabInfo
 
 type alias RootModel = {
     errorMsg: Maybe String,

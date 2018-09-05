@@ -103,6 +103,7 @@ squadList infoIconEnabled players selectedPlayerIdx =
                , Html.td [selectAction] [Uitk.playerPositionBadge p, Uitk.playerInjuryBadge p]
                , Html.td [selectAction] [text <| p.name]
                , Html.td [selectAction] [text <| Types.playerAvgSkill p]
+               , Html.td [selectAction] [text <| (\form -> "+" ++ toString form) <| p.form ]
                , Html.td [selectAction] [text <| toString <| p.shooting]
                , Html.td [selectAction] [text <| toString <| p.passing]
                , Html.td [selectAction] [text <| toString <| p.tackling]
@@ -117,6 +118,7 @@ squadList infoIconEnabled players selectedPlayerIdx =
                 Html.th [] [text "Pos."],
                 Html.th [] [text "Name"],
                 Html.th [] [text "Avg."],
+                Html.th [] [text "Form"],
                 Html.th [] [text "Sh"],
                 Html.th [] [text "Pa"],
                 Html.th [] [text "Ta"],

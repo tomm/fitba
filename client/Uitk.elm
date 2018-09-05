@@ -1,7 +1,7 @@
 -- This file uses purecss.io classes.
 -- The aim is to avoid putting css-framework-specific stuff anywhere except this file.
 module Uitk exposing (view, actionButton, backButton, playerPositionBadge, playerInjuryBadge,
-    row, column, responsiveColumn, blockButton, blockButtonRow, crossButton, infoIcon)
+    row, column, responsiveColumn, blockButton, blockButtonRow, crossButton, infoIcon, infoButton)
 
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -19,6 +19,9 @@ blockButton num24ths action label =
 
 actionButton : a -> String -> Html a
 actionButton action label = button [class "pure-button", class "button-action", onClick action] [text label]
+
+infoButton : a -> Html a
+infoButton action = button [class "pure-button", class "button-info", onClick action] [text infoIcon]
 
 backButton : a -> Html a
 backButton action = button [class "pure-button", class "button-action", onClick action] [text "Back"]
