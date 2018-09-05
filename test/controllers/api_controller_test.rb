@@ -387,8 +387,6 @@ class ApiControllerTest < ActionController::TestCase
 
     # amy at [1,2] is overridden by mandatory goalkeeper position
     expected_formation = [[2, 6], [2, 3], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
-    expected_formation[0] = [1,2]
-    expected_formation[1] = [2,3]
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
@@ -396,10 +394,8 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 12, body['players'].size
     assert_equal "Amy", body['players'][0]['name']
     assert_equal "Barbara", body['players'][1]['name']
-    assert_equal [1,2], body['formation'][0]
-    assert_equal [2,3], body['formation'][1]
 
-    # reorder amy & barbara. molly should be ignored because she is not on this team
+    # reorder amy & barbara. molly should be ignored because she is not on this team, and amy ignored because she's a GK
     post :save_formation, body: [[barbara.id, [4,1]], [amy.id, [3,2], [molly.id, [2,3]]]].to_json, :format => "json"
     assert_response :success
 
@@ -410,7 +406,7 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal 12, body['players'].size
     assert_equal "Barbara", body['players'][0]['name']
     assert_equal "Amy", body['players'][1]['name']
-    assert_equal [4,1], body['formation'][0]
+    assert_equal [2,6], body['formation'][0]
     assert_equal [3,2], body['formation'][1]
   end
 
