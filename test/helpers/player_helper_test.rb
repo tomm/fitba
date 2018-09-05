@@ -17,7 +17,7 @@ class PlayerHelperTest < ActiveSupport::TestCase
     assert_equal 0, Message.count
     assert_equal 1, NewsArticle.count
     assert_equal 12, teams(:test_utd).players.where(injury: 0).count
-    PlayerHelper.spawn_injury_on(teams(:test_utd).id)
+    PlayerHelper.spawn_injury_on_team(teams(:test_utd).id)
     # should have generated a message about the player's injury
     assert_equal 1, Message.count
     assert_equal 2, NewsArticle.count

@@ -14,7 +14,7 @@ class EndOfSeasonTest < ActiveSupport::TestCase
     FormationPo.where(formation: team.formation).delete_all
     assert_equal 0, FormationPo.where(formation: team.formation).count
     AiManagerHelper.pick_team_formation(team)
-    assert_equal 14, FormationPo.where(formation: team.formation).count
+    assert_equal 16, FormationPo.where(formation: team.formation).count
   end
 
   test "maybe_sell_player" do

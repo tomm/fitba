@@ -1,4 +1,5 @@
 module MatchSimHelper
+  MAX_SUBSTITUTIONS = 3
   SECONDS_PER_TICK = 1
   PLAYERS_ON_BENCH = 5
   GK = [2, 6]
@@ -57,9 +58,10 @@ module MatchSimHelper
   end
 
   class PlayerPos
-    attr_reader :player, :pos, :side
+    attr_reader :player, :pos, :side, :position_po
     def initialize(position_po, side)
       @player = position_po.player
+      @position_po = position_po
       @pos = PitchPos.new(position_po.position_x, position_po.position_y)
       @side = side
 
@@ -80,6 +82,7 @@ module MatchSimHelper
 
   class GameSimulator
     def initialize(game)
+      @game = game
       @last_event = GameEvent.where(game_id: game.id)
                              .order(:time).reverse_order.first
 
@@ -89,15 +92,25 @@ module MatchSimHelper
         game.away_formation = dup_starting_formation(game.away_team)
       end
 
-      team0_players = game.home_formation.formation_pos.order(:position_num).all
-      team1_players = game.away_formation.formation_pos.order(:position_num).all
+      reload_squad()
+    end
 
-      @game = game
-      @teams = [game.home_team, game.away_team]
+    def reload_squad
+      team0_players = @game.home_formation.formation_pos.order(:position_num).all
+      team1_players = @game.away_formation.formation_pos.order(:position_num).all
+
+      @teams = [@game.home_team, @game.away_team]
       @squad = [
         team0_players.take(11).map{|p| PlayerPos.new(p, 0)},
         team1_players.take(11).map{|p| PlayerPos.new(p, 1)}
       ]
+      @subs = [
+        team0_players.drop(11),
+        team1_players.drop(11)
+      ]
+
+      exclude_ineligible_players()
+
       @team_pids = [
         team0_players.map(&:player_id),
         team1_players.map(&:player_id),
@@ -105,6 +118,13 @@ module MatchSimHelper
       @player_by_id = ((team0_players + team1_players).map do |f|
         [f.player_id, f.player]
       end).to_h
+    end
+
+    def exclude_ineligible_players
+      # note we filter out ineligible players again (dup_starting_formation did it too).
+      # this is because injuries and send-offs could have happened
+      @squad.each{|s| s.select!{|pos| pos.player.can_play?}}
+      @subs.each{|s| s.select!{|pos| pos.player.can_play?}}
     end
 
     def dup_starting_formation(team)
@@ -171,10 +191,26 @@ module MatchSimHelper
       [period, ended]
     end
 
-    def end_game
+    def end_game(reason: "Full time!")
       @game.status = 'Played'
-      emit_event('EndOfGame', @last_event.side, ball_pos, "Full time!", @last_event.player_id)
+      emit_event('EndOfGame', @last_event.side, ball_pos, reason, @last_event.player_id)
       media_response
+    end
+
+    def test_match_abandonment
+      if @squad[0].size < 7 then
+        @game.home_goals = 0
+        @game.away_goals = 3
+        end_game(reason: "Match abandoned because #{@teams[0].name} cannot field enough players.")
+        return true
+      elsif @squad[1].size < 7 then
+        @game.home_goals = 3
+        @game.away_goals = 0
+        end_game(reason: "Match abandoned because #{@teams[1].name} cannot field enough players.")
+        return true
+      else
+        return false
+      end
     end
 
     def simulate_until(until_time)
@@ -184,7 +220,14 @@ module MatchSimHelper
       end
 
       while @last_event == nil or @last_event.time <= until_time do
+        if test_match_abandonment() then
+          break
+        end
+
         simulate_tick()
+
+        handle_injuries()
+        exclude_ineligible_players()
 
         period, ended = period_we_are_in(@last_event.time)
         is_level = @game.home_goals == @game.away_goals
@@ -217,6 +260,43 @@ module MatchSimHelper
       end
 
       @game.save
+    end
+
+    # maybe spawn injuries. do substutions as necessary
+    def handle_injuries
+      if rand < 0.1 then
+        side = RngHelper.int_range(0,1)
+        victim = @squad[side][RngHelper.int_range(0,10)]
+
+        if victim != nil then
+          PlayerHelper.spawn_injury_on_player(victim.player)
+          #emit_event('Boring', @last_event.side, ball_pos, "#{victim.player.name} is injured!", @last_event.player_id)
+          if @game.subs_used(side) < MAX_SUBSTITUTIONS then
+            substitute_out_player(side, victim)
+          else
+            puts "Team #{side} has used all subs"
+          end
+        end
+      end
+    end
+
+    def substitute_out_player(side, player_pos)
+      # no logic. choose randomly from available players
+      sub = @subs[side].sample
+      if sub == nil then
+        puts "Team #{side}: No sub available"
+      else
+        puts "Team #{side}: Subbing on #{sub.player.name} for #{player_pos.player.name}"
+        #emit_event('Boring', @last_event.side, ball_pos, "#{sub.player.name} will come on to replace #{player_pos.player.name}!", @last_event.player_id)
+        p = player_pos.player
+        player_pos.position_po.update(player: sub.player)
+        sub.update(player: p)
+
+        @game.use_sub(side)
+        @game.save
+
+        reload_squad()
+      end
     end
 
     def penalty_shootout

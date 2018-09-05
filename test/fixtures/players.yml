@@ -311,3 +311,27 @@ zuzana:
   handling: 5
   speed: 5
   positions: "[[2,6]]"
+
+andy:
+  team: test_city
+  age: 25
+  name: Andy
+  forename: x
+  shooting: 5
+  passing: 5
+  tackling: 5
+  handling: 5
+  speed: 5
+  positions: "[[2,6]]"
+
+bob:
+  team: test_city
+  age: 25
+  name: Bob
+  forename: x
+  shooting: 5
+  passing: 5
+  tackling: 5
+  handling: 5
+  speed: 5
+  positions: "[[2,6]]"

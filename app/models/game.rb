@@ -5,6 +5,14 @@ class Game < ApplicationRecord
   belongs_to :home_formation, :class_name => 'Formation', optional: true
   belongs_to :away_formation, :class_name => 'Formation', optional: true
 
+  def subs_used(side)
+    if side == 0 then self.home_subs else self.away_subs end
+  end
+
+  def use_sub(side)
+    if side == 0 then self.home_subs += 1 else self.away_subs += 1 end
+  end
+
   def winner_loser
     if status == "Played" then
       if self.home_goals > self.away_goals then

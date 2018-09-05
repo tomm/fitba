@@ -167,3 +167,17 @@ t2p13:
   position_num: 13
   position_x: 0
   position_y: 0
+
+t2p14:
+  formation: two
+  player: andy
+  position_num: 14
+  position_x: 0
+  position_y: 0
+
+t2p15:
+  formation: two
+  player: bob
+  position_num: 15
+  position_x: 0
+  position_y: 0

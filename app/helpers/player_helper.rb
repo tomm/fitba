@@ -9,28 +9,36 @@ module PlayerHelper
       # probability of injury per 5 minutes is:
       # 5minutes / 3.5days*24hrs*60minutes ~= 0.001
       if rand < 0.001 then
-        spawn_injury_on(team_id)
+        spawn_injury_on_team(team_id)
       end
     }
   end
 
-  def self.spawn_injury_on(team_id)
+  def self.spawn_injury_on_team(team_id)
     injure_player_id = Player.where(team_id: team_id).pluck(:id).sample
     player = Player.find(injure_player_id)
+
+    spawn_injury_on_player(player)
+  end
+
+  def self.spawn_injury_on_player(player)
     if player.injury == 0 then
       # light injuries are common
       duration = if RngHelper.int_range(0,1) == 0 then RngHelper.dice(1,2) else RngHelper.dice(1,15) end
       player.update(injury: duration, form: 0)
-      team = Team.find(team_id)
-      type = INJURY_TYPE.sample
-      Rails.logger.info "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
-      Message.send_message(team, "Head Coach", "Player injury",
-                           "#{player.name} has suffered a #{type} during training, and will need #{player.injury} days to recover.", Time.now)
-      NewsArticle.create(title: "#{team.name}'s #{player.name} in #{type} #{SILLY_WORDS.sample}!",
-                         body: "The player is unlikely to be fit to play for #{player.injury} days.",
-                         date: Time.now)
-      # AI can update formation after injury
-      AiManagerHelper.pick_team_formation(team)
+
+      if player.team != nil then
+        team = player.team
+        type = INJURY_TYPE.sample
+        Rails.logger.info "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
+        Message.send_message(team, "Head Coach", "Player injury",
+                             "#{player.name} has suffered a #{type} during training, and will need #{player.injury} days to recover.", Time.now)
+        NewsArticle.create(title: "#{team.name}'s #{player.name} in #{type} #{SILLY_WORDS.sample}!",
+                           body: "The player is unlikely to be fit to play for #{player.injury} days.",
+                           date: Time.now)
+        # AI can update formation after injury
+        AiManagerHelper.pick_team_formation(team)
+      end
     end
   end
 
