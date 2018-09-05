@@ -67,7 +67,7 @@ view ownTeamId state = case state.view of
 
                 in Html.tr clickAction [
                     Html.td [] [text <| listing.player.name],
-                    Html.td [] [Uitk.playerPositionBadge listing.player],
+                    Html.td [] [Uitk.playerPositionBadge listing.player, Uitk.playerInjuryBadge listing.player],
                     Html.td [] [text <| Utils.moneyFormat listing.minPrice],
                     Html.td [] [text <| case listing.status of
                         OnSale -> Utils.timeFormatShort listing.deadline
