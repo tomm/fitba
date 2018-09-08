@@ -32,9 +32,11 @@ module PlayerHelper
         type = INJURY_TYPE.sample
         Rails.logger.info "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
         Message.send_message(team, "Head Coach", "Player injury", "#{player.name} has suffered a #{type} #{how}, and will need #{player.injury} days to recover.", Time.now)
-        NewsArticle.create(title: "#{team.name}'s #{player.name} in #{type} #{SILLY_WORDS.sample}!",
-                           body: "The player is unlikely to be fit to play for #{player.injury} days.",
-                           date: Time.now)
+        if duration > 4 then
+          NewsArticle.create(title: "#{team.name}'s #{player.name} in #{type} #{SILLY_WORDS.sample}!",
+                             body: "The player is unlikely to be fit to play for #{player.injury} days.",
+                             date: Time.now)
+        end
         # AI can update formation after injury
         AiManagerHelper.pick_team_formation(team)
       end
