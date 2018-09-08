@@ -21,7 +21,7 @@ module PlayerHelper
     spawn_injury_on_player(player)
   end
 
-  def self.spawn_injury_on_player(player)
+  def self.spawn_injury_on_player(player, how: 'during training')
     if player.injury == 0 then
       # light injuries are common
       duration = if RngHelper.int_range(0,1) == 0 then RngHelper.dice(1,2) else RngHelper.dice(1,15) end
@@ -31,8 +31,7 @@ module PlayerHelper
         team = player.team
         type = INJURY_TYPE.sample
         Rails.logger.info "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
-        Message.send_message(team, "Head Coach", "Player injury",
-                             "#{player.name} has suffered a #{type} during training, and will need #{player.injury} days to recover.", Time.now)
+        Message.send_message(team, "Head Coach", "Player injury", "#{player.name} has suffered a #{type} #{how}, and will need #{player.injury} days to recover.", Time.now)
         NewsArticle.create(title: "#{team.name}'s #{player.name} in #{type} #{SILLY_WORDS.sample}!",
                            body: "The player is unlikely to be fit to play for #{player.injury} days.",
                            date: Time.now)

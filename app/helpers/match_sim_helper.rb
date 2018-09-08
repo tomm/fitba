@@ -193,7 +193,11 @@ module MatchSimHelper
 
     def end_game(reason: "Full time!")
       @game.status = 'Played'
-      emit_event('EndOfGame', @last_event.side, ball_pos, reason, @last_event.player_id)
+      if @last_event == nil then
+        emit_event('EndOfGame', 0, PitchPos.new(2,3), reason, nil)
+      else
+        emit_event('EndOfGame', @last_event.side, ball_pos, reason, @last_event.player_id)
+      end
       media_response
     end
 
@@ -226,8 +230,9 @@ module MatchSimHelper
 
         simulate_tick()
 
-        handle_injuries()
-        exclude_ineligible_players()
+        if @last_event.kind == 'Boring' then
+          spawn_injury()
+        end
 
         period, ended = period_we_are_in(@last_event.time)
         is_level = @game.home_goals == @game.away_goals
@@ -263,40 +268,57 @@ module MatchSimHelper
     end
 
     # maybe spawn injuries. do substutions as necessary
-    def handle_injuries
-      if rand < 0.1 then
+    def spawn_injury
+      if rand < 0.004 then
         side = RngHelper.int_range(0,1)
         victim = @squad[side][RngHelper.int_range(0,10)]
 
-        if victim != nil then
-          PlayerHelper.spawn_injury_on_player(victim.player)
-          #emit_event('Boring', @last_event.side, ball_pos, "#{victim.player.name} is injured!", @last_event.player_id)
-          if @game.subs_used(side) < MAX_SUBSTITUTIONS then
-            substitute_out_player(side, victim)
-          else
-            puts "Team #{side} has used all subs"
-          end
+        if victim != nil and
+          # <- don't injure the on-the-ball player. game engine can't deal with that yet
+          victim.player.id != @last_event.player_id then
+
+          PlayerHelper.spawn_injury_on_player(victim.player, how: "during our match against #{@teams[1-side].name}")
+          exclude_ineligible_players()
+          emit_event('Injury', @last_event.side, ball_pos, "#{victim.player.name} is injured!", @last_event.player_id)
         end
       end
     end
 
-    def substitute_out_player(side, player_pos)
+    def ai_substitutions
+      # Currently only does subs when there is an injured player
+      team0_players_injured = @game.home_formation.formation_pos.order(:position_num).limit(11).all.select{|p| not p.player.can_play?}
+      team1_players_injured = @game.away_formation.formation_pos.order(:position_num).limit(11).all.select{|p| not p.player.can_play?}
+
+      team0_players_injured.each{|formation_pos|
+        try_substitute_player(0, formation_pos)
+      }
+      team1_players_injured.each{|formation_pos|
+        try_substitute_player(1, formation_pos)
+      }
+    end
+
+    def try_substitute_player(side, formation_pos)
+      if @game.subs_used(side) < MAX_SUBSTITUTIONS and @subs[side].size > 0 then
+        substitute_out_player(side, formation_pos)
+      else
+        #puts "Team #{side} has used all subs or has none available"
+      end
+    end
+
+    def substitute_out_player(side, formation_pos)
       # no logic. choose randomly from available players
       sub = @subs[side].sample
-      if sub == nil then
-        puts "Team #{side}: No sub available"
-      else
-        puts "Team #{side}: Subbing on #{sub.player.name} for #{player_pos.player.name}"
-        #emit_event('Boring', @last_event.side, ball_pos, "#{sub.player.name} will come on to replace #{player_pos.player.name}!", @last_event.player_id)
-        p = player_pos.player
-        player_pos.position_po.update(player: sub.player)
-        sub.update(player: p)
+      raise "Expected there to be subs..." unless sub != nil
+      #puts "Team #{side}: Subbing on #{sub.player.name} for #{formation_pos.player.name}"
+      emit_event('Sub', side, ball_pos, "#{sub.player.name} will come on to replace #{formation_pos.player.name}", nil)
+      p = formation_pos.player
+      formation_pos.update(player: sub.player)
+      sub.update(player: p)
 
-        @game.use_sub(side)
-        @game.save
+      @game.use_sub(side)
+      @game.save
 
-        reload_squad()
-      end
+      reload_squad()
     end
 
     def penalty_shootout
@@ -417,17 +439,24 @@ module MatchSimHelper
       if @last_event == nil
         kick_off([0,1].sample)
       else
+        # store this since ai_substitutions might hose the @last_event
+        side = @last_event.side
         if @last_event.kind == 'Goal'
-          kick_off(1 - @last_event.side)
+          ai_substitutions()
+          kick_off(1 - side)
         elsif @last_event.kind == 'EndOfPeriod'
+          ai_substitutions()
           kick_off([0,1].sample)  # XXX should be alternating sides...
         elsif @last_event.kind == 'Corner'
-          corner()
+          ai_substitutions()
+          corner(side)
         elsif @last_event.kind == 'GoalKick'
-          goal_kick()
+          ai_substitutions()
+          goal_kick(side)
         elsif @last_event.kind == 'ShotSaved'
+          ai_substitutions()
           # goalkeeper controls it
-          goal_kick()
+          goal_kick(side)
         else
           normal_play()
         end
@@ -437,25 +466,12 @@ module MatchSimHelper
     def kick_off(side)
       pos = PitchPos.new(2,3)
       player = must_have_player_here(side, pos).player
-      if @last_event == nil then
-        # kickoff at beginning of game
-        @last_event = GameEvent.create(
-          game_id: @game.id,
-          kind: 'KickOff',
-          side: side,
-          time: @last_event == nil ? @game.start : @last_event.time + SECONDS_PER_TICK,
-          player_id: player.id,
-          message: 'Kick off!',
-          ball_pos_x: pos.x,
-          ball_pos_y: pos.y
-        )
-      else
-        emit_event('KickOff', side, pos, 'Kick off!', player.id)
-      end
+      emit_event('KickOff', side, pos, 'Kick off!', player.id)
     end
 
     def normal_play
       on_ball = @player_by_id[@last_event.player_id]
+      raise "On ball player is nil in game #{@game.id}! FUCK" unless on_ball != nil
 
       defenders = players_at(self.ball_pos, 1 - @last_event.side)
 
@@ -478,8 +494,7 @@ module MatchSimHelper
       RngHelper.dice(4, skill(1-side, defender, :tackling, ball_pos))
     end
 
-    def corner()
-      side = @last_event.side
+    def corner(side)
       # .drop(1) disallows GK
       kicker = @squad[side].drop(1).sort_by{|p| -p.player.passing}.first
 
@@ -630,7 +645,7 @@ module MatchSimHelper
         game_id: @game.id,
         kind: kind,
         side: side,
-        time: @last_event.time + SECONDS_PER_TICK,
+        time: @last_event == nil ? @game.start : @last_event.time + SECONDS_PER_TICK,
         message: msg,
         ball_pos_x: pos.x,
         ball_pos_y: pos.y,
@@ -890,8 +905,7 @@ module MatchSimHelper
       emit_event("Boring", p.side, pos, "#{p.player.name} in possession", p.player.id)
     end
 
-    def goal_kick
-      side = @last_event.side
+    def goal_kick(side)
       goalkeeper = get_goalkeeper(side)
       pos = PitchPos.new((0..4).to_a.sample, 3)
       emit_event("Boring", side, pos, "Goal kick by #{goalkeeper.name}", goalkeeper.id)
