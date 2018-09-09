@@ -8,6 +8,18 @@ module AiManagerHelper
       [0, 3], [1, 3], [3, 3], [4, 3],
       [1, 1], [3, 1]
   ]
+  FORMATION_4411 = [
+      [2, 6],
+      [0, 5], [1, 5], [3, 5], [4, 5],
+      [0, 3], [1, 3], [3, 3], [4, 3],
+      [2, 2], [2, 1]
+  ]
+  FORMATION_4411a = [
+      [2, 6],
+      [0, 4], [1, 5], [3, 5], [4, 4],
+      [0, 2], [1, 3], [3, 3], [4, 2],
+      [2, 2], [2, 1]
+  ]
   FORMATION_VAG = [
       [2,6], # gk
       [0,4], [1,5], [3,5], [4,4],
@@ -42,12 +54,23 @@ module AiManagerHelper
     [1,3],[2,3],[3,3],
     [1,1],[3,1]
   ]
+  FORMATION_433a = [
+    [2,6],
+    [0,5],[1,5],[3,5],[4,5],
+    [1,3],[2,3],[3,3],
+    [0,1],[2,1],[4,1]
+  ]
   FORMATION_433 = [
     [2,6],
     [0,5],[1,5],[3,5],[4,5],
-    [2,3],
-    [1,2],[3,2],
-    [0,1],[2,1],[4,1]
+    [1,3],[2,3],[3,3],
+    [0,2],[2,1],[4,2]
+  ]
+  FORMATION_433d = [
+    [2,6],
+    [0,5],[1,5],[3,5],[4,5],
+    [1,3],[2,4],[3,3],
+    [0,2],[2,1],[4,2]
   ]
   FORMATION_451m = [
     [2,6],
@@ -68,7 +91,7 @@ module AiManagerHelper
     [0,2],[1,3],[2,3],[3,3],[4,2],
     [2,1]
   ]
-  FORMATION_4231 = [
+  FORMATION_4231a = [
       [2,6],
       [0,5],[1,5],[3,5],[4,5],
       [1,3],[3,3],
@@ -80,6 +103,13 @@ module AiManagerHelper
       [0,5],[1,5],[3,5],[4,5],
       [1,4],[3,4],
       [0,2],[2,2],[4,2],
+      [2,1]
+  ]
+  FORMATION_4231 = [
+      [2,6],
+      [0,5],[1,5],[3,5],[4,5],
+      [1,4],[3,4],
+      [0,2],[2,3],[4,2],
       [2,1]
   ]
   FORMATION_4141 = [
@@ -96,10 +126,12 @@ module AiManagerHelper
     [0,3],[1,3],[3,3],[4,3],
     [2,1]
   ]
-  FORMATIONS = [ FORMATION_442, FORMATION_352, FORMATION_433, FORMATION_4231, FORMATION_4231d, FORMATION_4141,
-                 FORMATION_4141d, FORMATION_451m, FORMATION_451d, FORMATION_451a, FORMATION_532,
+  FORMATIONS = [ FORMATION_442, FORMATION_352, FORMATION_433, FORMATION_433a,
+                 FORMATION_433d, FORMATION_4231,
+                 FORMATION_4231a, FORMATION_4231d, FORMATION_4141, FORMATION_4141d,
+                 FORMATION_451m, FORMATION_451d, FORMATION_451a, FORMATION_532,
                  FORMATION_442_diamond, FORMATION_442_wingback_diamond,
-                 FORMATION_VAG ]
+                 FORMATION_VAG, FORMATION_4411, FORMATION_4411a ]
 
   def self.daily_task(team)
     if team.has_user? then
