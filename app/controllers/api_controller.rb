@@ -237,6 +237,10 @@ class ApiController < ApplicationController
     render json: {status: 'SUCCESS'}
   end
 
+  def got_fcm_token
+    puts "Got fcm token #{params[:token]} for user #{@user.id}"
+  end
+
   def news_articles
     news = NewsArticle.order(:date).reverse_order.limit(10).all
     render json: news.map{|item|

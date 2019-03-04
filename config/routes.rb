@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   post 'transfer_bid' => 'api#transfer_bid'
   post 'sell_player' => 'api#sell_player'
   post 'delete_message' => 'api#delete_message'
+  post 'got_fcm_token' => 'api#got_fcm_token'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

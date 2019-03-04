@@ -15,6 +15,10 @@
   messaging.requestPermission().then(() => {
     messaging.getToken().then(token => {
       console.log('user token', token);
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/got_fcm_token');
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.send(encodeURI('token=' + token));
     });
   });
 </script>
