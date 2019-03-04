@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_09_05_151059) do
+ActiveRecord::Schema.define(version: 2019_03_04_150746) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -75,6 +75,7 @@ ActiveRecord::Schema.define(version: 2018_09_05_151059) do
     t.integer "stage"
     t.integer "home_subs", default: 0, null: false
     t.integer "away_subs", default: 0, null: false
+    t.boolean "notified", default: false, null: false
     t.index ["away_team_id"], name: "index_games_on_away_team_id"
     t.index ["home_team_id"], name: "index_games_on_home_team_id"
     t.index ["league_id"], name: "index_games_on_league_id"
@@ -176,6 +177,14 @@ ActiveRecord::Schema.define(version: 2018_09_05_151059) do
     t.index ["team_id"], name: "index_transfer_listings_on_team_id"
   end
 
+  create_table "user_fcm_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "token", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_fcm_tokens_on_user_id"
+  end
+
   create_table "users", id: :serial, force: :cascade do |t|
     t.string "name"
     t.integer "team_id"
@@ -204,5 +213,6 @@ ActiveRecord::Schema.define(version: 2018_09_05_151059) do
   add_foreign_key "transfer_bids", "transfer_listings"
   add_foreign_key "transfer_listings", "players"
   add_foreign_key "transfer_listings", "teams"
+  add_foreign_key "user_fcm_tokens", "users"
   add_foreign_key "users", "teams"
 end
