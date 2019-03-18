@@ -239,6 +239,12 @@ class ApiController < ApplicationController
 
   def got_fcm_token
     puts "Got fcm token #{params[:token]} for user #{@user.id}"
+    begin
+      UserFcmToken.create!(user: @user, token: params[:token])
+    rescue ActiveRecord::RecordNotUnique
+      # fine. already got token
+    end
+    head :no_content
   end
 
   def news_articles
