@@ -40,8 +40,7 @@ init : (RootModel, Cmd Msg)
 init = (
         { errorMsg=Nothing, state=Loading},
         Cmd.batch [
-            getStartGameData,
-            Task.perform RequestNotificationPermissionResult Notification.requestPermission
+            getStartGameData
         ]
     )
 
@@ -49,8 +48,7 @@ init = (
 
 subscriptions : RootModel -> Sub Msg
 subscriptions model = Sub.batch [
-        Time.every Time.second SecondTick,
-        Time.every Time.minute MinuteTick
+        Time.every Time.second SecondTick
     ]
 
 -- UPDATE
