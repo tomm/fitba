@@ -214,13 +214,15 @@ module AiManagerHelper
 
   # used to estimate how good a formation is
   def self.player_value_at(player, position)
-    if position[1] == 6 then
-      5 * (player.handling + player.speed) / 2
-    elsif position[1] == 1 then
-      player.shooting * 5
-    else
-      player.skill
-    end
+    player.form * 5 + (
+      if position[1] == 6 then
+        5 * (player.handling + player.speed) / 2
+      elsif position[1] == 1 then
+        player.shooting * 5
+      else
+        player.skill
+      end
+    )
   end
 
   def self.pick_team_formation(team)
