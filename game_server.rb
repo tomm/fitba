@@ -53,7 +53,8 @@ def notify_game_starting(fcm_tokens, is_home, opponent_name)
   options = {
     "notification": {
       "title": msg,
-      "body": ''
+      "body": '',
+      'click_action': 'https://myfitba.club/'
     }
   }
 
