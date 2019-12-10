@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_03_18_081305) do
+ActiveRecord::Schema.define(version: 2019_12_11_150250) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -184,6 +184,13 @@ ActiveRecord::Schema.define(version: 2019_03_18_081305) do
     t.datetime "updated_at", null: false
     t.index ["user_id", "token"], name: "index_user_fcm_tokens_on_user_id_and_token", unique: true
     t.index ["user_id"], name: "index_user_fcm_tokens_on_user_id"
+  end
+
+  create_table "user_invites", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "welcome_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", id: :serial, force: :cascade do |t|

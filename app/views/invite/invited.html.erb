@@ -1,0 +1,29 @@
+<% if @invite.present? %>
+  <div class="login">
+    <% if @invite.welcome_name %>
+      <h1>Hi <%= @invite.welcome_name %></h1>
+      <p>In recognition of your outstanding service to Football,
+        you have been chosen to...
+      </p>
+    <% else %>
+      <h1>Hey there!</h1>
+      <p>You have been invited to.. </p>
+    <% end %>
+  <%= form_tag :action => 'redeem_invite' do %>
+    <%= hidden_field_tag(:code, @code) %>
+
+    <%= label_tag(:username, "Your in-game name:") %>
+    <%= text_field_tag(:username, '', required: true) %>
+    <br>
+    <%= label_tag(:password, "Password:") %>
+    <%= password_field_tag(:password, '', required: true) %>
+    <br>
+    <%= label_tag(:password, "Team name:") %>
+    <%= text_field_tag(:team_name, '', required: true) %>
+    <br>
+    <%= submit_tag("Let's get started!") %>
+  <% end %>
+  </div>
+<% else %>
+  <p>That invite code was not found! Maybe you already redeemed it?</p>
+<% end %>
