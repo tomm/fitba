@@ -71,8 +71,10 @@ class ApiController < ApplicationController
   def history
     season = params[:season].to_i
     leagues = League.is_league.order(:rank).all
+    cup_finalses = Game.where(season: season, stage: 1, status: 'Played').all
     render json: {
       season: season,
+      cup_finals: cup_finalses.map(&:to_api),
       leagues: (leagues.map do |l|
         {
           "name": l.name,

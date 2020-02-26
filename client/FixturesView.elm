@@ -1,4 +1,4 @@
-module FixturesView exposing (view)
+module FixturesView exposing (view, resultText)
 
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput, onClick)
@@ -12,6 +12,19 @@ import Utils
 import RootMsg exposing (Msg, Msg(..))
 import Types exposing (..)
 import Uitk
+
+resultText : Fixture -> Html Msg
+resultText fixture =
+    case fixture.status of
+        Scheduled -> text "Scheduled"
+        InProgress -> text "In Progress!"
+        Played result -> text (toString result.homeGoals ++ " : " ++ toString result.awayGoals
+            ++ (
+                if result.homePenalties > 0 || result.awayPenalties > 0 then
+                    " (" ++ toString result.homePenalties ++ " : " ++
+                            toString result.awayPenalties ++ " P)"
+                else ""
+            ))
 
 view : Model -> FixtureSubView -> Html Msg
 view model subView =
@@ -44,18 +57,6 @@ view model subView =
                             4 -> "Quarter-Finals"
                             8 -> "Last 16"
                             _ -> "Preliminaries"
-
-        resultText fixture =
-            case fixture.status of
-                Scheduled -> text "Scheduled"
-                InProgress -> text "In Progress!"
-                Played result -> text (toString result.homeGoals ++ " : " ++ toString result.awayGoals
-                    ++ (
-                        if result.homePenalties > 0 || result.awayPenalties > 0 then
-                            " (" ++ toString result.homePenalties ++ " : " ++
-                                    toString result.awayPenalties ++ " P)"
-                        else ""
-                    ))
 
         fixtureTable showTournament timeFormatter title fixtures = 
             div [] [

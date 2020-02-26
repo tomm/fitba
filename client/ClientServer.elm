@@ -297,9 +297,10 @@ jsonDecodeTopScorers =
 
 jsonDecodeHistory : Json.Decoder History
 jsonDecodeHistory =
-    Json.map2 History
+    Json.map3 History
         (Json.field "season" Json.int)
         (Json.field "leagues" jsonDecodeLeagueTables)
+        (Json.field "cup_finals" jsonDecodeFixtures)
 
 jsonDecodeLeagueTables : Json.Decoder (List LeagueTable)
 jsonDecodeLeagueTables =

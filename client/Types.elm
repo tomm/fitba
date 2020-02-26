@@ -11,7 +11,6 @@ type alias Team = { id: TeamId, name: String, manager: Maybe String, players: Ar
 type alias StartGameData = { team: Team, season: Int }
 type alias SeasonRecord = { teamId: TeamId, name: String, played: Int, won: Int, drawn: Int, lost: Int, goalsFor: Int, goalsAgainst: Int }
 type alias LeagueTable = { name: String, record: List SeasonRecord }
-type alias History = { season: Season, leagues: List LeagueTable }
 type alias PlayerId = Int
 type alias Player = { id: PlayerId, name: String, age: Int, forename: String, shooting: Int, passing: Int, tackling: Int,
                       handling: Int, speed: Int, injury: Int, form: Int, positions: List (Int, Int) }
@@ -30,6 +29,7 @@ type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, eve
 type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int, homePenalties: Int, awayPenalties: Int }
 type FixtureStatus = Scheduled | InProgress | Played FixtureStatusPlayed
 type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus, tournament: String, stage: Maybe Int }
+type alias History = { season: Season, leagues: List LeagueTable, cup_finals: List Fixture }
 type alias InboxMessageId = Int
 type alias InboxMessage = { id: InboxMessageId, from: String, subject: String, body: String, date: Time }
 type alias News = { title: String, body: String, time: Time }
