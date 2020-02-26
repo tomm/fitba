@@ -26,7 +26,7 @@ class ApiController < ApplicationController
   end
 
   def view_team
-    render json: get_team_json(Team.find(team_id))
+    render json: get_team_json(Team.find(params[:id]))
   rescue ActiveRecord::RecordNotFound
     head 404
   end
