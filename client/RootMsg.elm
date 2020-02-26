@@ -16,12 +16,13 @@ type Msg
   | MinuteTick Time.Time
   | MsgMatchView MatchViewMsg.Msg
   | MsgTransferMarket TransferMarketTypes.Msg
+  | UpdateHistory (Result Http.Error History)
   | UpdateFixtures (Result Http.Error (List Fixture))
   | UpdateLeagueTables (Result Http.Error (List LeagueTable))
   | UpdateTopScorers (Result Http.Error (List TournamentTopScorers))
   | LoadGame (Result Http.Error Game)
   | UpdateGame (Result Http.Error GameEventUpdate)
-  | GotStartGameData (Result Http.Error Team)
+  | GotStartGameData (Result Http.Error StartGameData)
   | SavedFormation (Result Http.Error String)
   | SavedBid (Result Http.Error String)
   | ViewTeam TeamId | ViewTeamLoaded (Result Http.Error Team)
@@ -34,4 +35,5 @@ type Msg
   | DeleteInboxMessage InboxMessageId
   | DeleteMessageResponse (Result Http.Error String)
   | Watch GameId
+  | ViewHistory Season
   | NoOp

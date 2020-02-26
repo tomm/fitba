@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   post 'try_login' => 'login#try_login'
   post 'save_formation' => 'api#save_formation'
   get 'load_world' => 'api#load_world'
+  get 'history/:season' => 'api#history'
   get 'squad/:id' => 'api#view_team'
   get 'game_events/:id' => 'api#game_events'
   get 'game_events_since/:id/:event_id' => 'api#game_events_since'

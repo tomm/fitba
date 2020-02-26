@@ -21,6 +21,8 @@ import MatchViewMsg
 import TeamViewTypes
 import InboxView
 import NewsView
+import HistoryView
+import LeagueTableView
 import Model exposing (..)
 import Types exposing (..)
 import RootMsg exposing (..)
@@ -95,13 +97,15 @@ update msg model =
         handleLoadingStateMsgs =
             case msg of
                 GotStartGameData result -> case result of
-                    Ok team -> ({model | state=GameData {ourTeamId = team.id,
-                                 tab = TabTeam { team = team, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } },
-                                 ourTeam = team,
+                    Ok data -> ({model | state=GameData {ourTeamId = data.team.id,
+                                 tab = TabTeam { team = data.team, view = TeamViewTypes.SquadView { selectedPlayer = Nothing } },
+                                 ourTeam = data.team,
+                                 season = data.season,
                                  currentTime = 0.0, -- would be better not to wait for tick to resolve this...
                                  fixtures = [],
                                  news = [],
                                  topScorers = [],
+                                 history = Nothing,
                                  leagueTables = []
                                 }}, Cmd.batch [getFixtures, getLeagueTables])
                     Err error -> handleHttpError error model
@@ -120,6 +124,7 @@ update msg model =
                         TabTeam _ -> getStartGameData
                         TabClub -> getStartGameData
                         TabNews -> ClientServer.loadNews
+                        TabHistory -> getHistory (m.season - 1)
                         _ -> Cmd.none
                     in updateStateCmd { m | tab = tab } cmd
                 ViewTransferMarket -> (model, ClientServer.loadTransferListings)
@@ -182,6 +187,13 @@ update msg model =
                         }
                         _ -> (model, Cmd.none)
                     Err error -> handleHttpError error model
+                ViewHistory season ->
+                    if season > 0 && season <= m.season then
+                        (model, getHistory season)
+                    else (model, Cmd.none)
+                UpdateHistory result -> case result of
+                    Ok history -> updateState { m | history = Just history }
+                    Err error -> handleHttpError error model
                 UpdateLeagueTables result -> case result of
                     Ok tables -> updateState { m | leagueTables = tables }
                     Err error -> handleHttpError error model
@@ -189,7 +201,7 @@ update msg model =
                     Ok scorers -> updateState { m | topScorers = scorers }
                     Err error -> handleHttpError error model
                 GotStartGameData result -> case result of
-                    Ok team -> updateState { m | ourTeam = team }
+                    Ok data -> updateState { m | ourTeam = data.team, season = data.season }
                     Err error -> handleHttpError error model
                 SavedFormation _ -> (model, Cmd.none) -- don't give a fuck
                 SavedBid _ -> (model, Cmd.none) -- don't give a fuck
@@ -247,6 +259,7 @@ view model =
                         TabTransferMarket state -> Html.map MsgTransferMarket <| TransferMarket.view m.ourTeamId state
                         TabInbox -> InboxView.view m
                         TabNews -> NewsView.view m
+                        TabHistory -> HistoryView.view m
                         TabInfo -> infoTab
                 ]
     ]
@@ -282,13 +295,13 @@ topScorerView model =
 
 tournamentTab : Model -> Html Msg
 tournamentTab model =
-    Uitk.view Nothing (text "Tournaments") <| [
+    Uitk.view Nothing (text <| "Season " ++ toString model.season) <| [
             Uitk.blockButtonRow [
                 Uitk.column 8 [],
                 Uitk.blockButton 8 (ChangeTab TabTopScorers) "Top Scorers",
                 Uitk.column 8 []
             ],
-            div [] (List.map (leagueTableTab model) model.leagueTables)
+            div [] (List.map (LeagueTableView.view model) model.leagueTables)
         ]
 
 infoTab : Html Msg
@@ -357,60 +370,15 @@ clubTab model =
             text <| "You have " ++ (Utils.moneyFormat <| Maybe.withDefault 0 model.ourTeam.money) ++ " available for transfers."
         ],
         Uitk.blockButtonRow [
-            --Uitk.column 0 [],
-            Uitk.blockButton 8 ViewTransferMarket "Transfer Market",
-            Uitk.blockButton 8 (ChangeTab TabInbox) (numMsgs ++ " Inbox"),
-            Uitk.blockButton 8 (ChangeTab TabNews) "News"
-            --Uitk.column 0 []
-            --Uitk.blockButton 8 NoOp "Something else"
+            Uitk.column 2 [],
+            Uitk.blockButton 10 ViewTransferMarket "Transfer Market",
+            Uitk.blockButton 10 (ChangeTab TabInbox) (numMsgs ++ " Inbox"),
+            Uitk.column 2 []
+        ],
+        Uitk.blockButtonRow [
+            Uitk.column 2 [],
+            Uitk.blockButton 10 (ChangeTab TabNews) "News",
+            Uitk.blockButton 10 (ChangeTab TabHistory) "History",
+            Uitk.column 2 []
         ]
     ]
-
-leagueTableTab : Model -> LeagueTable -> Html Msg
-leagueTableTab model league =
-    let recordToTableLine index record =
-        Html.tr
-            [onClick (ViewTeam record.teamId)] 
-            [
-                Html.td [] [text <| toString <| index + 1]
-              , Html.td [] [text record.name]
-              , Html.td [] [record.won + record.drawn + record.lost |> toString |> text]
-              , Html.td [] [record.won |> toString |> text]
-              , Html.td [] [record.drawn |> toString |> text]
-              , Html.td [] [record.lost |> toString |> text]
-              , Html.td [] [record.goalsFor |> toString |> text]
-              , Html.td [] [record.goalsAgainst |> toString |> text]
-              , Html.td [] [record.goalsFor - record.goalsAgainst |> toString |> text]
-              , Html.td [] [calcPoints record |> toString |> text]
-            ]
-    in
-        Html.div [] [
-            Html.h3 [] [text league.name],
-            Html.table [class "league-table"] (
-                (Html.tr [] [
-                    Html.th [] [text "Pos."]
-                  , Html.th [] [text "Team"]
-                  , Html.th [] [text "Played"]
-                  , Html.th [] [text "Won"]
-                  , Html.th [] [text "Drawn"]
-                  , Html.th [] [text "Lost"]
-                  , Html.th [] [text "GF"]
-                  , Html.th [] [text "GA"]
-                  , Html.th [] [text "GD"]
-                  , Html.th [] [text "Points"]
-                ]) ::
-                (List.indexedMap recordToTableLine (sortLeague league.record))
-            )
-        ]
-
-calcPoints : SeasonRecord -> Int
-calcPoints sr = sr.won*3 + sr.drawn*1
-
-sortLeague : List SeasonRecord -> List SeasonRecord
-sortLeague sr =
-  let ptsDesc a b = if calcPoints a > calcPoints b then LT else (
-      if calcPoints a < calcPoints b then GT else
-        (if a.goalsFor - a.goalsAgainst > b.goalsFor - b.goalsAgainst then LT else GT)
-      )
-                    
-  in List.sortWith ptsDesc sr

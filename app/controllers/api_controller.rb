@@ -25,26 +25,24 @@ class ApiController < ApplicationController
     }
   end
 
-  private def view_team_id(user, team_id)
-    begin
-      team = Team.find(team_id)
-      r = get_team_json(team)
-      if user.team_id == team_id then
-        r[:money] = team.money
-        r[:inbox] = team.messages.order(:date).reverse_order.limit(100).map(&:to_api)
-      end
-      render json: r
-    rescue ActiveRecord::RecordNotFound
-      head 404
-    end
-  end
-
   def view_team
-    view_team_id(@user, params[:id])
+    render json: get_team_json(Team.find(team_id))
+  rescue ActiveRecord::RecordNotFound
+    head 404
   end
 
   def load_world
-    view_team_id(@user, @user.team_id)
+    team = Team.find(@user.team_id)
+    team_json = get_team_json(team)
+    team_json[:money] = team.money
+    team_json[:inbox] = team.messages.order(:date).reverse_order.limit(100).map(&:to_api)
+
+    render json: {
+      season: SeasonHelper.current_season,
+      team: team_json
+    }
+  rescue ActiveRecord::RecordNotFound
+    head 404
   end
 
   @@load_team_record = lambda {|team|
@@ -69,6 +67,20 @@ class ApiController < ApplicationController
       record: teams.map(&@@load_team_record)
     }
   }
+
+  def history
+    season = params[:season].to_i
+    leagues = League.is_league.order(:rank).all
+    render json: {
+      season: season,
+      leagues: (leagues.map do |l|
+        {
+          "name": l.name,
+          "record": DbHelper::league_table(l.id, season)
+        }
+      end)
+    }
+  end
 
   def league_tables
     season = SeasonHelper::current_season

@@ -1,5 +1,5 @@
 module ClientServer exposing (loadGame, loadTeam, saveFormation, sellPlayer, pollGameEvents, getStartGameData, getFixtures, getLeagueTables,
-    loadTransferListings, makeTransferBid, deleteInboxMessage, loadNews, getTopScorers)
+    loadTransferListings, makeTransferBid, deleteInboxMessage, loadNews, getTopScorers, getHistory)
 
 import Array exposing (Array)
 import Date
@@ -67,7 +67,7 @@ pollGameEvents gameId lastEventId =
     in Http.send UpdateGame (Http.get url jsonDecodeGameEventUpdate)
 
 getStartGameData : Cmd Msg
-getStartGameData = Http.send GotStartGameData (Http.get "/load_world" jsonDecodeTeam)
+getStartGameData = Http.send GotStartGameData (Http.get "/load_world" jsonDecodeStartGameData)
 
 getFixtures : Cmd Msg
 getFixtures =
@@ -76,6 +76,11 @@ getFixtures =
 getLeagueTables : Cmd Msg
 getLeagueTables =
     Http.send UpdateLeagueTables (Http.get "/tables" jsonDecodeLeagueTables)
+
+getHistory : Season -> Cmd Msg
+getHistory season =
+    let url = "/history/" ++ toString season
+    in Http.send UpdateHistory (Http.get url jsonDecodeHistory)
 
 getTopScorers : Cmd Msg
 getTopScorers =
@@ -189,6 +194,12 @@ jsonDecodeGameEventSide =
             _ -> Json.fail ("Invalid GameEvent side: " ++ toString val)
         )
 
+jsonDecodeStartGameData : Json.Decoder StartGameData
+jsonDecodeStartGameData =
+    Json.map2 StartGameData
+        (Json.field "team" jsonDecodeTeam)
+        (Json.field "season" Json.int)
+
 jsonDecodeTeam : Json.Decoder Team
 jsonDecodeTeam =
     Json.map7 Team
@@ -283,6 +294,12 @@ jsonDecodeTopScorers =
                 )
             )
     )
+
+jsonDecodeHistory : Json.Decoder History
+jsonDecodeHistory =
+    Json.map2 History
+        (Json.field "season" Json.int)
+        (Json.field "leagues" jsonDecodeLeagueTables)
 
 jsonDecodeLeagueTables : Json.Decoder (List LeagueTable)
 jsonDecodeLeagueTables =

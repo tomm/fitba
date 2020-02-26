@@ -4,11 +4,14 @@ import Round
 import Array exposing (Array)
 import Time exposing (Time)
 
+type alias Season = Int
 type alias TeamId = Int
 type alias Team = { id: TeamId, name: String, manager: Maybe String, players: Array Player,
     formation: Array (Int, Int), money: Maybe Int, inbox: List InboxMessage }
+type alias StartGameData = { team: Team, season: Int }
 type alias SeasonRecord = { teamId: TeamId, name: String, played: Int, won: Int, drawn: Int, lost: Int, goalsFor: Int, goalsAgainst: Int }
 type alias LeagueTable = { name: String, record: List SeasonRecord }
+type alias History = { season: Season, leagues: List LeagueTable }
 type alias PlayerId = Int
 type alias Player = { id: PlayerId, name: String, age: Int, forename: String, shooting: Int, passing: Int, tackling: Int,
                       handling: Int, speed: Int, injury: Int, form: Int, positions: List (Int, Int) }

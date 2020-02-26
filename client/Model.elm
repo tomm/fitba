@@ -23,6 +23,7 @@ type UiTab = TabTeam TeamViewTypes.State
              | TabInbox
              | TabNews
              | TabInfo
+             | TabHistory
 
 type alias RootModel = {
     errorMsg: Maybe String,
@@ -32,11 +33,13 @@ type alias RootModel = {
 type RootState = Loading | GameData Model
 
 type alias Model = {
+    season: Season,
     ourTeamId: TeamId,
     currentTime: Time.Time,
     tab: UiTab,
     ourTeam: Team,
     news: List News,
+    history: Maybe History,
     fixtures: List Fixture,
     leagueTables: List LeagueTable,
     topScorers: List TournamentTopScorers
