@@ -31,7 +31,7 @@ class ApiController < ApplicationController
       r = get_team_json(team)
       if user.team_id == team_id then
         r[:money] = team.money
-        r[:inbox] = team.messages.order(:date).reverse_order.limit(10).map(&:to_api)
+        r[:inbox] = team.messages.order(:date).reverse_order.limit(100).map(&:to_api)
       end
       render json: r
     rescue ActiveRecord::RecordNotFound
