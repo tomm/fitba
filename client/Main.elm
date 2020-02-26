@@ -189,7 +189,7 @@ update msg model =
                     Err error -> handleHttpError error model
                 ViewHistory season ->
                     if season > 0 && season <= m.season then
-                        (model, getHistory season)
+                        updateStateCmd { m | history = Nothing } (getHistory season)
                     else (model, Cmd.none)
                 UpdateHistory result -> case result of
                     Ok history -> updateState { m | history = Just history }
