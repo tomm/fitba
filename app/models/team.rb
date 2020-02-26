@@ -27,8 +27,10 @@ class Team < ApplicationRecord
     Message.send_message(self, from, subject, body, date)
   end
 
-  def has_user?
-    User.where(team_id: self.id).count > 0
+  def is_actively_managed_by_human?
+    !!Session.where(
+      user_id: User.where(team_id: self.id).first&.id
+    ).order(:updated_at).reverse_order.first&.updated_at&.method(:>)&.call(Time.now - 30.day)
   end
 
   def player_positions

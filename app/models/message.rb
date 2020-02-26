@@ -3,7 +3,7 @@ class Message < ApplicationRecord
 
   def self.send_message(team, from, subject, body, date)
     # don't bother sending messages to AI users
-    if not team.has_user? then
+    if not team.is_actively_managed_by_human? then
       return
     end
 

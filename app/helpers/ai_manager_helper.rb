@@ -134,7 +134,7 @@ module AiManagerHelper
                  FORMATION_VAG, FORMATION_4411, FORMATION_4411a ]
 
   def self.daily_task(team)
-    if team.has_user? then
+    if team.is_actively_managed_by_human? then
       return
     end
 
@@ -149,7 +149,7 @@ module AiManagerHelper
   end
 
   def self.maybe_acquire_player(team)
-    if team.has_user? || team.players.count >= SQUAD_MAX_SIZE then
+    if team.is_actively_managed_by_human? || team.players.count >= SQUAD_MAX_SIZE then
       return
     end
 
@@ -161,7 +161,7 @@ module AiManagerHelper
   end
 
   def self.maybe_sell_player(team)
-    if team.has_user? then
+    if team.is_actively_managed_by_human? then
       return
     end
 
@@ -226,7 +226,7 @@ module AiManagerHelper
   end
 
   def self.pick_team_formation(team)
-    if team.has_user? then
+    if team.is_actively_managed_by_human? then
       # don't help human players ;)
       return
     end
