@@ -5,6 +5,25 @@ class Game < ApplicationRecord
   belongs_to :home_formation, :class_name => 'Formation', optional: true
   belongs_to :away_formation, :class_name => 'Formation', optional: true
 
+  def time_to_match_minutes(time)
+    # seconds
+    s = (time - self.start).to_i
+
+    if s < 3*55 then
+      mins = s/3
+      if mins <= 45 then mins else "45+" + (mins-45) end
+    elsif s < 3*105 then
+      mins = (s/3 - 10)
+      if mins <= 90 then mins else "90+" + (mins-90) end
+    elsif s < 3*125 then
+      mins = (s/3 - 15)
+      if mins <= 105 then mins else "105+" + (mins-105) end
+    else
+      mins = (s/3 - 20)
+      if mins <= 120 then mins else "120+" ++ (mins-120) end
+    end
+  end
+
   def subs_used(side)
     if side == 0 then self.home_subs else self.away_subs end
   end

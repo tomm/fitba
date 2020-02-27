@@ -1,25 +1,18 @@
 #!/usr/bin/env ruby
 # Try running with:
-# $ RAILS_ENV=development ruby test_server.rb
-require 'fcm'
+# $ RAILS_ENV=development ruby game_server.rb
 require 'date'
 require "./config/environment"
 require "./app/helpers/populate_db_helper"
 require "./app/helpers/spring_clean_db_helper"
+require "./app/helpers/push_notification_helper"
 
 daily_tasks_last = Date.today
 DAYS_REST_BETWEEN_SEASONS = 1
 
 five_minutely_tasks_last = nil
 
-def init_firebase
-  server_key = ENV['FIREBASE_SERVER_KEY']
-  if server_key != nil
-    FCM.new(server_key)
-  else
-    raise 'Missing FIREBASE_SERVER_KEY variable'
-  end
-end
+PushNotificationHelper.test_config()
 
 def daily_task
   Rails.logger.info "executing daily tasks..."
@@ -49,19 +42,14 @@ def five_minutely_task
   PlayerHelper.spawn_injuries
 end
 
-def notify_game_starting(fcm_tokens, is_home, opponent_name)
-  venue = is_home ? 'home' : 'away'
-  msg = "Your #{venue} game against #{opponent_name} starts in 5 minutes!"
-  options = {
-    "notification": {
-      "title": msg,
-      "body": '',
-      'click_action': 'https://myfitba.club/'
-    }
-  }
-
-  puts "Fcm notification to #{fcm_tokens}: #{msg}"
-  init_firebase.send(fcm_tokens, options)
+def notify_game_starting(team_id, is_home, opponent_name)
+  puts "Fcm notification to manager of team id #{team_id}"
+  PushNotificationHelper.send_to_manager_of_team_id(
+    team_id,
+    "Your #{is_home ? 'home' : 'away'} game against #{opponent_name} starts in 5 minutes!",
+    '',
+    'https://myfitba.club/'
+  )
 end
 
 def notify_games_starting(now)
@@ -69,12 +57,9 @@ def notify_games_starting(now)
       .where.not(notified: true)
       .where('start < ?', now + (60 * 5))
       .each do |g|
-    # who should we notify?
-    home_tokens = UserFcmToken.for_team_id(g.home_team_id).pluck(:token)
-    away_tokens = UserFcmToken.for_team_id(g.away_team_id).pluck(:token)
 
-    notify_game_starting(home_tokens, true, g.away_team.name)
-    notify_game_starting(away_tokens, false, g.home_team.name)
+    notify_game_starting(g.home_team_id, true, g.away_team.name)
+    notify_game_starting(g.away_team_id, false, g.home_team.name)
     g.update(notified: true)
   end
 end

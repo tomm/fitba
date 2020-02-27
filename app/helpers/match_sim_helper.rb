@@ -1,3 +1,5 @@
+require_relative './push_notification_helper'
+
 module MatchSimHelper
   MAX_SUBSTITUTIONS = 3
   SECONDS_PER_TICK = 1
@@ -199,6 +201,7 @@ module MatchSimHelper
         emit_event('EndOfGame', @last_event.side, ball_pos, reason, @last_event.player_id)
       end
       media_response
+      PushNotificationHelper.send_result_notifications(@game)
     end
 
     def test_match_abandonment
