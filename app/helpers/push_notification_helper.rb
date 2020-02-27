@@ -29,7 +29,7 @@ module PushNotificationHelper
       }
     }
 
-    init_firebase.send(fcm_tokens, options)
+    get_firebase.send(token, options)
   end
 
   def self.send_result_notifications(game)
