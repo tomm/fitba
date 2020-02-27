@@ -4,7 +4,8 @@
 require 'fcm'
 require 'date'
 require "./config/environment"
-require "./app/helpers/populate_db_helper.rb"
+require "./app/helpers/populate_db_helper"
+require "./app/helpers/spring_clean_db_helper"
 
 daily_tasks_last = Date.today
 DAYS_REST_BETWEEN_SEASONS = 1
@@ -25,6 +26,7 @@ def daily_task
   if SeasonHelper.is_end_of_season? then
     if Date.today - SeasonHelper.last_game_date >= DAYS_REST_BETWEEN_SEASONS then
       SeasonHelper.handle_end_of_season
+      SpringCleanDbHelper.go
     end
   end
 
