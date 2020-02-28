@@ -13,10 +13,10 @@ class ApiControllerTest < ActionController::TestCase
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal user.team_id, body['id']
-    assert_equal "Test Utd", body['name']
-    assert_equal 12345, body['money']
-    assert_equal "Tom", body['manager']
+    assert_equal user.team_id, body['team']['id']
+    assert_equal "Test Utd", body['team']['name']
+    assert_equal 12345, body['team']['money']
+    assert_equal "Tom", body['team']['manager']
   end
 
   test "team_messages" do
@@ -25,16 +25,16 @@ class ApiControllerTest < ActionController::TestCase
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal [], body['inbox']
+    assert_equal [], body['team']['inbox']
 
     Message.send_message(user.team, "Bob", "Hello", "Hello old bean", Time.now)
 
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal "Hello", body['inbox'][0]['subject']
+    assert_equal "Hello", body['team']['inbox'][0]['subject']
 
-    post :delete_message, body: {message_id: body['inbox'][0]['id']}.to_json, :format => "json"
+    post :delete_message, body: {message_id: body['team']['inbox'][0]['id']}.to_json, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
     assert_equal "SUCCESS", body['status']
@@ -42,7 +42,7 @@ class ApiControllerTest < ActionController::TestCase
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal [], body['inbox']
+    assert_equal [], body['team']['inbox']
   end
 
   test "/sell_player" do
@@ -379,8 +379,8 @@ class ApiControllerTest < ActionController::TestCase
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal AiManagerHelper::FORMATION_442, body['formation']
-    assert_equal 12, body['players'].size
+    assert_equal AiManagerHelper::FORMATION_442, body['team']['formation']
+    assert_equal 12, body['team']['players'].size
 
     post :save_formation, body: [[amy.id, [1,2]], [barbara.id, [2,3]]].to_json, :format => "json"
     assert_response :success
@@ -390,10 +390,10 @@ class ApiControllerTest < ActionController::TestCase
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal expected_formation, body['formation']
-    assert_equal 12, body['players'].size
-    assert_equal "Amy", body['players'][0]['name']
-    assert_equal "Barbara", body['players'][1]['name']
+    assert_equal expected_formation, body['team']['formation']
+    assert_equal 12, body['team']['players'].size
+    assert_equal "Amy", body['team']['players'][0]['name']
+    assert_equal "Barbara", body['team']['players'][1]['name']
 
     # reorder amy & barbara. molly should be ignored because she is not on this team, and amy ignored because she's a GK
     post :save_formation, body: [[barbara.id, [4,1]], [amy.id, [3,2], [molly.id, [2,3]]]].to_json, :format => "json"
@@ -402,12 +402,12 @@ class ApiControllerTest < ActionController::TestCase
     get :load_world, :format => "json"
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal 11, body['formation'].size
-    assert_equal 12, body['players'].size
-    assert_equal "Barbara", body['players'][0]['name']
-    assert_equal "Amy", body['players'][1]['name']
-    assert_equal [2,6], body['formation'][0]
-    assert_equal [3,2], body['formation'][1]
+    assert_equal 11, body['team']['formation'].size
+    assert_equal 12, body['team']['players'].size
+    assert_equal "Barbara", body['team']['players'][0]['name']
+    assert_equal "Amy", body['team']['players'][1]['name']
+    assert_equal [2,6], body['team']['formation'][0]
+    assert_equal [3,2], body['team']['formation'][1]
   end
 
   test "news_articles" do

@@ -1,58 +1,220 @@
 module Types exposing (..)
-import Round
 
 import Array exposing (Array)
-import Time exposing (Time)
+import Round
+import Time
 
-type alias Season = Int
-type alias TeamId = Int
-type alias Team = { id: TeamId, name: String, manager: Maybe String, players: Array Player,
-    formation: Array (Int, Int), money: Maybe Int, inbox: List InboxMessage }
-type alias StartGameData = { team: Team, season: Int }
-type alias SeasonRecord = { teamId: TeamId, name: String, played: Int, won: Int, drawn: Int, lost: Int, goalsFor: Int, goalsAgainst: Int }
-type alias LeagueTable = { name: String, record: List SeasonRecord }
-type alias PlayerId = Int
-type alias Player = { id: PlayerId, name: String, age: Int, forename: String, shooting: Int, passing: Int, tackling: Int,
-                      handling: Int, speed: Int, injury: Int, form: Int, positions: List (Int, Int) }
-type alias TransferListingId = Int
-type TransferStatus = OnSale | Sold | Unsold | YouWon | OutBid | TeamRejected | PlayerRejected | InsufficientMoney
-type alias TransferListing = { id: TransferListingId, minPrice: Int, deadline: Time, sellerTeamId: TeamId,
-                               player: Player, youBid: Maybe Int, status: TransferStatus }
-type alias GameId = Int
-type alias GameEventId = Int
-type GameEventKind = KickOff | Goal | GoalKick | Boring | ShotTry | ShotMiss | ShotSaved | Corner | EndOfGame
-type GameEventSide = Home | Away
-type alias GameEvent = { id: GameEventId, gameId: GameId, kind: GameEventKind, side: GameEventSide,
-                         timestamp: Time, message: String, ballPos: (Int, Int), playerName: Maybe String }
-type alias GameEventUpdate = { attending: List String, events: List GameEvent }
-type alias Game = { id: GameId, homeTeam: Team, awayTeam: Team, start: Time, events: List GameEvent, status: FixtureStatus, attending: List String, stage: Maybe Int }
-type alias FixtureStatusPlayed = { homeGoals: Int, awayGoals: Int, homePenalties: Int, awayPenalties: Int }
-type FixtureStatus = Scheduled | InProgress | Played FixtureStatusPlayed
-type alias Fixture = { gameId: GameId, homeName: String, awayName: String, start: Time, status: FixtureStatus, tournament: String, stage: Maybe Int }
-type alias History = { season: Season, leagues: List LeagueTable, cup_finals: List Fixture }
-type alias InboxMessageId = Int
-type alias InboxMessage = { id: InboxMessageId, from: String, subject: String, body: String, date: Time }
-type alias News = { title: String, body: String, time: Time }
-type alias TopScorer = { teamName: Maybe String, playerName: String, goals: Int }
-type alias TournamentTopScorers = { tournamentName: String, topScorers: List TopScorer }
 
-playerPositionFormat : List (Int, Int) -> String
+type alias Season =
+    Int
+
+
+type alias TeamId =
+    Int
+
+
+type alias Team =
+    { id : TeamId
+    , name : String
+    , manager : Maybe String
+    , players : Array Player
+    , formation : Array ( Int, Int )
+    , money : Maybe Int
+    , inbox : List InboxMessage
+    }
+
+
+type alias StartGameData =
+    { team : Team, season : Int }
+
+
+type alias SeasonRecord =
+    { teamId : TeamId, name : String, played : Int, won : Int, drawn : Int, lost : Int, goalsFor : Int, goalsAgainst : Int }
+
+
+type alias LeagueTable =
+    { name : String, record : List SeasonRecord }
+
+
+type alias PlayerId =
+    Int
+
+
+type alias Player =
+    { id : PlayerId
+    , name : String
+    , age : Int
+    , forename : String
+    , shooting : Int
+    , passing : Int
+    , tackling : Int
+    , handling : Int
+    , speed : Int
+    , injury : Int
+    , form : Int
+    , positions : List ( Int, Int )
+    }
+
+
+type alias TransferListingId =
+    Int
+
+
+type TransferStatus
+    = OnSale
+    | Sold
+    | Unsold
+    | YouWon
+    | OutBid
+    | TeamRejected
+    | PlayerRejected
+    | InsufficientMoney
+
+
+type alias TransferListing =
+    { id : TransferListingId
+    , minPrice : Int
+    , deadline : Time.Posix
+    , sellerTeamId : TeamId
+    , player : Player
+    , youBid : Maybe Int
+    , status : TransferStatus
+    }
+
+
+type alias GameId =
+    Int
+
+
+type alias GameEventId =
+    Int
+
+
+type GameEventKind
+    = KickOff
+    | Goal
+    | GoalKick
+    | Boring
+    | ShotTry
+    | ShotMiss
+    | ShotSaved
+    | Corner
+    | EndOfGame
+
+
+type GameEventSide
+    = Home
+    | Away
+
+
+type alias GameEvent =
+    { id : GameEventId
+    , gameId : GameId
+    , kind : GameEventKind
+    , side : GameEventSide
+    , timestamp : Time.Posix
+    , message : String
+    , ballPos : ( Int, Int )
+    , playerName : Maybe String
+    }
+
+
+type alias GameEventUpdate =
+    { attending : List String, events : List GameEvent }
+
+
+type alias Game =
+    { id : GameId, homeTeam : Team, awayTeam : Team, start : Time.Posix, events : List GameEvent, status : FixtureStatus, attending : List String, stage : Maybe Int }
+
+
+type alias FixtureStatusPlayed =
+    { homeGoals : Int, awayGoals : Int, homePenalties : Int, awayPenalties : Int }
+
+
+type FixtureStatus
+    = Scheduled
+    | InProgress
+    | Played FixtureStatusPlayed
+
+
+type alias Fixture =
+    { gameId : GameId, homeName : String, awayName : String, start : Time.Posix, status : FixtureStatus, tournament : String, stage : Maybe Int }
+
+
+type alias History =
+    { season : Season, leagues : List LeagueTable, cup_finals : List Fixture }
+
+
+type alias InboxMessageId =
+    Int
+
+
+type alias InboxMessage =
+    { id : InboxMessageId, from : String, subject : String, body : String, date : Time.Posix }
+
+
+type alias News =
+    { title : String, body : String, time : Time.Posix }
+
+
+type alias TopScorer =
+    { teamName : Maybe String, playerName : String, goals : Int }
+
+
+type alias TournamentTopScorers =
+    { tournamentName : String, topScorers : List TopScorer }
+
+sideToString : GameEventSide -> String
+sideToString s = if s == Home then "Home" else "Away"
+
+playerPositionFormat : List ( Int, Int ) -> String
 playerPositionFormat ps =
-    if List.member (2,6) ps then "GK"
-    else if List.member (2,5) ps then "DC"
-    else if List.member (2,4) ps then "DMC"
-    else if List.member (2,3) ps then "MC"
-    else if List.member (2,2) ps then "AMC"
-    else if List.member (2,1) ps then "CF"
-    else if List.member (0,5) ps then "DL"
-    else if List.member (4,5) ps then "DR"
-    else if List.member (0,4) ps then "DML"
-    else if List.member (4,4) ps then "DMR"
-    else if List.member (0,3) ps then "ML"
-    else if List.member (4,3) ps then "MR"
-    else if List.member (0,2) ps then "AML"
-    else if List.member (4,2) ps then "AMR"
-    else "ERROR: " ++ (toString ps)
+    if List.member ( 2, 6 ) ps then
+        "GK"
+
+    else if List.member ( 2, 5 ) ps then
+        "DC"
+
+    else if List.member ( 2, 4 ) ps then
+        "DMC"
+
+    else if List.member ( 2, 3 ) ps then
+        "MC"
+
+    else if List.member ( 2, 2 ) ps then
+        "AMC"
+
+    else if List.member ( 2, 1 ) ps then
+        "CF"
+
+    else if List.member ( 0, 5 ) ps then
+        "DL"
+
+    else if List.member ( 4, 5 ) ps then
+        "DR"
+
+    else if List.member ( 0, 4 ) ps then
+        "DML"
+
+    else if List.member ( 4, 4 ) ps then
+        "DMR"
+
+    else if List.member ( 0, 3 ) ps then
+        "ML"
+
+    else if List.member ( 4, 3 ) ps then
+        "MR"
+
+    else if List.member ( 0, 2 ) ps then
+        "AML"
+
+    else if List.member ( 4, 2 ) ps then
+        "AMR"
+
+    else
+        "ERROR"
+
 
 playerAvgSkill : Player -> String
-playerAvgSkill p = Round.round 1 <| 0.2 * toFloat (p.shooting + p.passing + p.tackling + p.handling + p.speed)
+playerAvgSkill p =
+    Round.round 1 <| 0.2 * toFloat (p.shooting + p.passing + p.tackling + p.handling + p.speed)

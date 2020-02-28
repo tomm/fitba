@@ -11,16 +11,16 @@ class Game < ApplicationRecord
 
     if s < 3*55 then
       mins = s/3
-      if mins <= 45 then mins else "45+" + (mins-45) end
+      if mins <= 45 then mins else "45+" + (mins-45).to_s end
     elsif s < 3*105 then
       mins = (s/3 - 10)
-      if mins <= 90 then mins else "90+" + (mins-90) end
+      if mins <= 90 then mins else "90+" + (mins-90).to_s end
     elsif s < 3*125 then
       mins = (s/3 - 15)
-      if mins <= 105 then mins else "105+" + (mins-105) end
+      if mins <= 105 then mins else "105+" + (mins-105).to_s end
     else
       mins = (s/3 - 20)
-      if mins <= 120 then mins else "120+" ++ (mins-120) end
+      if mins <= 120 then mins else "120+" + (mins-120).to_s end
     end
   end
 

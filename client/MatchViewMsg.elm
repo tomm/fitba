@@ -1,3 +1,7 @@
-module MatchViewMsg exposing (Msg, Msg(..))
+module MatchViewMsg exposing (Msg(..))
 
-type Msg = GameTick | ShowFinalScore | NoOp
+
+type Msg
+    = GameTick
+    | ShowFinalScore
+    | NoOp

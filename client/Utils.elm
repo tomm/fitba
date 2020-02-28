@@ -1,70 +1,93 @@
-module Utils exposing (dateEq, timeEqYYMMDDHHMM, onlyTimeFormat, dateFormat, timeFormat, moneyFormat, timeFormatShort, dateTimeFormat)
+module Utils exposing (posixToSeconds, addSeconds, dateEq, dateFormat, dateTimeFormat, moneyFormat, onlyTimeFormat, timeFormat, timeFormatShort)
 
-import Time
 import Date
+import DateFormat
 import FormatNumber
 import FormatNumber.Locales exposing (Locale, usLocale)
+import Time exposing (Zone, Posix, utc)
 
-timeEqYYMMDDHHMM : Time.Time -> Time.Time -> Bool
-timeEqYYMMDDHHMM t1 t2 =
-    let d1 = Date.fromTime t1
-        d2 = Date.fromTime t2
-    in dateEq d1 d2 &&
-       (Date.hour d1 == Date.hour d2) &&
-       (Date.minute d1 == Date.minute d2)
+addSeconds : Posix -> Int -> Posix
+addSeconds t s = Time.millisToPosix (Time.posixToMillis t + 1000*s)
 
-dateEq : Date.Date -> Date.Date -> Bool
-dateEq a b = Date.year a == Date.year b &&
-             Date.month a == Date.month b &&
-             Date.day a == Date.day b
+posixToSeconds : Posix -> Int
+posixToSeconds p = Time.posixToMillis p // 1000
 
-dateFormat : Date.Date -> String
-dateFormat d =
-    (Date.dayOfWeek d |> toString)
-    ++ " " ++
-    (Date.day d |> toString)
-    ++ " " ++
-    (Date.month d |> toString)
+dateEq : Posix -> Posix -> Bool
+dateEq ta tb =
+    let a = Date.fromPosix utc ta
+        b = Date.fromPosix utc tb
+    in Date.year a
+        == Date.year b
+        && Date.month a
+        == Date.month b
+        && Date.day a
+        == Date.day b
 
-dateTimeFormat : Date.Date -> String
-dateTimeFormat d =
-    (Date.dayOfWeek d |> toString)
-    ++ " " ++
-    (Date.day d |> toString)
-    ++ " " ++
-    (Date.month d |> toString)
-    ++ " " ++
-    (Date.hour d |> toString)
-    ++ ":" ++
-    (if Date.minute d < 10 then "0" else "") ++
-    (Date.minute d |> toString)
 
--- uh god, i painted myself into a corner with these dumb names...
-onlyTimeFormat : Time.Time -> String
-onlyTimeFormat t = Date.fromTime t |> (\d ->
-        (Date.hour d |> toString)
-        ++ ":" ++
-        (if Date.minute d < 10 then "0" else "") ++
-        (Date.minute d |> toString)
-    )
+dateFormatter : Zone -> Posix -> String
+dateFormatter =
+    DateFormat.format
+        [ DateFormat.dayOfWeekNameAbbreviated
+        , DateFormat.text " "
+        , DateFormat.dayOfMonthNumber
+        , DateFormat.text " "
+        , DateFormat.monthNameAbbreviated
+        ]
 
-timeFormat : Time.Time -> String
-timeFormat t = Date.fromTime t |> dateTimeFormat
+dateFormat : Posix -> String
+dateFormat d = dateFormatter utc d
 
-timeFormatShort : Time.Time -> String
-timeFormatShort t =
-    let dateFormatShort d =
-            (Date.dayOfWeek d |> toString)
-            ++ " " ++
-            (Date.hour d |> toString)
-            ++ ":" ++
-            (if Date.minute d < 10 then "0" else "") ++
-            (Date.minute d |> toString)
-    in Date.fromTime t |> dateFormatShort
+dateTimeFormatter : Zone -> Posix -> String
+dateTimeFormatter =
+    DateFormat.format
+        [ DateFormat.dayOfWeekNameAbbreviated
+        , DateFormat.text " "
+        , DateFormat.dayOfMonthNumber
+        , DateFormat.text " "
+        , DateFormat.monthNameAbbreviated
+        , DateFormat.text " "
+        , DateFormat.hourMilitaryNumber
+        , DateFormat.text ":"
+        , DateFormat.minuteFixed
+        ]
+
+dateTimeFormat : Posix -> String
+dateTimeFormat d = dateTimeFormatter utc d
+
+timeFormatter : Zone -> Posix -> String
+timeFormatter =
+    DateFormat.format
+        [ DateFormat.hourMilitaryNumber
+        , DateFormat.text ":"
+        , DateFormat.minuteFixed
+        ]
+
+
+onlyTimeFormat : Time.Posix -> String
+onlyTimeFormat t = timeFormatter utc t
+
+timeFormat : Time.Posix -> String
+timeFormat = dateTimeFormat
+
+
+timeFormatterShort : Zone -> Posix -> String
+timeFormatterShort =
+    DateFormat.format
+        [ DateFormat.dayOfWeekNameAbbreviated
+        , DateFormat.text " "
+        , DateFormat.hourMilitaryNumber
+        , DateFormat.text ":"
+        , DateFormat.minuteFixed
+        ]
+
+timeFormatShort : Time.Posix -> String
+timeFormatShort t = timeFormatterShort utc t
 
 moneyLocale : Locale
-moneyLocale = { usLocale | decimals = 0 }
+moneyLocale =
+    { usLocale | decimals = 0 }
+
 
 moneyFormat : Int -> String
 moneyFormat m =
-    "€" ++ (FormatNumber.format moneyLocale <| toFloat (m//1000)) ++ "k"
+    "€" ++ (FormatNumber.format moneyLocale <| toFloat (m // 1000)) ++ "k"
