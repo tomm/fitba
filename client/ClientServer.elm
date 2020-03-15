@@ -120,7 +120,7 @@ loadTransferListings =
 loadTeam : TeamId -> Cmd Msg
 loadTeam teamId =
     Http.get {
-        url = "/squad" ++ String.fromInt teamId,
+        url = "/squad/" ++ String.fromInt teamId,
         expect = Http.expectJson ViewTeamLoaded jsonDecodeTeam
     }
 
