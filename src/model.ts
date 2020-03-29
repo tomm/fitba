@@ -15,8 +15,16 @@ const httpCall = <Args, Resp>(
   url: string, argType: Safe.Obj<Args>, respType: Safe.Type<Resp>
 ): HttpCall<Args, Resp> => ({
   url, argType, respType, 
-  call: async (args: Args): Promise<Resp> =>
-    respType.read((await axios.post(url, argType.write(args))).data)
+  call: async (args: Args): Promise<Resp> => {
+    return axios.post(url, argType.write(args))
+      .then(v => respType.read(v.data))
+      .catch(e => {
+        if (e.response.status == 403) {
+          window.location.pathname = '/login';
+        }
+        throw e;
+      });
+  }
 });
 
 const SafePlayer = Safe.obj({
@@ -70,6 +78,8 @@ const SafeLeagueTable = Safe.obj({
 const SafeGame = Safe.obj({
   gameId: Safe.int,
   tournament: Safe.str,
+  homeTeamId: Safe.int,
+  awayTeamId: Safe.int,
   homeName: Safe.str,
   awayName: Safe.str,
   start: Safe.dateIso,

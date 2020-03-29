@@ -54,6 +54,8 @@ class Game < ApplicationRecord
     {
       gameId: self.id,
       tournament: self.league.name,
+      homeTeamId: self.home_team.id,
+      awayTeamId: self.away_team.id,
       homeName: self.home_team.name,
       awayName: self.away_team.name,
       start: self.start,
