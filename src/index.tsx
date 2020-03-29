@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import InfoIcon from '@material-ui/icons/Info';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import * as model from './model';
@@ -12,6 +11,11 @@ import { UiTab, Commands } from './commands';
 import { HelpPage } from './HelpPage';
 import { TournamentView } from './TournamentView';
 import { FixturesView } from './FixturesView';
+import QueryBuilderOutlinedIcon from '@material-ui/icons/QueryBuilderOutlined';
+import PeopleAltOutlinedIcon from '@material-ui/icons/PeopleAltOutlined';
+import ViewListIcon from '@material-ui/icons/ViewList';
+import ClassOutlinedIcon from '@material-ui/icons/ClassOutlined';
+import MenuOutlinedIcon from '@material-ui/icons/MenuOutlined';
 import './style.css';
 const clone = require('ramda/src/clone');
 
@@ -93,12 +97,12 @@ function App(props: {
 
   return <>
     <AppBar position="static">
-      <Tabs value={tab} onChange={handleChangeTab}>
-        <Tab label="Squad" id="tab-0" />
-        <Tab label="Tables" id="tab-1" />
-        <Tab label="Fixtures" id="tab-2" />
-        <Tab label="Club" id="tab-3" />
-        <Tab icon={<InfoIcon />} id="tab-4" />
+      <Tabs /*variant={'scrollable'} scrollButtons={'on'}*/ value={tab} onChange={handleChangeTab}>
+        <Tab icon={<PeopleAltOutlinedIcon />} id="tab-0" />
+        <Tab icon={<ViewListIcon />} id="tab-1" />
+        <Tab icon={<QueryBuilderOutlinedIcon />} id="tab-2" />
+        <Tab icon={<ClassOutlinedIcon />} id="tab-3" />
+        <Tab icon={<MenuOutlinedIcon />} id="tab-4" />
       </Tabs>
     </AppBar>
     <TabPanel value={tab} index={0}>

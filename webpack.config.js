@@ -9,7 +9,7 @@ const config = {
     entry: './src/index.tsx',
     output: {
         filename: "[hash].js",
-        path: __dirname + "/public/ts"
+        path: __dirname + "/public/js"
     },
 
     // Enable sourcemaps for debugging webpack's output.
@@ -21,6 +21,7 @@ const config = {
               test: /\.tsx?$/,
               loader: "ts-loader",
               options: {
+                transpileOnly: true
               },
             },
 

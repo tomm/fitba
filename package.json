@@ -5,7 +5,8 @@
   "author": "",
   "license": "GPL",
   "scripts": {
-    "build": "NODE_ENV=production npx webpack"
+    "check": "npx tsc --noEmit -w",
+    "build": "rm -rf ./public/js && NODE_ENV=production npx webpack"
   },
   "dependencies": {
     "@material-ui/core": "^4.9.7",

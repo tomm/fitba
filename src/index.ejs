@@ -17,7 +17,6 @@
   <body>
         <div id="main"></div>
         <noscript>You need to enable JavaScript to play Fitba!</noscript>
-        <script src="main.js"></script>
         <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase.js"></script>
         <script>
           firebase.initializeApp({
@@ -38,10 +37,6 @@
               xhr.send(encodeURI('token=' + token));
             });
           });
-        </script>
-        <script>
-            var node = document.getElementById('main');
-            var app = Elm.Main.init({ node: node });
         </script>
   </body>
 </html>
