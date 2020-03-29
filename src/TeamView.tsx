@@ -3,12 +3,13 @@ import * as model from './model';
 import Grid from '@material-ui/core/Grid';
 import Switch from '@material-ui/core/Switch';
 import PersonIcon from '@material-ui/icons/Person';
-import IconButton from '@material-ui/core/IconButton';
+//import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import Box from '@material-ui/core/Box';
 import { ConfirmDialog } from './ConfirmDialog';
 //import DialogContentText from '@material-ui/core/DialogContentText';
 import * as Uitk from './Uitk';
@@ -17,7 +18,6 @@ import { Commands } from './commands';
 import { bug } from './utils';
 const includes = require('ramda/src/includes');
 const take = require('ramda/src/take');
-const flatten = require('ramda/src/flatten');
 const unnest = require('ramda/src/unnest');
 
 const positionCircleRadius = 75;
@@ -98,11 +98,9 @@ export function TeamView(props: { team: model.Team, commands: Commands }) {
     <h2>{ teamTitle(props.team) }</h2>
     <Grid container spacing={5}>
       <Grid item sm={6} xs={12}>
-        <h3>Squad</h3>
         <RosterView team={props.team} commands={props.commands} />
       </Grid>
       <Grid item sm={6} xs={12}>
-        <h3>Formation</h3>
         <TacticsView team={props.team} commands={props.commands} />
       </Grid>
     </Grid>
@@ -148,14 +146,16 @@ function PlayerDetailsDialog(props: {
 function RosterView(props: { team: model.Team, commands: Commands }) {
   const [ selected, setSelected ] = React.useState<model.PlayerIdx | undefined>(undefined);
   const [ altView, setAltView ] = React.useState<boolean>(false);
-  const [ playerDetailsDialogOpen, setPlayerDetailsDialogOpen ] = React.useState<boolean>(false);
+  const [ showDetailsOf, setShowDetailsOf ] = React.useState<model.PlayerIdx | undefined>(undefined);
   const [ openConfirmSell, setOpenConfirmSell ] = React.useState<boolean>(false);
   const isOwnTeam = props.commands.isOwnTeam(props.team.id);
 
-  const rowStyle = (idx: number) => flatten([
-    idx == selected ? ['active-table-row-style'] : [],
-    props.team.players[idx].injury > 0 ? ['player-row-injury'] : [],
-  ]);
+  const rowStyle = (idx: number): string => {
+    if (idx == selected) return 'active-table-row-style';
+    else if (props.team.players[idx].injury > 0) return 'player-row-injury';
+    else if (selected != undefined) return 'roster-row-move-target';
+    else return '';
+  };
 
   const handleSelectPlayer = (idx: number) => {
     // already selected deselects
@@ -168,51 +168,46 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
     else {
       // a player is already selected. swap them
       if (isOwnTeam) props.commands.swapPlayers(props.team, selected, idx);
-      setSelected(idx);
+      setSelected(undefined);
     }
   }
 
   function handleSellPlayer() {
-    if (selected == undefined) bug();
-    if (isOwnTeam) props.commands.sellPlayer(props.team.players[selected]);
+    if (showDetailsOf == undefined) bug();
+    if (isOwnTeam) props.commands.sellPlayer(props.team.players[showDetailsOf]);
   }
 
   function handleConfirmSell(confirmed: boolean) {
-    if (confirmed && selected != undefined) {
+    if (confirmed && showDetailsOf != undefined) {
       handleSellPlayer();
     }
     setOpenConfirmSell(false);
   }
 
   return <>
-    { selected != undefined && <>
+    { showDetailsOf != undefined && <>
         <ConfirmDialog
           open={openConfirmSell}
-          message={`Do you really want to sell ${props.team.players[selected].name}?`}
+          message={`Do you really want to sell ${props.team.players[showDetailsOf].name}?`}
           onConfirm={b => handleConfirmSell(b)}
         />
         <PlayerDetailsDialog
-          open={playerDetailsDialogOpen}
-          player={props.team.players[selected]}
-          handleClose={() => setPlayerDetailsDialogOpen(false)}
+          open={showDetailsOf != undefined}
+          player={props.team.players[showDetailsOf]}
+          handleClose={() => setShowDetailsOf(undefined)}
           handleClickSell={isOwnTeam ? () => setOpenConfirmSell(true) : undefined}
         />
       </>
     }
-    <Grid container>
-      <Grid item xs={12}>
-        <Switch color="default" checked={altView} onChange={e => setAltView(e.target.checked)} />
-        <IconButton
-            onClick={() => setPlayerDetailsDialogOpen(true)}
-            disabled={selected==undefined} color={"secondary"}>
-          <PersonIcon />
-        </IconButton>
-      </Grid>
-    </Grid>
+    <Box display="flex" justifyContent="center">
+      <h3>Squad</h3>
+    </Box>
     <table className="squad-list">
       <thead>
         <tr>
-          <th>#</th>
+          <th>
+            <Switch color="default" checked={altView} onChange={e => setAltView(e.target.checked)} />
+          </th>
           <th>Pos.</th>
           <th>Name</th>
           <th>Av.</th>
@@ -225,23 +220,30 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
         </tr>
       </thead>
       <tbody>
-        { props.team.players.map((p, idx) =>
-            <tr className={rowStyle(idx)} onClick={() => handleSelectPlayer(idx)}>
-              <td>{ idx + 1 }</td>
+        { props.team.players.map((p, idx) => {
+            const click = () => handleSelectPlayer(idx);
+            return <tr className={rowStyle(idx)}>
               <td>
+                <Button onClick={() => setShowDetailsOf(idx)}
+                  variant="contained"
+                  style={{padding: 0}} size="small" color="default" startIcon={<PersonIcon />}>
+                  { idx + 1 }
+                </Button>
+              </td>
+              <td onClick={click}>
                 <Uitk.PlayerPositionBadge player={p} />
                 <Uitk.PlayerInjuryBadge player={p} />
               </td>
-              <td>{ p.name }</td>
-              <td>{ logic.playerAvgSkill(p).toFixed(1) }</td>
-              <td>{ altView ? p.age : `+${p.form}` }</td>
-              <td>{ p.shooting }</td>
-              <td>{ p.passing }</td>
-              <td>{ p.tackling }</td>
-              <td>{ p.handling }</td>
-              <td>{ p.speed }</td>
-            </tr>
-          )
+              <td onClick={click}>{ p.name }</td>
+              <td onClick={click}>{ logic.playerAvgSkill(p).toFixed(1) }</td>
+              <td onClick={click}>{ altView ? p.age : `+${p.form}` }</td>
+              <td onClick={click}>{ p.shooting }</td>
+              <td onClick={click}>{ p.passing }</td>
+              <td onClick={click}>{ p.tackling }</td>
+              <td onClick={click}>{ p.handling }</td>
+              <td onClick={click}>{ p.speed }</td>
+            </tr>;
+        })
         }
       </tbody>
     </table>
@@ -286,33 +288,36 @@ function TacticsView(props: { team: model.Team, commands: Commands }) {
     setSelected(undefined);
   }
 
-  return <svg width="100%" height="auto" viewBox="0 0 812 1280">
-    <image width="100%" height="100%" xlinkHref="/pitch.png"
-      /*onclick SelectPlayer Nothing */ />
-    { take(11, props.team.formation.map((pos, idx) => 
-        <PlayerOnPitch
-          team={props.team}
-          selected={selected}
-          playerIdx={idx}
-          pos={pos}
-          onSelect={() => handleSelectPlayer(idx)}
-        />
-      ))
-    }
-    {
-      // show pitch positions the selected player can move to
-      // (except idx=0 (GK), who can't be moved outfield
-      (selected && selected > 0)
-      &&
-      movablePitchPositions.map(pos => {
-        if (includes(pos, take(11, props.team.formation))) {
-          return <text></text>
-        } else {
-          const player = props.team.players[selected];
-          const positionSuitsPlayer = includes(pos, player.positions);
-          return emptyPitchPosition(pos, positionSuitsPlayer);
-        }
-      })
-    }
-  </svg>;
+  return <>
+    <h3>Formation</h3>
+    <svg width="100%" height="auto" viewBox="0 0 812 1280">
+      <image width="100%" height="100%" xlinkHref="/pitch.png"
+        /*onclick SelectPlayer Nothing */ />
+      { take(11, props.team.formation.map((pos, idx) => 
+          <PlayerOnPitch
+            team={props.team}
+            selected={selected}
+            playerIdx={idx}
+            pos={pos}
+            onSelect={() => handleSelectPlayer(idx)}
+          />
+        ))
+      }
+      {
+        // show pitch positions the selected player can move to
+        // (except idx=0 (GK), who can't be moved outfield
+        (selected && selected > 0)
+        &&
+        movablePitchPositions.map(pos => {
+          if (includes(pos, take(11, props.team.formation))) {
+            return <text></text>
+          } else {
+            const player = props.team.players[selected];
+            const positionSuitsPlayer = includes(pos, player.positions);
+            return emptyPitchPosition(pos, positionSuitsPlayer);
+          }
+        })
+      }
+    </svg>
+  </>;
 }

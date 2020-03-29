@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import * as Uitk from './Uitk';
 import { makeStyles } from '@material-ui/core/styles';
 import * as model from './model';
 import { TeamView } from './TeamView';
@@ -11,6 +11,7 @@ import { UiTab, Commands } from './commands';
 import { HelpPage } from './HelpPage';
 import { TournamentView } from './TournamentView';
 import { FixturesView } from './FixturesView';
+import { ClubView } from './ClubView';
 import QueryBuilderOutlinedIcon from '@material-ui/icons/QueryBuilderOutlined';
 import PeopleAltOutlinedIcon from '@material-ui/icons/PeopleAltOutlined';
 import ViewListIcon from '@material-ui/icons/ViewList';
@@ -22,7 +23,6 @@ const clone = require('ramda/src/clone');
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
   },
 }));
 
@@ -38,12 +38,22 @@ function TabPanel(props: any) {
 
 function App(props: {
   rootState: model.RootState,
+  requestReloadRootState: () => void,
   updateRootState: (newRootState: model.RootState) => void
 }) {
   const handleChangeTab = (event: any, index: number) => setTab(index);
   const [ tab, setTab ] = React.useState<UiTab>(0);
 
   const commands: Commands = {
+    async deleteInboxMessage(id: number): Promise<void> {
+      await model.deleteInboxMessage.call({ message_id: id })
+                 .then(props.requestReloadRootState);
+    },
+
+    reloadRootState() {
+      props.requestReloadRootState();
+    },
+
     openTab(tab: UiTab) {
       setTab(tab);
     },
@@ -115,7 +125,7 @@ function App(props: {
       <FixturesView commands={commands} rootState={props.rootState} />
     </TabPanel>
     <TabPanel value={tab} index={3}>
-      Item Four
+      <ClubView commands={commands} rootState={props.rootState} />
     </TabPanel>
     <TabPanel value={tab} index={4}>
       <HelpPage />
@@ -125,16 +135,18 @@ function App(props: {
 
 function Loader() {
   const classes = useStyles();
-
-  React.useEffect(() => {
-    model.getRootState.call({}).then(setRootState);
-  }, []);
-
   const [ rootState, setRootState ] = React.useState<model.RootState | undefined>(undefined);
+
+  function handleReloadRootState() {
+    model.getRootState.call({}).then(setRootState);
+  }
+
+  React.useEffect(handleReloadRootState, []);
+
   return <div className={classes.root}>
     { rootState === undefined
-      ? <div style={{textAlign: 'center', marginTop: '4rem'}}><CircularProgress /></div>
-      : <App rootState={rootState} updateRootState={setRootState} />
+      ? <Uitk.Loading />
+      : <App rootState={rootState} updateRootState={setRootState} requestReloadRootState={handleReloadRootState} />
     }
   </div>
 }

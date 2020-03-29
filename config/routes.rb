@@ -30,4 +30,10 @@ Rails.application.routes.draw do
   post 'load_world' => 'api#load_world'
   post 'tables' => 'api#league_tables'
   post 'fixtures' => 'api#fixtures'
+  post 'get_game' => 'api#game_events'
+  post 'game_events_since' => 'api#game_events_since'
+  post 'news_articles' => 'api#news_articles'
+  post 'history' => 'api#history'
+  post 'transfer_listings' => 'api#transfer_listings'
+  post 'top_scorers' => 'api#top_scorers'
 end

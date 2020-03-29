@@ -274,19 +274,31 @@ class ApiController < ApplicationController
   end
 
   def top_scorers
+    season = if params[:season] then params[:season] else SeasonHelper.current_season end
     conn = ActiveRecord::Base.connection
     render json: League.is_league.order(:rank).all.map{|l|
-      r = conn.execute(
-        "select (select name from teams where id=(select team_id from players where id=g.player_id)) as teamname,
-                (select concat(forename,' ',name) from players where id=g.player_id) as playername,
-                 count(g.*) as goals
-        from game_events g
-        join games gm on g.game_id=gm.id
-        where gm.season=#{conn.quote(SeasonHelper.current_season)} and gm.league_id=#{conn.quote(l.id)} and g.kind='Goal'
-        group by g.player_id
-        order by goals desc
-        limit 25")
-      {tournamentName: l.name, topScorers: r.to_a}
+      r = conn.execute("
+    select 
+      concat(p.forename,' ',p.name) as playername,
+
+      (select array_to_string(array_agg(name), ', ') from teams where id in
+        (select (case ge2.side when 0 then gm2.home_team_id else gm2.away_team_id end) as team_id
+        from games gm2
+        join game_events ge2 on ge2.game_id=gm2.id
+        where ge2.player_id=p.id and 
+          gm2.season=#{conn.quote(season)} and gm2.league_id=#{conn.quote(l.id)}
+      )) as teamname,
+
+      (select count(*) from game_events ge
+       join games g on g.id = ge.game_id
+       where ge.player_id = p.id and ge.kind = 'Goal'
+       and g.season=#{conn.quote(season)} and g.league_id=#{conn.quote(l.id)}) as goals
+    from players p
+    order by 3 desc
+    limit 25
+      ")
+
+      { tournamentName: l.name, topScorers: r.to_a }
     }
   end
 end

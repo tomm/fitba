@@ -1,6 +1,13 @@
 import React from 'react';
 import * as model from './model';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { playerPositionFormat } from './formatters';
+
+export function Loading() {
+  return <div style={{textAlign: 'center', marginTop: '4rem'}}>
+    <CircularProgress />
+  </div>
+}
 
 export function PlayerPositionBadge(props: { player: model.Player }) {
   const pos = playerPositionFormat(props.player.positions);

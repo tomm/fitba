@@ -1,11 +1,12 @@
 import * as model from './model';
 import * as React from 'react';
 import { bug } from './utils';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import * as Uitk from './Uitk';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Box from '@material-ui/core/Box';
 import FormControl from '@material-ui/core/FormControl';
+import { MatchView } from './MatchView';
 import { Commands } from './commands';
 import { format } from 'date-fns';
 const uniq = require('ramda/src/uniq');
@@ -16,11 +17,11 @@ function dateEq(d1: Date, d2: Date) {
          d1.getDate() == d2.getDate();
 }
 
-function resultText(game: model.Game): string {
+export function resultText(game: model.Fixture): string {
   switch (game.status) {
-    case 'Scheduled': return 'Scheduled';
-    case 'InProgress': return 'In Progress!';
-    case 'Played':
+    case model.GameStatus.Scheduled: return 'Scheduled';
+    case model.GameStatus.InProgress: return 'In Progress!';
+    case model.GameStatus.Played:
       const penalties = game.homePenalties > 0 || game.awayPenalties > 0
         ? ` (${game.homePenalties} : ${game.awayPenalties} P)`
         : '';
@@ -33,9 +34,10 @@ function FixturesTable(props: {
   rootState: model.RootState,
   showTournament: boolean,
   dateFormatter: (d: Date) => string,
-  fixtures: model.Game[]
+  onClickGame: (gameId: number) => void,
+  fixtures: model.Fixture[]
 }) {
-  const rowClass = (game: model.Game): string =>
+  const rowClass = (game: model.Fixture): string =>
     game.homeTeamId == props.rootState.team.id ||
     game.awayTeamId == props.rootState.team.id
     ? 'fixture-own'
@@ -51,7 +53,7 @@ function FixturesTable(props: {
     }
   }
 
-  const tournamentText = (game: model.Game) =>
+  const tournamentText = (game: model.Fixture) =>
     `${game.tournament} ${game.stage && cupStage(game.stage)}`
 
   return <div>
@@ -64,7 +66,7 @@ function FixturesTable(props: {
       {
         props.fixtures.map(game =>
           <tr className={rowClass(game)}
-              /*onClick Watch fixture.gameId */>
+              onClick={e => props.onClickGame(game.gameId)}>
             <td>
               { props.showTournament
                 ? <span className="fixture-tournament">{ tournamentText(game) }</span>
@@ -85,18 +87,10 @@ function FixturesTable(props: {
   </div>
 }
 
-function FixturesToday(props: { rootState: model.RootState, fixtures: model.Game[] }) {
-  return <FixturesTable
-    rootState={props.rootState}
-    showTournament={true}
-    dateFormatter={d => format(d, 'HH:mm')}
-    fixtures={props.fixtures.filter(f => dateEq(f.start, new Date()))}
-  />
-}
-
 export function FixturesView(props: { rootState: model.RootState, commands: Commands }) {
-  const [ fixtures, setFixtures ] = React.useState<model.Game[] | undefined>(undefined);
+  const [ fixtures, setFixtures ] = React.useState<model.Fixture[] | undefined>(undefined);
   const [ viewTournamentName, setViewTournamentName ] = React.useState<string>("Today");
+  const [ viewGameId, setViewGameId ] = React.useState<number | undefined>(undefined);
 
   React.useEffect(() => {
     model.getFixtures.call({}).then(setFixtures);
@@ -106,43 +100,54 @@ export function FixturesView(props: { rootState: model.RootState, commands: Comm
     setViewTournamentName(view);
   }
 
-  const getTournaments = (fixtures: model.Game[]): string[] =>
+  function handleClickGame(gameId: number) {
+    setViewGameId(gameId);
+  }
+
+  const getTournaments = (fixtures: model.Fixture[]): string[] =>
     uniq(fixtures.map(g => g.tournament));
 
-  return <>
-    <h2>Fixtures</h2>
-    { fixtures == undefined &&
-      <div style={{textAlign: 'center', marginTop: '4rem'}}>
-        <CircularProgress />
-      </div>
-    }
-    { fixtures != undefined &&
-      <>
-        <Box display="flex" justifyContent="center" padding={2}>
-          <FormControl variant="outlined">
-            <Select
-              value={viewTournamentName}
-              onChange={(e: any) => handleChangeView(e.target.value)}
-            >
-              <MenuItem value="Today">Today&apos;s Fixtures</MenuItem>
-              {
-                getTournaments(fixtures).map(tournamentName =>
-                  <MenuItem value={tournamentName}>{ tournamentName }, Season { props.rootState.season }</MenuItem>
-                )
-              }
-            </Select>
-          </FormControl>
-        </Box>
-        { viewTournamentName == 'Today'
-          ? <FixturesToday rootState={props.rootState} fixtures={fixtures} />
-          : <FixturesTable
-              rootState={props.rootState}
-              showTournament={false}
-              dateFormatter={d => format(d, 'E d MMM HH:mm')}
-              fixtures={fixtures.filter(f => f.tournament == viewTournamentName)}
-            />
-        }
-      </>
-    }
-  </>;
+  if (viewGameId != undefined) {
+    return <MatchView gameId={viewGameId} {...props} />
+  } else {
+    return <>
+      <h2>Fixtures</h2>
+      { fixtures == undefined && <Uitk.Loading /> }
+      { fixtures != undefined &&
+        <>
+          <Box display="flex" justifyContent="center" padding={2}>
+            <FormControl variant="outlined">
+              <Select
+                value={viewTournamentName}
+                onChange={(e: any) => handleChangeView(e.target.value)}
+              >
+                <MenuItem value="Today">Today&apos;s Fixtures</MenuItem>
+                {
+                  getTournaments(fixtures).map(tournamentName =>
+                    <MenuItem value={tournamentName}>{ tournamentName }, Season { props.rootState.season }</MenuItem>
+                  )
+                }
+              </Select>
+            </FormControl>
+          </Box>
+          { viewTournamentName == 'Today'
+            ?  <FixturesTable
+                onClickGame={handleClickGame}
+                rootState={props.rootState}
+                showTournament={true}
+                dateFormatter={d => format(d, 'HH:mm')}
+                fixtures={fixtures.filter(f => dateEq(f.start, new Date()))}
+              />
+            : <FixturesTable
+                onClickGame={handleClickGame}
+                rootState={props.rootState}
+                showTournament={false}
+                dateFormatter={d => format(d, 'E d MMM HH:mm')}
+                fixtures={fixtures.filter(f => f.tournament == viewTournamentName)}
+              />
+          }
+        </>
+      }
+    </>;
+  }
 }
