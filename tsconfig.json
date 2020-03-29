@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "sourceMap": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "emitDecoratorMetadata": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "noUnusedLocals": true,
+        "noImplicitReturns": true,
+        "incremental": true,
+        "strict": true,
+        "jsx": "react",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "target": "es5"
+    }
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fitba</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <link rel="shortcut icon" href="favicon.png">
+    <link rel="stylesheet" href="/base-min.css">
+    <link rel="stylesheet" href="/pure-min.css">
+  <!--[if lte IE 8]>
+      <link rel="stylesheet" href="grids-responsive-old-ie-min.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+      <link rel="stylesheet" href="/grids-responsive-min.css">
+  <!--<![endif]-->
+  </head>
+  <body>
+        <div id="main"></div>
+        <noscript>You need to enable JavaScript to play Fitba!</noscript>
+        <script src="main.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase.js"></script>
+        <script>
+          firebase.initializeApp({
+            apiKey: "AIzaSyDTPDoU-_eRDWdqrugw0AZSorKuRiQqrKk",
+            authDomain: "myfitba.firebaseapp.com",
+            databaseURL: "https://myfitba.firebaseio.com",
+            projectId: "myfitba",
+            storageBucket: "myfitba.appspot.com",
+            messagingSenderId: "8662031540"
+          });
+          var messaging = firebase.messaging();
+          messaging.requestPermission().then(() => {
+            messaging.getToken().then(token => {
+              console.log('user token', token);
+              var xhr = new XMLHttpRequest();
+              xhr.open('POST', '/got_fcm_token');
+              xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+              xhr.send(encodeURI('token=' + token));
+            });
+          });
+        </script>
+        <script>
+            var node = document.getElementById('main');
+            var app = Elm.Main.init({ node: node });
+        </script>
+  </body>
+</html>

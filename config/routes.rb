@@ -24,4 +24,10 @@ Rails.application.routes.draw do
   post 'sell_player' => 'api#sell_player'
   post 'delete_message' => 'api#delete_message'
   post 'got_fcm_token' => 'api#got_fcm_token'
+
+  # routes with modified METHOD for TS port
+  post 'squad' => 'api#view_team'
+  post 'load_world' => 'api#load_world'
+  post 'tables' => 'api#league_tables'
+  post 'fixtures' => 'api#fixtures'
 end

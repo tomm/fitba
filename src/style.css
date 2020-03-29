@@ -1,0 +1,208 @@
+body {
+	-webkit-user-select: none;
+	padding: 0; margin: 0;
+	font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+	font-size: 75%;
+	background-image: url('/background.jpg');
+	background-attachment: fixed;
+	background-size: 100%;
+	background-repeat: repeat-y;
+	overflow-x: hidden;
+}
+
+table {
+	white-space: nowrap;
+	width: 100%;
+	border-collapse: collapse;
+	overflow-x: hidden;
+	margin-bottom: 1em;
+}
+
+dt {
+	font-style: italic;
+}
+
+.button-info {
+	position: absolute;
+	right: 0;
+	font-size: 180%;
+	background: none;
+}
+
+.fixture-tournament {
+	font-size: 80%;
+	font-weight: bold;
+	text-transform: uppercase;
+	display: block;
+}
+.news-article-title {
+	font-size: 200%;
+	font-weight: bold;
+	margin-top: 0;
+	text-transform: uppercase;
+}
+.news-article-date {
+	font-weight: bold;
+}
+.news-article-body {
+	margin-top: 10px;
+}
+.cross-icon {
+  font-size: 2.0rem;
+}
+.cross-icon::after {
+  content: '\2716';
+}
+.clicky-clicky div.pure-g {
+  padding: 6px;
+  }
+.clicky-clicky div.pure-g > div {
+  padding: 0;
+}
+.clicky-clicky div.pure-g > div > div{
+  padding: 0 5px;
+}
+.clicky-clicky div.pure-g > div > div > button {
+  background-color: rgba(150, 150, 255, 0.5);
+  padding: 25px 0;
+  margin: 0 3px;
+  width: 100%;
+  display: block;
+  border: none;
+  font-weight: bold;
+}
+span.injury-icon { background-color: white; color: red; margin: 0 5px; padding: 0 2px; }
+span.injury-icon::after {
+  content: '\271a';
+}
+tr.player-row-injury { background-color: rgba(255,0,0,0.5); }
+.icon-button { background: none; border: none; margin: 0; padding: 0 0 0 5px; }
+.squad-list tr:nth-child(11) { border-bottom: 3px solid black; }
+.squad-list tr:nth-child(16) { border-bottom: 3px solid black; }
+.league-table tr:nth-last-child(1) { background-color: rgba(255, 180, 180, 0.5); }
+.league-table tr:nth-last-child(2) { background-color: rgba(255, 180, 180, 0.5); }
+.league-table tr:nth-last-child(3) { background-color: rgba(255, 180, 180, 0.5); }
+.league-table tr:nth-child(2) { background-color: rgba(180, 255, 180, 0.5); }
+.league-table tr:nth-child(3) { background-color: rgba(180, 255, 180, 0.5); }
+.league-table tr:nth-child(4) { background-color: rgba(180, 255, 180, 0.5); }
+.home-team { color: blue; }
+.away-team { color: red; }
+
+.login { font-size: 200%; }
+.login form { margin: 20px; }
+.login label { display: block; margin: 5px; }
+.login input { border: 0px;margin: 5px; padding: 5px; }
+.login input[type="submit"] { padding: 10px 40px; background-color: rgba(150, 150, 255, 0.5); }
+
+span.player-position-badge { border-radius: 5px; padding: 0 3px; }
+span.player-position-GK { background-color: #f7f; }
+span.player-position-DR, span.player-position-DL, span.player-position-DC { background-color: #77f; }
+span.player-position-DMR, span.player-position-DML, span.player-position-DMC { background-color: #7c7; }
+span.player-position-MR, span.player-position-ML, span.player-position-MC { background-color: #ff7; }
+span.player-position-AMR, span.player-position-AML, span.player-position-AMC { background-color: #fa7; }
+span.player-position-CF { background-color: #f77; }
+
+tr.fixture-own { font-weight: bold; }
+tr.scorer-own { font-weight: bold; }
+
+.player-detailed-view td:nth-child(1) { font-weight: bold; }
+
+.game-summary-Home { text-align: right; margin-right: 10px; }
+.game-summary-Away { text-align: left; margin-left: 10px; }
+.cup-finals-history { width: 33%; text-align: center; }
+.center { text-align: center; }
+.managers-attending { text-align: center; font-weight: bold; }
+.game-time { text-align: center; }
+.game-message { font-weight: bold; float: left; margin-left: 5px; }
+.inbox-message { background-color: rgba(255,255,255,0.5); padding: 10px; margin: 0 10px 10px 10px;}
+.inbox-message-from { font-weight: bold; }
+.inbox-message-subject { font-weight: bold; }
+.inbox-message-date { font-weight: bold; text-align: right; }
+.inbox-message-body { margin-top: 10px; }
+
+.match-event-message {
+	font-size: 200%;
+	font-weight: bold;
+}
+
+.match-ball-label {
+	font-size: 150%;
+	font-weight: bold;
+}
+.match-player-label {
+	font-size: 140%;
+}
+
+.button-action {
+	background-color: rgba(150, 150, 255, 0.5);
+	padding: 10px;
+	font-weight: bold;
+	margin: 10px;
+}
+
+ul.tab-menu {
+  opacity: 0.9;
+  list-style-type: none;
+  width: 100%;
+  padding: 0 0 0 0;
+  top: 0;
+  left: 0;
+  margin: 0;
+  position: fixed;
+}
+
+li.tab-item {
+  display: block;
+  float: left;
+  width: 25%;
+  border: 0;
+}
+
+button.active-tab-style {
+  border: none;
+  width: 100%;
+  height: 3em;
+  background-color: blue;
+  color: white;
+}
+
+button.inactive-tab-style {
+  border: none;
+  width: 100%;
+  height: 3em;
+  background-color: white;
+}
+
+tr.active-table-row-style { background-color: blue; }
+
+h1,h2,h3,h4,h5,h6 {
+	text-align: center;
+}
+
+div.view {
+  margin: 3em auto 0 auto;
+}
+
+div.view-content {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+h4 { margin: 5px 0px; }
+
+tr {
+	border-bottom: 1px solid grey;
+}
+
+td, th {
+	padding: 0.5em 0.2em;
+	text-align: left;
+}
+
+th {
+	background-color: rgba(150, 150, 255, 0.5);
+}
+
+div.main-content {
+	clear: both;
+}
