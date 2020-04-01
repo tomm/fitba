@@ -9,7 +9,7 @@ import FormControl from '@material-ui/core/FormControl';
 import { MatchView } from './MatchView';
 import { Commands } from './commands';
 import { format } from 'date-fns';
-const uniq = require('ramda/src/uniq');
+import { uniq } from 'rambda';
 
 function dateEq(d1: Date, d2: Date) {
   return d1.getFullYear() == d2.getFullYear() &&

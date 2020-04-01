@@ -18,7 +18,7 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 import ClassOutlinedIcon from '@material-ui/icons/ClassOutlined';
 import MenuOutlinedIcon from '@material-ui/icons/MenuOutlined';
 import './style.css';
-const clone = require('ramda/src/clone');
+import { clone } from 'rambda';
 
 const useStyles = makeStyles(theme => ({
   root: {

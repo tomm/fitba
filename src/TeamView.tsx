@@ -16,9 +16,7 @@ import * as Uitk from './Uitk';
 import * as logic from './logic';
 import { Commands } from './commands';
 import { bug } from './utils';
-const includes = require('ramda/src/includes');
-const take = require('ramda/src/take');
-const unnest = require('ramda/src/unnest');
+import { includes, take } from 'rambda';
 
 const positionCircleRadius = 75;
 const playerGoodPositionOpacity = 0.5;
@@ -251,7 +249,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
 }
 
 const movablePitchPositions: [number, number][] =
-  unnest([0, 1, 2, 3, 4].map(x => [1,2,3,4,5].map(y => [x, y])));
+  ([0, 1, 2, 3, 4].reduce((acc, x) => acc.concat([1,2,3,4,5].map(y => [x, y])), [] as [number,number][] ));
   
 function TacticsView(props: { team: model.Team, commands: Commands }) {
   const [ selected, setSelected ] = React.useState<model.PlayerIdx | undefined>(undefined);

@@ -8,8 +8,8 @@ const config = {
     mode: process.env['NODE_ENV'] == 'production' ? 'production' : 'development',
     entry: './src/index.tsx',
     output: {
-        filename: "[hash].js",
-        path: __dirname + "/public/js"
+        filename: "js/[hash].js",
+        path: __dirname + "/public"
     },
 
     // Enable sourcemaps for debugging webpack's output.

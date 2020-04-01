@@ -56,7 +56,7 @@ function ListingDetailsDialog(props: {
 
   const player = props.listing.player;
   return <>
-    <Dialog onClose={props.handleClose} open={true}>
+    <Dialog onClose={props.handleClose} open={true} fullWidth={true}>
       <DialogTitle>{ player.forename } { player.name }</DialogTitle>
       <DialogContent>
         <table>
