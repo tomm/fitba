@@ -19,6 +19,7 @@ import ClassOutlinedIcon from '@material-ui/icons/ClassOutlined';
 import MenuOutlinedIcon from '@material-ui/icons/MenuOutlined';
 import './style.css';
 import { clone } from 'rambda';
+import { bug } from './utils';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -100,7 +101,17 @@ function App(props: {
     },
 
     async sellPlayer(p: model.Player): Promise<void> {
-      // XXXs should check it's our player?
+      const idx = props.rootState.team.players.indexOf(p);
+      if (idx == -1) return bug();
+
+      const newTeam = clone(props.rootState.team);
+      newTeam.players[idx] = { ...newTeam.players[idx], is_transfer_listed: true };
+
+      props.updateRootState({
+        ...props.rootState,
+        team: newTeam
+      });
+
       await model.sellPlayer.call({ player_id: p.id });
     }
   };

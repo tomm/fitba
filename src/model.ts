@@ -42,7 +42,8 @@ const SafePlayer = Safe.obj({
   form: Safe.int,
   positions: Safe.array(
     Safe.tuple(Safe.int, Safe.int)
-  )
+  ),
+  is_transfer_listed: Safe.bool
 });
 
 const SafeInboxMessage = Safe.obj({

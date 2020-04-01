@@ -10,6 +10,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import Box from '@material-ui/core/Box';
+import Typography from '@material-ui/core/Typography';
 import { ConfirmDialog } from './ConfirmDialog';
 //import DialogContentText from '@material-ui/core/DialogContentText';
 import * as Uitk from './Uitk';
@@ -92,6 +93,9 @@ function teamTitle(t: model.Team): string {
 }
 
 export function TeamView(props: { team: model.Team, commands: Commands }) {
+  // reload team in case we have bought people, etc.
+  React.useEffect(props.commands.reloadRootState, []);
+
   return <>
     <h2>{ teamTitle(props.team) }</h2>
     <Grid container spacing={5}>
@@ -126,6 +130,11 @@ function PlayerDetailsDialog(props: {
           <tr><th>Handling</th><td>{ props.player.handling }</td></tr>
           <tr><th>Speed</th><td>{ props.player.speed }</td></tr>
         </table>
+        { props.player.is_transfer_listed &&
+          <Typography variant="body1">
+            This player listed on the transfer market
+          </Typography>
+        }
       </DialogContent>
       <DialogActions>
         <Button onClick={props.handleClose} color="primary">
@@ -231,6 +240,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
               <td onClick={click}>
                 <Uitk.PlayerPositionBadge player={p} />
                 <Uitk.PlayerInjuryBadge player={p} />
+                <Uitk.PlayerForSaleBadge player={p} />
               </td>
               <td onClick={click}>{ p.name }</td>
               <td onClick={click}>{ logic.playerAvgSkill(p).toFixed(1) }</td>

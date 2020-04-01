@@ -20,7 +20,8 @@ class Player < ApplicationRecord
       speed: self.speed,
       injury: self.injury,
       form: self.form,
-      positions: self.get_positions
+      positions: self.get_positions,
+      is_transfer_listed: TransferListing.where(player_id: self.id, status: 'Active').where('deadline >= now()').count > 0
     }
   end
 

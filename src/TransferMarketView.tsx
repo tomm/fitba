@@ -20,7 +20,10 @@ import { bug } from './utils';
 //import Slider from '@material-ui/core/Slider';
 
 const formatMoney = (amount: number): string =>
-  (amount).toLocaleString("en-GB", {style: "currency", currency: "GBP", minimumFractionDigits: 0});
+  (amount).toLocaleString("en-GB", {style: "currency", currency: "GBP", minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+const formatMoneyMillions = (amount: number): string =>
+  (amount / 1e6).toLocaleString("en-GB", {style: "currency", currency: "GBP", minimumFractionDigits: 1, maximumFractionDigits: 1}) + "M";
 
 function listingStatusShort(listing: model.TransferListing): string {
   switch (listing.status) {
@@ -60,16 +63,27 @@ function ListingDetailsDialog(props: {
       <DialogTitle>{ player.forename } { player.name }</DialogTitle>
       <DialogContent>
         <table>
-          <tr><th>Name</th><td>{ player.forename } { player.name }</td></tr>
           <tr><th>Age</th><td>{ player.age }</td></tr>
           <tr><th>Favoured Positions</th><td><Uitk.PlayerPositionBadge player={player} /></td></tr>
           <tr><th>Skill Average</th><td>{ logic.playerAvgSkill(player).toFixed(1) }</td></tr>
-          <tr><th>Shooting</th><td>{ player.shooting }</td></tr>
-          <tr><th>Passing</th><td>{ player.passing }</td></tr>
-          <tr><th>Tackling</th><td>{ player.tackling }</td></tr>
-          <tr><th>Handling</th><td>{ player.handling }</td></tr>
-          <tr><th>Speed</th><td>{ player.speed }</td></tr>
           <tr><th><strong>Minimum bid</strong></th><td><strong>{ formatMoney(props.listing.minPrice) }</strong></td></tr>
+        </table>
+      
+        <table>
+          <tr>
+            <th>Shooting</th>
+            <th>Passing</th>
+            <th>Tacking</th>
+            <th>Handling</th>
+            <th>Speed</th>
+          </tr>
+          <tr>
+            <td>{ player.shooting }</td>
+            <td>{ player.passing }</td>
+            <td>{ player.tackling }</td>
+            <td>{ player.handling }</td>
+            <td>{ player.speed }</td>
+          </tr>
         </table>
 
         { props.listing.sellerTeamId == props.ownTeam.id
@@ -82,7 +96,7 @@ function ListingDetailsDialog(props: {
                 <Box padding={1}>
                   <Card>
                     <CardContent>
-                      <Typography component="h2">
+                      <Typography component="h3">
                         { formatMoney(nextBid) }
                       </Typography>
                     </CardContent>
@@ -103,7 +117,7 @@ function ListingDetailsDialog(props: {
                   <Box padding={1}>
                     <Card>
                       <CardContent>
-                        <Typography component="h2">
+                        <Typography component="h3">
                           Current bid: { formatMoney(props.listing.youBid) }
                         </Typography>
                       </CardContent>
@@ -162,6 +176,12 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
       }
       <h2>Transfer Market</h2>
 
+      { props.ownTeam.money &&
+        <Typography variant="subtitle1" gutterBottom={true}>
+          You have { formatMoney(props.ownTeam.money) } available for transfers
+        </Typography>
+      }
+
       <table className="transfer-listings">
         <tr>
           <th>Name</th>
@@ -183,13 +203,13 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                 <Uitk.PlayerPositionBadge player={l.player} />
                 <Uitk.PlayerInjuryBadge player={l.player} />
               </td>
-              <td>{ formatMoney(l.minPrice) }</td>
+              <td>{ formatMoneyMillions(l.minPrice) }</td>
               <td>{ listingStatusShort(l) }</td>
               <td>{
                 l.sellerTeamId == props.ownTeam.id
                 ? 'You are seller'
                 : l.youBid
-                ? formatMoney(l.youBid)
+                ? formatMoneyMillions(l.youBid)
                 : ''
               }</td>
               <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
