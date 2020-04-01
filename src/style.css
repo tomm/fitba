@@ -79,6 +79,8 @@ span.forsale-icon { background-color: green; color: gold; margin: 0 5px; padding
 span.forsale-icon::after {
   content: '$';
 }
+tr.transfer-listing-own { color: grey }
+tr.transfer-listing-bid { background-color: rgba(255,225,0,0.5) }
 tr.player-row-injury { background-color: rgba(255,0,0,0.5); }
 .icon-button { background: none; border: none; margin: 0; padding: 0 0 0 5px; }
 .squad-list tr:nth-child(11) { border-bottom: 3px solid black; }

@@ -4,11 +4,7 @@ import { format } from 'date-fns';
 import * as Uitk from './Uitk';
 import * as logic from './logic';
 import Typography from '@material-ui/core/Typography';
-import Card from '@material-ui/core/Card';
-import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
@@ -91,44 +87,35 @@ function ListingDetailsDialog(props: {
               You are the seller
             </Typography>
 
-          : <Grid container spacing={2}>
-              <Grid xs={12}>
+          : <>
+              <Box display="flex" padding={0} justifyContent="center">
                 <Box padding={1}>
-                  <Card>
-                    <CardContent>
-                      <Typography component="h3">
-                        { formatMoney(nextBid) }
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      <Button variant="contained" onClick={() => decBid()}>
-                        <RemoveIcon />
-                      </Button>
-                      <Button variant="contained" onClick={() => incBid()}>
-                        <AddIcon />
-                      </Button>
-                      <Button variant="contained" color="primary" onClick={() => props.handleMakeBid(props.listing.id, nextBid)}>Place bid</Button>
-                    </CardActions>
-                  </Card>
+                  <Button variant="contained" size="small" onClick={() => decBid()}>
+                    <RemoveIcon />
+                  </Button>
                 </Box>
-              </Grid>
+                <Box padding={1}>
+                  <Button variant="contained" size="small" color="primary" onClick={() => props.handleMakeBid(props.listing.id, nextBid)}>
+                    Bid { formatMoneyMillions(nextBid) }
+                  </Button>
+                </Box>
+                <Box padding={1}>
+                  <Button variant="contained" size="small" onClick={() => incBid()}>
+                    <AddIcon />
+                  </Button>
+                </Box>
+              </Box>
               { props.listing.youBid != undefined &&
-                <Grid xs={12}>
-                  <Box padding={1}>
-                    <Card>
-                      <CardContent>
-                        <Typography component="h3">
-                          Current bid: { formatMoney(props.listing.youBid) }
-                        </Typography>
-                      </CardContent>
-                      <CardActions>
-                        <Button variant="contained" color="secondary" onClick={() => props.handleMakeBid(props.listing.id, undefined)}>Withdraw</Button>
-                      </CardActions>
-                    </Card>
+                <>
+                  <Box display="flex" padding={1} justifyContent="center">
+                    Current bid: { formatMoney(props.listing.youBid) }
                   </Box>
-                </Grid>
+                  <Box display="flex" padding={1} justifyContent="center">
+                    <Button size="small" variant="contained" color="secondary" onClick={() => props.handleMakeBid(props.listing.id, undefined)}>Withdraw</Button>
+                  </Box>
+                </>
               }
-            </Grid>
+          </>
         }
 
       </DialogContent>
@@ -145,6 +132,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
   
   const [ listings, setListings ] = React.useState<model.TransferListing[] | undefined>(undefined);
   const [ viewingListingId, setViewingListingId ] = React.useState<number | undefined>(undefined);
+  const yourBids = listings ? listings.filter(l => l.youBid != undefined) : [];
 
   React.useEffect(() => {
     model.getTransferListings.call({}).then(setListings);
@@ -162,6 +150,14 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
     model.makeBid.call({ transfer_listing_id, amount });
   }
 
+  function transferListingCssClass(l: model.TransferListing): string {
+    return l.sellerTeamId == props.ownTeam.id
+    ? 'transfer-listing-own'
+    : l.youBid
+    ? 'transfer-listing-bid'
+    : '';
+  }
+
   if (listings == undefined) {
     return <Uitk.Loading />
   } else {
@@ -174,7 +170,9 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
           handleMakeBid={handleMakeBid}
         />
       }
-      <h2>Transfer Market</h2>
+      <h2>
+        Transfer Market
+      </h2>
 
       { props.ownTeam.money &&
         <Typography variant="subtitle1" gutterBottom={true}>
@@ -182,13 +180,53 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
         </Typography>
       }
 
+      { yourBids.length > 0 &&
+        <>
+          <h3>
+            Your bids
+          </h3>
+          <table className="transfer-listings">
+            <tr>
+              <th>Name</th>
+              <th>Pos</th>
+              <th>Min Bid</th>
+              <th>End</th>
+              <th>Your Bid</th>
+              <th>Avg.</th>
+            </tr>
+            { yourBids.map(l =>
+              <tr className="transfer-listing-bid"
+                  onClick={() => setViewingListingId(l.id)}
+              >
+                <td>{ l.player.name }</td>
+                <td>
+                  <Uitk.PlayerPositionBadge player={l.player} />
+                  <Uitk.PlayerInjuryBadge player={l.player} />
+                </td>
+                <td>{ formatMoneyMillions(l.minPrice) }</td>
+                <td>{ listingStatusShort(l) }</td>
+                <td>{
+                  l.youBid
+                  ? formatMoneyMillions(l.youBid)
+                  : ''
+                }</td>
+                <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
+              </tr>
+              )
+            }
+          </table>
+        </>
+      }
+
+      <h3>
+        All listings
+      </h3>
       <table className="transfer-listings">
         <tr>
           <th>Name</th>
           <th>Pos</th>
           <th>Min Bid</th>
           <th>End</th>
-          <th>Your Bid</th>
           <th>Avg.</th>
           <th>Sh</th>
           <th>Pa</th>
@@ -197,7 +235,8 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
           <th>Sp</th>
         </tr>
         { listings.map(l =>
-            <tr onClick={() => setViewingListingId(l.id)}>
+            <tr onClick={() => setViewingListingId(l.id)}
+                className={transferListingCssClass(l)}>
               <td>{ l.player.name }</td>
               <td>
                 <Uitk.PlayerPositionBadge player={l.player} />
@@ -205,13 +244,6 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
               </td>
               <td>{ formatMoneyMillions(l.minPrice) }</td>
               <td>{ listingStatusShort(l) }</td>
-              <td>{
-                l.sellerTeamId == props.ownTeam.id
-                ? 'You are seller'
-                : l.youBid
-                ? formatMoneyMillions(l.youBid)
-                : ''
-              }</td>
               <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
               <td>{ l.player.shooting }</td>
               <td>{ l.player.passing }</td>
