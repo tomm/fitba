@@ -54,7 +54,7 @@ function FixturesTable(props: {
   }
 
   const tournamentText = (game: model.Fixture) =>
-    `${game.tournament} ${game.stage && cupStage(game.stage)}`
+    <>{game.tournament} {game.stage && cupStage(game.stage)}</>
 
   return <div>
     <table>
