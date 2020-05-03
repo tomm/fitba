@@ -130,6 +130,12 @@ function PlayerDetailsDialog(props: {
           <tr><th>Handling</th><td>{ props.player.handling }</td></tr>
           <tr><th>Speed</th><td>{ props.player.speed }</td></tr>
         </table>
+        { props.player.injury &&
+          <Typography variant="body1">
+            <Uitk.PlayerInjuryBadge player={props.player} />
+            Recovery in { props.player.injury } days
+          </Typography>
+        }
         { props.player.is_transfer_listed &&
           <Typography variant="body1">
             This player listed on the transfer market
