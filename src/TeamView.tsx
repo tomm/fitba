@@ -223,7 +223,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
           </th>
           <th>Pos.</th>
           <th>Name</th>
-          <th>Av.</th>
+          <th>{ altView ? 'Goals' : 'Av.' }</th>
           <th>{ altView ? 'Age' : 'Form' }</th>
           <th>Sh</th>
           <th>Pa</th>
@@ -249,7 +249,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
                 <Uitk.PlayerForSaleBadge player={p} />
               </td>
               <td onClick={click}>{ p.name }</td>
-              <td onClick={click}>{ logic.playerAvgSkill(p).toFixed(1) }</td>
+              <td onClick={click}>{ altView ? p.season_stats.goals : logic.playerAvgSkill(p).toFixed(1) }</td>
               <td onClick={click}>{ altView ? p.age : `+${p.form}` }</td>
               <td onClick={click}>{ p.shooting }</td>
               <td onClick={click}>{ p.passing }</td>
