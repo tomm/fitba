@@ -41,7 +41,8 @@ const SafePlayer = Safe.obj({
   injury: Safe.int,
   form: Safe.int,
   season_stats: Safe.obj({
-    goals: Safe.int
+    goals: Safe.int,
+    played: Safe.int
   }),
   positions: Safe.array(
     Safe.tuple(Safe.int, Safe.int)

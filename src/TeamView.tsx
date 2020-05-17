@@ -223,13 +223,23 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
           </th>
           <th>Pos.</th>
           <th>Name</th>
-          <th>{ altView ? 'Goals' : 'Av.' }</th>
-          <th>{ altView ? 'Age' : 'Form' }</th>
-          <th>Sh</th>
-          <th>Pa</th>
-          <th>Ta</th>
-          <th>Ha</th>
-          <th>Sp</th>
+          <th>Av.</th>
+          {
+            altView
+            ? <>
+              <th>Age</th>
+              <th>Games</th>
+              <th>Goals</th>
+            </>
+            : <>
+              <th>Form</th>
+              <th>Sh</th>
+              <th>Pa</th>
+              <th>Ta</th>
+              <th>Ha</th>
+              <th>Sp</th>
+            </>
+          }
         </tr>
       </thead>
       <tbody>
@@ -249,13 +259,22 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
                 <Uitk.PlayerForSaleBadge player={p} />
               </td>
               <td onClick={click}>{ p.name }</td>
-              <td onClick={click}>{ altView ? p.season_stats.goals : logic.playerAvgSkill(p).toFixed(1) }</td>
-              <td onClick={click}>{ altView ? p.age : `+${p.form}` }</td>
-              <td onClick={click}>{ p.shooting }</td>
-              <td onClick={click}>{ p.passing }</td>
-              <td onClick={click}>{ p.tackling }</td>
-              <td onClick={click}>{ p.handling }</td>
-              <td onClick={click}>{ p.speed }</td>
+              <td onClick={click}>{ logic.playerAvgSkill(p).toFixed(1) }</td>
+              { altView
+                ? <>
+                  <td onClick={click}>{ p.age }</td>
+                  <td onClick={click}>{ p.season_stats.played }</td>
+                  <td onClick={click}>{ p.season_stats.goals }</td>
+                </>
+                : <>
+                  <td onClick={click}>{ `+${p.form}` }</td>
+                  <td onClick={click}>{ p.shooting }</td>
+                  <td onClick={click}>{ p.passing }</td>
+                  <td onClick={click}>{ p.tackling }</td>
+                  <td onClick={click}>{ p.handling }</td>
+                  <td onClick={click}>{ p.speed }</td>
+                </>
+              }
             </tr>;
         })
         }

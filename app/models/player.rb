@@ -20,11 +20,32 @@ class Player < ApplicationRecord
       speed: self.speed,
       injury: self.injury,
       form: self.form,
-      season_stats: {
-        goals: self.get_goals_this_season
-      },
+      season_stats: self.get_season_stats,
       positions: self.get_positions,
       is_transfer_listed: TransferListing.where(player_id: self.id, status: 'Active').where('deadline >= now()').count > 0
+    }
+  end
+
+  def get_season_stats
+    season = SeasonHelper.current_season
+
+    {
+      goals: ActiveRecord::Base.connection.execute("
+        select count(*) from game_events
+        join games on games.id=game_events.game_id
+        where game_events.kind='Goal'
+          and games.season=#{season}
+          and game_events.player_id=#{self.id.to_i}
+      ").column_values(0).first,
+
+      played: ActiveRecord::Base.connection.execute("
+        select count(*) from games
+        join formations
+          on (games.home_formation_id = formations.id or games.away_formation_id=formations.id)
+        join formation_pos on formation_pos.formation_id=formations.id
+        where formation_pos.player_id=#{self.id.to_i}
+          and games.season=#{season}
+      ").column_values(0).first
     }
   end
 
