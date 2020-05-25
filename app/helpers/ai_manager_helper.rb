@@ -138,10 +138,10 @@ module AiManagerHelper
       return
     end
 
-    if RngHelper.dice(1,10) == 1 then
+    if RngHelper.dice(1,4) == 1 then
       maybe_acquire_player(team)
     end
-    if RngHelper.dice(1,10) == 1 then
+    if RngHelper.dice(1,4) == 1 then
       maybe_sell_player(team)
     end
     
