@@ -44,6 +44,7 @@ class Player < ApplicationRecord
           on (games.home_formation_id = formations.id or games.away_formation_id=formations.id)
         join formation_pos on formation_pos.formation_id=formations.id
         where formation_pos.player_id=#{self.id.to_i}
+          and formation_pos.position_num < 11
           and games.season=#{season}
       ").column_values(0).first
     }
