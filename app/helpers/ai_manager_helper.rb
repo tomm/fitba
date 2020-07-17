@@ -133,18 +133,29 @@ module AiManagerHelper
                  FORMATION_442_diamond, FORMATION_442_wingback_diamond,
                  FORMATION_VAG, FORMATION_4411, FORMATION_4411a ]
 
+  def self.five_minutely_task(team)
+    if team.is_actively_managed_by_human? then
+      return
+    end
+
+    # roughly once every 2 days
+    runs_per_day = 60*24/5
+    chance_of_transfer = runs_per_day*2
+
+    if RngHelper.dice(1,chance_of_transfer) == 1 then
+      maybe_acquire_player(team)
+    end
+    if RngHelper.dice(1,chance_of_transfer) == 1 then
+      maybe_sell_player(team)
+    end
+    
+  end
+
   def self.daily_task(team)
     if team.is_actively_managed_by_human? then
       return
     end
 
-    if RngHelper.dice(1,4) == 1 then
-      maybe_acquire_player(team)
-    end
-    if RngHelper.dice(1,4) == 1 then
-      maybe_sell_player(team)
-    end
-    
     AiManagerHelper.pick_team_formation(team)
   end
 

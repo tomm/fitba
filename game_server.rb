@@ -40,6 +40,11 @@ def five_minutely_task
   Rails.logger.info "executing five-minutely tasks..."
   TransferMarketHelper.update_transfer_market
   PlayerHelper.spawn_injuries
+  
+  # AI update
+  Team.all.each do |t|
+    AiManagerHelper.five_minutely_task(t)
+  end
 end
 
 def notify_game_starting(team_id, is_home, opponent_name)
