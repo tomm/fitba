@@ -11,6 +11,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import AddIcon from '@material-ui/icons/Add';
+import Switch from '@material-ui/core/Switch';
 import RemoveIcon from '@material-ui/icons/Remove';
 import { bug } from './utils';
 //import Slider from '@material-ui/core/Slider';
@@ -130,6 +131,7 @@ function ListingDetailsDialog(props: {
 
 export function TransferMarketView(props: { ownTeam: model.Team }) {
   
+  const [ altView, setAltView ] = React.useState(false);
   const [ listings, setListings ] = React.useState<model.TransferListing[] | undefined>(undefined);
   const [ viewingListingId, setViewingListingId ] = React.useState<number | undefined>(undefined);
   const yourBids = listings ? listings.filter(l => l.youBid != undefined) : [];
@@ -180,6 +182,11 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
         </Typography>
       }
 
+      <div>
+        Toggle show price / show age
+        <Switch color="default" checked={altView} onChange={e => setAltView(e.target.checked)} />
+      </div>
+
       { yourBids.length > 0 &&
         <>
           <h3>
@@ -189,7 +196,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
             <tr>
               <th>Name</th>
               <th>Pos</th>
-              <th>Min Bid</th>
+              <th>{ altView ? 'Age' : 'Min Bid' }</th>
               <th>End</th>
               <th>Your Bid</th>
               <th>Avg.</th>
@@ -203,7 +210,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                   <Uitk.PlayerPositionBadge player={l.player} />
                   <Uitk.PlayerInjuryBadge player={l.player} />
                 </td>
-                <td>{ formatMoneyMillions(l.minPrice) }</td>
+                <td>{ altView ? l.player.age : formatMoneyMillions(l.minPrice) }</td>
                 <td>{ listingStatusShort(l) }</td>
                 <td>{
                   l.youBid
@@ -225,7 +232,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
         <tr>
           <th>Name</th>
           <th>Pos</th>
-          <th>Min Bid</th>
+          <th>{ altView ? 'Age' : 'Min Bid' }</th>
           <th>End</th>
           <th>Avg.</th>
           <th>Sh</th>
@@ -242,7 +249,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                 <Uitk.PlayerPositionBadge player={l.player} />
                 <Uitk.PlayerInjuryBadge player={l.player} />
               </td>
-              <td>{ formatMoneyMillions(l.minPrice) }</td>
+              <td>{ altView ? l.player.age : formatMoneyMillions(l.minPrice) }</td>
               <td>{ listingStatusShort(l) }</td>
               <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
               <td>{ l.player.shooting }</td>
