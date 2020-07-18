@@ -222,7 +222,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
       </>
     }
     <Box display="flex" justifyContent="center">
-      <h3>Squad &nbsp;&nbsp;<Chip label={`Skill ${startingElevenSkill(props.team)}`} /></h3>
+      <h3>Squad &nbsp;&nbsp;<Chip color="primary" label={`Skill ${startingElevenSkill(props.team)}`} /></h3>
     </Box>
     <table className="squad-list">
       <thead>
