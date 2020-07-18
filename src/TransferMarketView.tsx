@@ -152,9 +152,11 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
   const [ viewingListingId, setViewingListingId ] = React.useState<number | undefined>(undefined);
   const yourBids = listings ? listings.filter(l => l.youBid != undefined) : [];
 
-  React.useEffect(() => {
+  React.useEffect(reloadListings, []);
+
+  function reloadListings() {
     model.getTransferListings.call({}).then(setListings);
-  }, []);
+  }
 
   function handleMakeBid(transfer_listing_id: number, amount: number | undefined): void {
     if (listings == undefined) return bug();
@@ -165,7 +167,9 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
       )
     );
     // tell back-end
-    model.makeBid.call({ transfer_listing_id, amount });
+    model.makeBid.call(
+      { transfer_listing_id, amount }
+    ).then(reloadListings);
   }
 
   function transferListingCssClass(l: model.TransferListing): string {
