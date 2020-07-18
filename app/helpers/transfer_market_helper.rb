@@ -11,7 +11,7 @@ module TransferMarketHelper
     if not is_listed?(player.id) then
       price_jiggle = 1.0 + (rand * 0.1)
       TransferListing.create(team_id: player.team_id, status: 'Active', player: player,
-                             min_price: player.skill * 200000 * price_jiggle,
+                             min_price: player.valuation * price_jiggle,
                              deadline: Time.now + TRANSFER_LISTING_DURATION)
     end
   end

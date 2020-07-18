@@ -61,6 +61,22 @@ class Player < ApplicationRecord
     ).column_values(0).first
   end
 
+  AGE_PRICE_MULTIPLIER = [
+    # age 0-9 ;)
+    0.0, 0.0, 0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0, 0.0,
+    # age 10-19
+    0.0, 0.0, 0.0, 0.0, 0.0,  0.0, 1.0, 1.5, 2.0, 2.0,
+    # age 20-29
+    2.0, 1.9, 1.8, 1.7, 1.6,  1.5, 1.4, 1.3, 1.2, 1.1,
+    # age 30-39
+    1.0, 0.9, 0.8, 0.7, 0.6,  0.5, 0.4, 0.3, 0.2, 0.1
+  ]
+
+  def valuation
+    age_mult = AGE_PRICE_MULTIPLIER[self.age] || 0.0
+    return self.skill * 200000 * age_mult
+  end
+
   def to_s
     "#{self.forename} #{self.name} of #{self.team}: Sh #{self.shooting}, Pa #{self.passing}, Ta #{self.tackling}, Ha #{self.handling}, Sp #{self.speed}"
   end
