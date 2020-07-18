@@ -207,6 +207,7 @@ class ApiController < ApplicationController
         minPrice: t.min_price,
         deadline: t.deadline,
         sellerTeamId: t.team_id ? t.team_id : 0,
+        sellerTeamName: t.team&.name,
         status: status,
         youBid: your_bid == nil ? nil : your_bid.amount,
         numBids: num_bids,

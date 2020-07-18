@@ -15,13 +15,26 @@ import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import RemoveIcon from '@material-ui/icons/Remove';
 import { bug } from './utils';
-//import Slider from '@material-ui/core/Slider';
+const seedrandom = require('seedrandom');
 
 const formatMoney = (amount: number): string =>
   (amount).toLocaleString("en-GB", {style: "currency", currency: "GBP", minimumFractionDigits: 0, maximumFractionDigits: 0});
 
 const formatMoneyMillions = (amount: number): string =>
   (amount / 1e6).toLocaleString("en-GB", {style: "currency", currency: "GBP", minimumFractionDigits: 1, maximumFractionDigits: 1}) + "M";
+
+function randomClubName(seed: string) {
+  const r = seedrandom(seed);
+  const pre = ['Ab', 'Col', 'Nur', 'Saltz', 'Sturm', 'Hart', 'Wolfs', 
+    'Oden', 'Sonder', 'Lyng', 'Hobro', 'Esbj', 'Anger', 'Nime'];
+  const suf = ['borg', 'jerg', 'jysk', 'ondby', 'arhus', 'havn', 'burg',
+    'ton', 'lin', 'land', 'antes', 'naco', 'iens', 'pellier', 'eaux', 'orino'];
+  const wtf = ['', '', '', '', '', '',
+    ' AC', ' FC', ' Utd', ' Athletic', ' City'];
+  return pre[Math.abs(r.int32()) % pre.length] +
+         suf[Math.abs(r.int32()) % suf.length] +
+         wtf[Math.abs(r.int32()) % wtf.length];
+}
 
 function listingStatusShort(listing: model.TransferListing): string {
   switch (listing.status) {
@@ -75,9 +88,10 @@ function ListingDetailsDialog(props: {
       <DialogTitle>{ player.forename } { player.name }</DialogTitle>
       <DialogContent>
         <table>
-          <tr><th>Age</th><td>{ player.age }</td></tr>
           <tr><th>Favoured Positions</th><td><Uitk.PlayerPositionBadge player={player} /></td></tr>
+          <tr><th>Age</th><td>{ player.age }</td></tr>
           <tr><th>Skill Average</th><td>{ logic.playerAvgSkill(player).toFixed(1) }</td></tr>
+          <tr><th>Current club</th><td>{ props.listing.sellerTeamName || randomClubName(player.forename + ' ' + player.name) }</td></tr>
           <tr><th><strong>Minimum bid</strong></th><td><strong>{ formatMoney(props.listing.minPrice) }</strong></td></tr>
           <tr><th><strong># Bidders</strong></th><td><strong>{ props.listing.numBids }</strong></td></tr>
         </table>

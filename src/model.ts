@@ -91,6 +91,7 @@ const SafeTransferListing = Safe.obj({
   minPrice: Safe.int,
   deadline: Safe.dateIso,
   sellerTeamId: Safe.int,
+  sellerTeamName: Safe.optional(Safe.str),
   numBids: Safe.int,
   player: SafePlayer,
   youBid: Safe.optional(Safe.int),
