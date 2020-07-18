@@ -160,15 +160,35 @@ module AiManagerHelper
   end
 
   def self.maybe_acquire_player(team)
-    if team.is_actively_managed_by_human? || team.players.count >= SQUAD_MAX_SIZE then
+    if team.is_actively_managed_by_human? then
       return
     end
 
-    p = Player.random(team.player_spawn_quality)
-    p.team_id = team.id
-    p.save
-    pick_team_formation(team)
-    Rails.logger.info "Team #{team.name} signed new player #{p.name}"
+    if team.players.count >= SQUAD_MAX_SIZE then
+      Rails.logger.info "#{team.name} too large to make signings."
+      return
+    end
+
+    # find transfer listings that are right skill level for this team
+    tls = TransferListing.where('team_id != ?', team.id).where(status: 'Active').to_a.select { |l|
+      (
+        l.player.skill >= (team.player_spawn_quality - 1.5) * 5 &&
+        l.player.skill <= (team.player_spawn_quality + 1) * 5 &&
+        l.player.age <= 34
+      )
+    }
+
+    # pick one at random and bid on it...
+    tl = tls.sample
+    if !tl.nil? then
+      bid = TransferBid.create(
+        transfer_listing_id: tl.id,
+        team_id: team.id,
+        amount: tl.min_price + RngHelper.dice(1, tl.min_price),
+        status: 'Pending'
+      )
+      Rails.logger.info "Team #{team.name} have bid #{bid.amount} for listed player #{tl.player.name} (min bid #{tl.min_price})"
+    end
   end
 
   def self.maybe_sell_player(team)

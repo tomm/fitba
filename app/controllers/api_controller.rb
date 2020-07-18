@@ -186,6 +186,9 @@ class ApiController < ApplicationController
     end
     render json: (ts.map do |t|
       your_bid = TransferBid.where(team_id: @user.team_id, transfer_listing_id: t.id).first
+      # count number of teams bidding
+      num_bids = TransferBid.where(transfer_listing_id: t.id).select(:team_id).distinct.count
+
       status =
         if t.status == 'Active' then
           'OnSale'
@@ -206,6 +209,7 @@ class ApiController < ApplicationController
         sellerTeamId: t.team_id ? t.team_id : 0,
         status: status,
         youBid: your_bid == nil ? nil : your_bid.amount,
+        numBids: num_bids,
         player: player.to_api
       }
     end)

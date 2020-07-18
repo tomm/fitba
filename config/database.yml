@@ -13,8 +13,8 @@ default: &default
 development:
   <<: *default
   database: fitba_dev
-  username: 
-  password: 
+  username: tom
+  password: letme1n
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -22,8 +22,8 @@ development:
 test:
   <<: *default
   database: fitba_test
-  username:
-  password:
+  username: tom
+  password: letme1n
 
 production:
   <<: *default

@@ -1,6 +1,6 @@
 import React from 'react';
 import * as model from './model';
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import * as Uitk from './Uitk';
 import * as logic from './logic';
 import Typography from '@material-ui/core/Typography';
@@ -12,6 +12,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import AddIcon from '@material-ui/icons/Add';
 import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import RemoveIcon from '@material-ui/icons/Remove';
 import { bug } from './utils';
 //import Slider from '@material-ui/core/Slider';
@@ -24,7 +25,21 @@ const formatMoneyMillions = (amount: number): string =>
 
 function listingStatusShort(listing: model.TransferListing): string {
   switch (listing.status) {
-    case 'OnSale': return format(listing.deadline, 'E HH:mm');
+    case 'OnSale': {
+      const now = new Date();
+      const endingInMinutes = (listing.deadline.getTime() - now.getTime()) / (60*1000);
+      // if less than a minute till deadline
+      if (endingInMinutes <= 1) {
+        return 'now!';
+      // if less than an hour till deadline
+      } else if (endingInMinutes <= 60) {
+        return `${endingInMinutes.toFixed(0)} mins`;
+      } else if (isSameDay(listing.deadline, new Date())) {
+        return format(listing.deadline, 'HH:mm');
+      } else {
+        return format(listing.deadline, 'E HH:mm');
+      }
+    }
     case 'Sold': return 'Sold';
     case 'Unsold': return 'Unsold';
     case 'YouWon': return 'You won!';
@@ -64,6 +79,7 @@ function ListingDetailsDialog(props: {
           <tr><th>Favoured Positions</th><td><Uitk.PlayerPositionBadge player={player} /></td></tr>
           <tr><th>Skill Average</th><td>{ logic.playerAvgSkill(player).toFixed(1) }</td></tr>
           <tr><th><strong>Minimum bid</strong></th><td><strong>{ formatMoney(props.listing.minPrice) }</strong></td></tr>
+          <tr><th><strong># Bidders</strong></th><td><strong>{ props.listing.numBids }</strong></td></tr>
         </table>
       
         <table>
@@ -182,24 +198,20 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
         </Typography>
       }
 
-      <div>
-        Toggle show price / show age
-        <Switch color="default" checked={altView} onChange={e => setAltView(e.target.checked)} />
-      </div>
-
       { yourBids.length > 0 &&
         <>
-          <h3>
+          <h2>
             Your bids
-          </h3>
+          </h2>
           <table className="transfer-listings">
             <tr>
               <th>Name</th>
               <th>Pos</th>
-              <th>{ altView ? 'Age' : 'Min Bid' }</th>
+              <th>Avg.</th>
+              <th>Min Bid</th>
               <th>End</th>
               <th>Your Bid</th>
-              <th>Avg.</th>
+              <th># Bidders</th>
             </tr>
             { yourBids.map(l =>
               <tr className="transfer-listing-bid"
@@ -210,14 +222,15 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                   <Uitk.PlayerPositionBadge player={l.player} />
                   <Uitk.PlayerInjuryBadge player={l.player} />
                 </td>
-                <td>{ altView ? l.player.age : formatMoneyMillions(l.minPrice) }</td>
+                <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
+                <td>{ formatMoneyMillions(l.minPrice) }</td>
                 <td>{ listingStatusShort(l) }</td>
                 <td>{
                   l.youBid
                   ? formatMoneyMillions(l.youBid)
                   : ''
                 }</td>
-                <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
+                <td>{ l.numBids }</td>
               </tr>
               )
             }
@@ -225,21 +238,40 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
         </>
       }
 
-      <h3>
+      <h2>
         All listings
-      </h3>
+      </h2>
+
+      <Box padding={1}>
+        <FormControlLabel
+          control={
+            <Switch color="default" checked={altView} onChange={e => setAltView(e.target.checked)} />
+          }
+          label={'Toggle bidding / player information'}
+        />
+      </Box>
+
       <table className="transfer-listings">
         <tr>
           <th>Name</th>
           <th>Pos</th>
-          <th>{ altView ? 'Age' : 'Min Bid' }</th>
-          <th>End</th>
-          <th>Avg.</th>
-          <th>Sh</th>
-          <th>Pa</th>
-          <th>Ta</th>
-          <th>Ha</th>
-          <th>Sp</th>
+          { altView
+            ? <>
+                <th>Age</th>
+                <th>Avg.</th>
+                <th>Sh</th>
+                <th>Pa</th>
+                <th>Ta</th>
+                <th>Ha</th>
+                <th>Sp</th>
+              </>
+            : <>
+                <th>Avg.</th>
+                <th>Min Bid</th>
+                <th># Bidders</th>
+                <th>Ending</th>
+              </>
+          }
         </tr>
         { listings.map(l =>
             <tr onClick={() => setViewingListingId(l.id)}
@@ -249,14 +281,23 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                 <Uitk.PlayerPositionBadge player={l.player} />
                 <Uitk.PlayerInjuryBadge player={l.player} />
               </td>
-              <td>{ altView ? l.player.age : formatMoneyMillions(l.minPrice) }</td>
-              <td>{ listingStatusShort(l) }</td>
-              <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
-              <td>{ l.player.shooting }</td>
-              <td>{ l.player.passing }</td>
-              <td>{ l.player.tackling }</td>
-              <td>{ l.player.handling }</td>
-              <td>{ l.player.speed }</td>
+              { altView
+                ? <>
+                    <td>{ l.player.age }</td>
+                    <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
+                    <td>{ l.player.shooting.toFixed(0) }</td>
+                    <td>{ l.player.passing.toFixed(0) }</td>
+                    <td>{ l.player.tackling.toFixed(0) }</td>
+                    <td>{ l.player.handling.toFixed(0) }</td>
+                    <td>{ l.player.speed.toFixed(0) }</td>
+                  </>
+                : <>
+                    <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
+                    <td>{ formatMoneyMillions(l.minPrice) }</td>
+                    <td>{ l.numBids }</td>
+                    <td>{ listingStatusShort(l) }</td>
+                  </>
+              }
             </tr>
           )
         }
