@@ -70,7 +70,10 @@ def notify_games_starting(now)
 end
 
 def per_second_task(now)
-  notify_games_starting(now)
+  # XXX turned off game start notifications, because push notifications are
+  # so crap and seem to limit to 1 per day, and the result notifications are more useful
+  # given push notifications almost never arrive on time.
+  #notify_games_starting(now)
 
   games = Game.where.not(status: 'Played').where('start < ?', now).all
 
