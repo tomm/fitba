@@ -12,6 +12,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { ConfirmDialog } from './ConfirmDialog';
+import Chip from '@material-ui/core/Chip';
 //import DialogContentText from '@material-ui/core/DialogContentText';
 import * as Uitk from './Uitk';
 import * as logic from './logic';
@@ -156,6 +157,14 @@ function PlayerDetailsDialog(props: {
   </>
 }
 
+function startingElevenSkill(team: model.Team) {
+  return (team.players.slice(0, 11).reduce(
+    (total: number, p: model.Player) =>
+      total + (p.shooting + p.passing + p.tackling + p.handling + p.speed)/5 + p.form
+    , 0
+  ) / 11.0).toFixed(1);
+}
+
 function RosterView(props: { team: model.Team, commands: Commands }) {
   const [ selected, setSelected ] = React.useState<model.PlayerIdx | undefined>(undefined);
   const [ altView, setAltView ] = React.useState<boolean>(false);
@@ -213,7 +222,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
       </>
     }
     <Box display="flex" justifyContent="center">
-      <h3>Squad</h3>
+      <h3>Squad &nbsp;&nbsp;<Chip label={`Skill ${startingElevenSkill(props.team)}`} /></h3>
     </Box>
     <table className="squad-list">
       <thead>
@@ -223,7 +232,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
           </th>
           <th>Pos.</th>
           <th>Name</th>
-          <th>Av.</th>
+          <th>Av + Form</th>
           {
             altView
             ? <>
@@ -232,7 +241,6 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
               <th>Goals</th>
             </>
             : <>
-              <th>Form</th>
               <th>Sh</th>
               <th>Pa</th>
               <th>Ta</th>
@@ -259,7 +267,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
                 <Uitk.PlayerForSaleBadge player={p} />
               </td>
               <td onClick={click}>{ p.name }</td>
-              <td onClick={click}>{ logic.playerAvgSkill(p).toFixed(1) }</td>
+              <td onClick={click}>{ logic.playerAvgSkill(p).toFixed(1) } { p.form ? `+${p.form}` : '' }</td>
               { altView
                 ? <>
                   <td onClick={click}>{ p.age }</td>
@@ -267,7 +275,6 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
                   <td onClick={click}>{ p.season_stats.goals }</td>
                 </>
                 : <>
-                  <td onClick={click}>{ `+${p.form}` }</td>
                   <td onClick={click}>{ p.shooting }</td>
                   <td onClick={click}>{ p.passing }</td>
                   <td onClick={click}>{ p.tackling }</td>
