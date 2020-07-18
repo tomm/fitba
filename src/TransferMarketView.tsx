@@ -211,9 +211,10 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
             <tr>
               <th>Name</th>
               <th>Pos</th>
+              <th>Age</th>
               <th>Avg.</th>
-              <th>Min Bid</th>
               <th>End</th>
+              <th>Min Bid</th>
               <th>Your Bid</th>
               <th># Bidders</th>
             </tr>
@@ -226,6 +227,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                   <Uitk.PlayerPositionBadge player={l.player} />
                   <Uitk.PlayerInjuryBadge player={l.player} />
                 </td>
+                <td>{ l.player.age }</td>
                 <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
                 <td>{ formatMoneyMillions(l.minPrice) }</td>
                 <td>{ listingStatusShort(l) }</td>
@@ -270,6 +272,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                 <th>Sp</th>
               </>
             : <>
+                <th>Age</th>
                 <th>Avg.</th>
                 <th>Min Bid</th>
                 <th># Bidders</th>
@@ -296,6 +299,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                     <td>{ l.player.speed.toFixed(0) }</td>
                   </>
                 : <>
+                    <td>{ l.player.age }</td>
                     <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
                     <td>{ formatMoneyMillions(l.minPrice) }</td>
                     <td>{ l.numBids }</td>
