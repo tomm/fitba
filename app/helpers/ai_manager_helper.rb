@@ -138,9 +138,9 @@ module AiManagerHelper
       return
     end
 
-    # roughly once every 2 days
     runs_per_day = 60*24/5
-    chance_of_transfer = runs_per_day*2
+    # roughly once per day
+    chance_of_transfer = runs_per_day*1
 
     if RngHelper.dice(1,chance_of_transfer) == 1 then
       maybe_acquire_player(team)
