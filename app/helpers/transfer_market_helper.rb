@@ -71,6 +71,26 @@ module TransferMarketHelper
           seller_team&.update(money: seller_team.money + bid.amount*(1.0-SALES_TAX))
           seller_team&.remove_player_from_squad(player)
           player.update(team_id: buyer_team.id)
+
+          # make accounting items
+          if seller_team
+            AccountItem.create!(
+              description: 'Transfer fees',
+              amount: bid.amount,
+              season: SeasonHelper.current_season,
+              team_id: seller_team.id
+            )
+          end
+
+          if buyer_team
+            AccountItem.create!(
+              description: 'Transfer fees',
+              amount: -bid.amount,
+              season: SeasonHelper.current_season,
+              team_id: buyer_team.id
+            )
+          end
+
           # update listing, marking sold
           sold = true
           Rails.logger.info "Team #{buyer_team.name} bought #{player.name} for #{bid.amount}"

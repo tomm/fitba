@@ -130,6 +130,7 @@ function PlayerDetailsDialog(props: {
           <tr><th>Tackling</th><td>{ props.player.tackling }</td></tr>
           <tr><th>Handling</th><td>{ props.player.handling }</td></tr>
           <tr><th>Speed</th><td>{ props.player.speed }</td></tr>
+          <tr><th>Daily wage</th><td>£{ props.player.wage.toLocaleString() }</td></tr>
         </table>
         { !!props.player.injury &&
           <Typography variant="body1">

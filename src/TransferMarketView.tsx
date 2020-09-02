@@ -92,6 +92,7 @@ function ListingDetailsDialog(props: {
           <tr><th>Age</th><td>{ player.age }</td></tr>
           <tr><th>Skill Average</th><td>{ logic.playerAvgSkill(player).toFixed(1) }</td></tr>
           <tr><th>Current club</th><td>{ props.listing.sellerTeamName || randomClubName(player.forename + ' ' + player.name) }</td></tr>
+          <tr><th>Daily wage</th><td>£{ props.listing.player.wage.toLocaleString() }</td></tr>
           <tr><th><strong>Minimum bid</strong></th><td><strong>{ formatMoney(props.listing.minPrice) }</strong></td></tr>
           <tr><th><strong># Bidders</strong></th><td><strong>{ props.listing.numBids }</strong></td></tr>
         </table>

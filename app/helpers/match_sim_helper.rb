@@ -201,6 +201,7 @@ module MatchSimHelper
         emit_event('EndOfGame', @last_event.side, ball_pos, reason, @last_event.player_id)
       end
       media_response
+      #pay_match_income
       PushNotificationHelper.send_result_notifications(@game)
     end
 
@@ -367,6 +368,26 @@ module MatchSimHelper
         emit_event(kind, side, PitchPos.new(2,6), "Goal! Great penalty by #{taker.name}", taker.id)
         1
       end
+    end
+
+    def pay_match_income
+      team0_players = @game.home_formation.formation_pos.order(:position_num).all.take(11)
+      team1_players = @game.away_formation.formation_pos.order(:position_num).all.take(11)
+
+      total_skill = team0_players.map(&:player).map(&:skill).sum + team1_players.map(&:player).map(&:skill).sum
+
+      # for 2 teams of avg 9 skill total skill = 990
+      # for such a game we try to give ~3M income
+
+      income = 2500*total_skill + (rand()*1000*total_skill).to_i
+      puts "Paying match income of #{income} to #{@game.home_team.name}"
+      @game.home_team.update!(money: @game.home_team.money + income)
+      AccountItem.create!(
+        description: 'Game income',
+        amount: income,
+        season: SeasonHelper.current_season,
+        team_id: @game.home_team.id
+      )
     end
 
     def media_response

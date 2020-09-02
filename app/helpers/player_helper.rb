@@ -2,6 +2,12 @@ module PlayerHelper
   SILLY_WORDS = ["shocker", "nightmare", "tragedy", "debacle", "crisis"]
   INJURY_TYPE = ["knee injury", "sprained ankle", "hamstring injury", "concussion", "calf injury", "head injury", "dislocated shoulder"]
 
+  def self.pick_daily_wage(p)
+    # / (season len * max skill * num skills)
+    v = 1500000 * p.skill / (28*9*5)
+    return (rand()*0.2*v + v).to_i
+  end
+
   def self.spawn_injuries
     # expected to be run every 5 minutes
     Team.pluck(:id).each{|team_id|

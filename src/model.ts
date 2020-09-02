@@ -40,6 +40,7 @@ const SafePlayer = Safe.obj({
   speed: Safe.int,
   injury: Safe.int,
   form: Safe.int,
+  wage: Safe.int,
   season_stats: Safe.obj({
     goals: Safe.int,
     played: Safe.int
@@ -234,6 +235,21 @@ const SafeTopScorers = Safe.array(
   })
 );
 
+const SafeFinances = Safe.obj({
+  seasonItems: Safe.array(
+    Safe.obj({
+      description: Safe.str,
+      amount: Safe.int
+    })
+  ),
+  todayItems: Safe.array(
+    Safe.obj({
+      description: Safe.str,
+      amount: Safe.int
+    })
+  )
+})
+
 export type Team = Safe.TypeEncapsulatedBy<typeof SafeTeam>;
 export type Player = Safe.TypeEncapsulatedBy<typeof SafePlayer>;
 export type LeagueTable = Safe.TypeEncapsulatedBy<typeof SafeLeagueTable>;
@@ -247,6 +263,7 @@ export type InboxMessage = Safe.TypeEncapsulatedBy<typeof SafeInboxMessage>;
 export type SeasonHistory = Safe.TypeEncapsulatedBy<typeof SafeSeasonHistory>;
 export type TransferListing = Safe.TypeEncapsulatedBy<typeof SafeTransferListing>;
 export type TopScorers = Safe.TypeEncapsulatedBy<typeof SafeTopScorers>;
+export type Finances = Safe.TypeEncapsulatedBy<typeof SafeFinances>;
 
 export const getGame = httpCall(
   '/get_game',
@@ -348,4 +365,10 @@ export const getTopScorers = httpCall(
     season: Safe.int
   }),
   SafeTopScorers
+);
+
+export const getFinances = httpCall(
+  '/finances',
+  Safe.obj({}),
+  SafeFinances
 );

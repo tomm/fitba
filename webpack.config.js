@@ -3,9 +3,10 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const BundleAnalyzerPlugin = !!process.env.PROFILE ? require('webpack-bundle-analyzer').BundleAnalyzerPlugin : undefined;
+const isProduction = process.argv.indexOf('-p') != -1;
 
 const config = {
-    mode: process.env['NODE_ENV'] == 'production' ? 'production' : 'development',
+    mode: isProduction ? 'production' : 'development',
     entry: './src/index.tsx',
     output: {
         filename: "js/[hash].js",
@@ -21,7 +22,7 @@ const config = {
               test: /\.tsx?$/,
               loader: "ts-loader",
               options: {
-                transpileOnly: true
+                transpileOnly: isProduction
               },
             },
 

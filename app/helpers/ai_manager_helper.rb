@@ -151,7 +151,20 @@ module AiManagerHelper
     
   end
 
+  def self.pay_wages(team)
+    wage_bill = team.players.map(&:wage).sum
+    team.update!(money: team.money - wage_bill)
+    AccountItem.create!(
+      description: 'Player wages',
+      amount: -wage_bill,
+      season: SeasonHelper.current_season,
+      team_id: team.id
+    )
+  end
+
   def self.daily_task(team)
+    AiManagerHelper.pay_wages(team)
+
     if team.is_actively_managed_by_human? then
       return
     end

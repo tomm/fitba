@@ -36,4 +36,5 @@ Rails.application.routes.draw do
   post 'history' => 'api#history'
   post 'transfer_listings' => 'api#transfer_listings'
   post 'top_scorers' => 'api#top_scorers'
+  post 'finances' => 'api#finances'
 end

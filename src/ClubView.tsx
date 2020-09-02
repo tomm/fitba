@@ -8,6 +8,7 @@ import { NewsView } from './NewsView';
 import { InboxView } from './InboxView';
 import { SeasonHistoryView } from './SeasonHistoryView';
 import { TransferMarketView } from './TransferMarketView';
+import { FinancesView } from './FinancesView';
 
 function TabPanel(props: any) {
   const { children, value, index } = props;
@@ -46,9 +47,10 @@ export function ClubView(props: { rootState: model.RootState, commands: Commands
         <Tab label="News" />
         <Tab label="Transfers" />
         <Tab label={inboxLabel()} />
+        <Tab label="Finances" />
         <Tab label="Records" />
       </Tabs>
-    </AppBar>;
+    </AppBar>
     <TabPanel value={tab} index={0}>
       <NewsView />
     </TabPanel>
@@ -60,6 +62,9 @@ export function ClubView(props: { rootState: model.RootState, commands: Commands
                  onClickDeleteMessage={deleteMessage} />
     </TabPanel>
     <TabPanel value={tab} index={3}>
+      <FinancesView ownTeam={props.rootState.team} />
+    </TabPanel>
+    <TabPanel value={tab} index={4}>
       <SeasonHistoryView ownTeam={props.rootState.team} currentSeason={props.rootState.season} />
     </TabPanel>
   </>;

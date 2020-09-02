@@ -306,4 +306,27 @@ class ApiController < ApplicationController
       { tournamentName: l.name, topScorers: r.to_a }
     }
   end
+
+  def finances
+    season = SeasonHelper.current_season
+
+    conn = ActiveRecord::Base.connection
+
+    season_items = conn.execute("
+      select description,sum(amount) as amount from account_items
+      where team_id=#{conn.quote(@user.team_id)} and season=#{conn.quote(season)}
+        group by 1
+    ")
+    today_items = conn.execute("
+      select description,sum(amount) as amount from account_items
+      where team_id=#{conn.quote(@user.team_id)} and season=#{conn.quote(season)}
+        and created_at::date = now()::date
+        group by 1
+    ")
+
+    render json: {
+      seasonItems: season_items.to_a,
+      todayItems: today_items.to_a
+    }
+  end
 end

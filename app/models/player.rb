@@ -20,6 +20,7 @@ class Player < ApplicationRecord
       speed: self.speed,
       injury: self.injury,
       form: self.form,
+      wage: self.wage,
       season_stats: self.get_season_stats,
       positions: self.get_positions,
       is_transfer_listed: TransferListing.where(player_id: self.id, status: 'Active').where('deadline >= now()').count > 0
@@ -103,6 +104,9 @@ class Player < ApplicationRecord
         self.method(which_skill + "=").call(v-1)
       end
     end
+    # wage changes for youth teamers
+    self.wage = PlayerHelper.pick_daily_wage(self) if self.age <= 18
+
     self.save
   end
 
@@ -151,6 +155,7 @@ class Player < ApplicationRecord
     )
 
     player.positions = JSON.generate(player.pick_positions(nil))
+    player.wage = PlayerHelper.pick_daily_wage(player)
     
     player
   end

@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_11_150250) do
+ActiveRecord::Schema.define(version: 2020_09_02_165239) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "account_items", force: :cascade do |t|
+    t.string "description"
+    t.integer "amount"
+    t.integer "season"
+    t.bigint "team_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["team_id"], name: "index_account_items_on_team_id"
+  end
 
   create_table "attendances", force: :cascade do |t|
     t.bigint "game_id", null: false
@@ -123,7 +133,26 @@ ActiveRecord::Schema.define(version: 2019_12_11_150250) do
     t.integer "age", null: false
     t.integer "injury", default: 0, null: false
     t.integer "form", default: 0, null: false
+    t.integer "wage"
     t.index ["team_id"], name: "index_players_on_team_id"
+  end
+
+  create_table "players_missing_s1_to_23", id: false, force: :cascade do |t|
+    t.integer "id"
+    t.integer "team_id"
+    t.string "name"
+    t.integer "shooting"
+    t.integer "passing"
+    t.integer "tackling"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer "handling"
+    t.integer "speed"
+    t.string "positions"
+    t.string "forename"
+    t.integer "age"
+    t.integer "injury"
+    t.integer "form"
   end
 
   create_table "sessions", id: :serial, force: :cascade do |t|
