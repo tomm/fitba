@@ -6,6 +6,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import * as model from './model';
 import { TeamView } from './TeamView';
 import { LeagueTableView } from './LeagueTableView';
+import { TopScorersView } from './SeasonHistoryView';
 import * as Uitk from './Uitk';
 
 export function TournamentView(props: { rootState: model.RootState, commands: Commands }) {
@@ -41,14 +42,17 @@ export function TournamentView(props: { rootState: model.RootState, commands: Co
       ? <OpponentTeamView team={viewingTeam} commands={props.commands} />
 
       : !!tables
-      ? <Grid container spacing={5}>
-          { tables.map(l => 
-            <Grid item xs={12}>
-              <LeagueTableView league={l} onClickTeam={handleClickTeam} />
-            </Grid>
-            )
-          }
-        </Grid>
+      ? <>
+        <Grid container spacing={5}>
+            { tables.map(l => 
+              <Grid item xs={12}>
+                <LeagueTableView league={l} onClickTeam={handleClickTeam} />
+              </Grid>
+              )
+            }
+          </Grid>
+          <TopScorersView ownTeam={props.rootState.team} season={props.rootState.season} />
+        </>
       : <Uitk.Loading />
     }
   </>

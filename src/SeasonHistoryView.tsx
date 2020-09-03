@@ -8,7 +8,7 @@ import { LeagueTableView } from './LeagueTableView';
 import * as Uitk from './Uitk';
 import { resultText } from './FixturesView';
 
-function TopScorersView(props: { ownTeam: model.Team, season: number }) {
+export function TopScorersView(props: { ownTeam: model.Team, season: number }) {
   const [ stats, setStats ] = React.useState<model.TopScorers | undefined>(undefined);
 
   React.useEffect(() => {
