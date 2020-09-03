@@ -68,7 +68,8 @@ module TransferMarketHelper
           bid.update(status: "YouWon")
           t.update(status: 'Sold')
           buyer_team.update(money: buyer_team.money - bid.amount)
-          seller_team&.update(money: seller_team.money + bid.amount*(1.0-SALES_TAX))
+          seller_receives = bid.amount*(1.0-SALES_TAX)
+          seller_team&.update(money: seller_team.money + seller_receives)
           seller_team&.remove_player_from_squad(player)
           player.update(team_id: buyer_team.id)
 
@@ -76,7 +77,7 @@ module TransferMarketHelper
           if seller_team
             AccountItem.create!(
               description: 'Transfer fees (selling)',
-              amount: bid.amount,
+              amount: seller_receives,
               season: SeasonHelper.current_season,
               team_id: seller_team.id
             )
