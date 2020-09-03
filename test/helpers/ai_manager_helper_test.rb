@@ -24,6 +24,15 @@ class EndOfSeasonTest < ActiveSupport::TestCase
     assert_equal 1, TransferListing.count
   end
 
+  test "AI tasks runthrough (no assertions)" do
+    team = PopulateDbHelper.make_team(name: "Test team", player_spawn_quality: 5)
+
+    AiManagerHelper.five_minutely_task(team)
+    AiManagerHelper.daily_task(team)
+    AiManagerHelper.maybe_acquire_player(team)
+    AiManagerHelper.maybe_sell_player(team)
+  end
+
   # test broken now AI places bids rather than spawning players
   #test "maybe_acquire_player" do
   #  team = PopulateDbHelper.make_team(name: "Test team", player_spawn_quality: 5)

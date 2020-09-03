@@ -244,8 +244,8 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                 </td>
                 <td>{ l.player.age }</td>
                 <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
-                <td>{ formatMoneyMillions(l.minPrice) }</td>
                 <td>{ listingStatusShort(l) }</td>
+                <td>{ formatMoneyMillions(l.minPrice) }</td>
                 <td>{
                   l.youBid
                   ? formatMoneyMillions(l.youBid)

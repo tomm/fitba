@@ -20,6 +20,10 @@ export function FinancesView(props: { ownTeam: model.Team }) {
     return items.reduce((p,n) => p + n.amount, 0);
   }
 
+  function sumExcludingTransfers(items: { description: string, amount: number }[]): number {
+    return items.reduce((p,n) => p + (n.description.startsWith('Transfer') ? 0 : n.amount), 0);
+  }
+
   function timeperiod(title: string, items: { description: string, amount: number }[]) {
     return <>
       <h2>{ title }</h2>
@@ -39,7 +43,11 @@ export function FinancesView(props: { ownTeam: model.Team }) {
               </TableRow>
             )}
             <TableRow>
-              <TableCell>Total</TableCell>
+              <TableCell>Total (excluding transfers)</TableCell>
+              <TableCell align="right">£{ sumExcludingTransfers(items).toLocaleString() }</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell><strong>Total</strong></TableCell>
               <TableCell align="right"><strong>£{ sum(items).toLocaleString() }</strong></TableCell>
             </TableRow>
           </TableBody>

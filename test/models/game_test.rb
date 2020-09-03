@@ -14,12 +14,13 @@ class GameTest < ActiveSupport::TestCase
     game.simulate(game.start + 500)
     assert_equal "Played", game.status
 
-#=begin
     events = GameEvent.where(game_id: game.id).order(:time).all
+=begin
     puts "GAME ======================+"
     events.each do |e|
       puts "#{game.event_minutes e} #{e.time} #{e.kind} InPossession:#{e.side} #{e.ball_pos_x},#{e.ball_pos_y} #{e.message}"
     end
+=end
     puts "Final score: #{game.home_goals}:#{game.away_goals}."
     puts "Shootout result (if it happened...): #{game.home_penalties}:#{game.away_penalties}."
     home_shots_missed = GameEvent.where(game: game, side: 0, kind: "ShotMiss").count
@@ -29,7 +30,6 @@ class GameTest < ActiveSupport::TestCase
     puts "Shots total: #{home_shots_total}:#{away_shots_total}"
     puts "Missed: #{home_shots_missed}:#{away_shots_missed}"
     puts "On target: #{home_shots_total - home_shots_missed}:#{away_shots_total - away_shots_missed}"
-#=end
   end
 
   test "simulation_internals" do

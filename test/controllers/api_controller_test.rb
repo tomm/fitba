@@ -429,4 +429,18 @@ class ApiControllerTest < ActionController::TestCase
     assert_equal "First Division", body[0]['tournamentName']
     assert_equal "Second Division", body[1]['tournamentName']
   end
+
+  test "post /finances" do
+    user = login
+    get :finances, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+  end
+
+  test "post /history" do
+    user = login
+    get :history, :format => "json"
+    assert_response :success
+    body = JSON.parse(response.body)
+  end
 end

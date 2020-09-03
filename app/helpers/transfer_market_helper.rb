@@ -75,7 +75,7 @@ module TransferMarketHelper
           # make accounting items
           if seller_team
             AccountItem.create!(
-              description: 'Transfer fees',
+              description: 'Transfer fees (selling)',
               amount: bid.amount,
               season: SeasonHelper.current_season,
               team_id: seller_team.id
@@ -84,7 +84,7 @@ module TransferMarketHelper
 
           if buyer_team
             AccountItem.create!(
-              description: 'Transfer fees',
+              description: 'Transfer fees (buying)',
               amount: -bid.amount,
               season: SeasonHelper.current_season,
               team_id: buyer_team.id

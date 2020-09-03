@@ -201,7 +201,7 @@ module MatchSimHelper
         emit_event('EndOfGame', @last_event.side, ball_pos, reason, @last_event.player_id)
       end
       media_response
-      #pay_match_income
+      pay_match_income
       PushNotificationHelper.send_result_notifications(@game)
     end
 
