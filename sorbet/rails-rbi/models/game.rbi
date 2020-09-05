@@ -17,10 +17,10 @@ module Game::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def away_formation_id?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def away_goals; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def away_goals=(value); end
 
   sig { returns(T::Boolean) }
@@ -44,10 +44,10 @@ module Game::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def away_subs?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def away_team_id; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def away_team_id=(value); end
 
   sig { returns(T::Boolean) }
@@ -71,10 +71,10 @@ module Game::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def home_formation_id?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def home_goals; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def home_goals=(value); end
 
   sig { returns(T::Boolean) }
@@ -98,10 +98,10 @@ module Game::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def home_subs?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def home_team_id; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def home_team_id=(value); end
 
   sig { returns(T::Boolean) }
@@ -116,10 +116,10 @@ module Game::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def id?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def league_id; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def league_id=(value); end
 
   sig { returns(T::Boolean) }
@@ -196,7 +196,7 @@ module Game::GeneratedAssociationMethods
   sig { params(value: T.nilable(::Formation)).void }
   def away_formation=(value); end
 
-  sig { returns(T.nilable(::Team)) }
+  sig { returns(::Team) }
   def away_team; end
 
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Team).void)).returns(::Team) }
@@ -208,7 +208,7 @@ module Game::GeneratedAssociationMethods
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Team).void)).returns(::Team) }
   def create_away_team!(*args, &block); end
 
-  sig { params(value: T.nilable(::Team)).void }
+  sig { params(value: ::Team).void }
   def away_team=(value); end
 
   sig { returns(T.nilable(::Formation)) }
@@ -226,7 +226,7 @@ module Game::GeneratedAssociationMethods
   sig { params(value: T.nilable(::Formation)).void }
   def home_formation=(value); end
 
-  sig { returns(T.nilable(::Team)) }
+  sig { returns(::Team) }
   def home_team; end
 
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Team).void)).returns(::Team) }
@@ -238,10 +238,10 @@ module Game::GeneratedAssociationMethods
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Team).void)).returns(::Team) }
   def create_home_team!(*args, &block); end
 
-  sig { params(value: T.nilable(::Team)).void }
+  sig { params(value: ::Team).void }
   def home_team=(value); end
 
-  sig { returns(T.nilable(::League)) }
+  sig { returns(::League) }
   def league; end
 
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::League).void)).returns(::League) }
@@ -253,7 +253,7 @@ module Game::GeneratedAssociationMethods
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::League).void)).returns(::League) }
   def create_league!(*args, &block); end
 
-  sig { params(value: T.nilable(::League)).void }
+  sig { params(value: ::League).void }
   def league=(value); end
 end
 

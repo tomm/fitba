@@ -89,10 +89,10 @@ module GameEvent::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def side?; end
 
-  sig { returns(T.nilable(ActiveSupport::TimeWithZone)) }
+  sig { returns(ActiveSupport::TimeWithZone) }
   def time; end
 
-  sig { params(value: T.nilable(T.any(Date, Time, ActiveSupport::TimeWithZone))).void }
+  sig { params(value: T.any(Date, Time, ActiveSupport::TimeWithZone)).void }
   def time=(value); end
 
   sig { returns(T::Boolean) }
