@@ -41,6 +41,7 @@ const SafePlayer = Safe.obj({
   injury: Safe.int,
   form: Safe.int,
   wage: Safe.int,
+  suspension: Safe.int,
   season_stats: Safe.obj({
     goals: Safe.int,
     played: Safe.int
@@ -143,7 +144,7 @@ const SafeFixture = Safe.obj({
 });
 
 export enum GameEventKind {
-  KickOff, Goal, GoalKick, Corner, Boring, ShotTry, ShotMiss, ShotSaved, EndOfGame
+  KickOff, Goal, GoalKick, Corner, Boring, ShotTry, ShotMiss, ShotSaved, EndOfGame, YellowCard, RedCard, FreeKick, Injury
 };
 
 export enum GameEventSide {
@@ -162,8 +163,11 @@ const SafeGameEventKind: Safe.Type<GameEventKind> = {
       case "ShotMiss": return GameEventKind.ShotMiss;
       case "ShotSaved": return GameEventKind.ShotSaved;
       case "Boring": return GameEventKind.Boring;
+      case "YellowCard": return GameEventKind.YellowCard;
+      case "FreeKick": return GameEventKind.FreeKick;
+      case "RedCard": return GameEventKind.RedCard;
       case "EndOfPeriod": return GameEventKind.Boring;
-      case "Injury": return GameEventKind.Boring;
+      case "Injury": return GameEventKind.Injury;
       case "Sub": return GameEventKind.Boring;
       case "EndOfGame": return GameEventKind.EndOfGame;
       default: bug(`Unknown GameEventKind: ${o}`);

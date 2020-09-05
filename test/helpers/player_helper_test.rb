@@ -18,10 +18,19 @@ class PlayerHelperTest < ActiveSupport::TestCase
     assert_equal 12, teams(:test_utd).players.where(injury: 0).count
     PlayerHelper.spawn_injury_on_team(teams(:test_utd).id)
     assert_equal 11, teams(:test_utd).players.where(injury: 0).count
+    assert_equal 11, teams(:test_utd).players.all.select(&:can_play?).count
     50.times do
       PlayerHelper.daily_cure_injury
     end
     assert_equal 12, teams(:test_utd).players.where(injury: 0).count
+    assert_equal 12, teams(:test_utd).players.all.select(&:can_play?).count
+
+    teams(:test_utd).players.first.update(suspension: 2)
+    assert_equal 11, teams(:test_utd).players.all.select(&:can_play?).count
+    PlayerHelper.daily_reduce_suspension
+    assert_equal 11, teams(:test_utd).players.all.select(&:can_play?).count
+    PlayerHelper.daily_reduce_suspension
+    assert_equal 12, teams(:test_utd).players.all.select(&:can_play?).count
   end
 
   test "daily_maybe_change_player_form" do

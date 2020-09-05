@@ -2,7 +2,7 @@ require 'digest/md5'
 require 'readline'
 require "./app/name_gen.rb"
 
-SQUAD_SIZE = 22
+SQUAD_SIZE = 26
 
 TEAMS_PER_LEAGUE = 12
 

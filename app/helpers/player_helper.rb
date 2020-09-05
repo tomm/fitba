@@ -2,6 +2,18 @@ module PlayerHelper
   SILLY_WORDS = ["shocker", "nightmare", "tragedy", "debacle", "crisis"]
   INJURY_TYPE = ["knee injury", "sprained ankle", "hamstring injury", "concussion", "calf injury", "head injury", "dislocated shoulder"]
 
+  def self.pick_aggression
+    a = 1
+    8.times do
+      if rand < 0.5
+        a += 1
+      else
+        break
+      end
+    end
+    return a
+  end
+
   def self.pick_daily_wage(p)
     # / (season len * max skill * num skills)
     v = 1500000 * p.skill / (28*9*5)
@@ -56,6 +68,16 @@ module PlayerHelper
       if p.injury == 0 and p.team_id != nil then
         Message.send_message(Team.find(p.team_id), "Head Coach", "Player recovery",
                              "#{p.name} has fully recovered from injury and is fit to play", Time.now)
+      end
+    end
+  end
+
+  def self.daily_reduce_suspension
+    Player.where.not(suspension: 0).all.each do |p|
+      p.update(suspension: p.suspension-1)
+      if p.suspension == 0 then
+        Message.send_message(Team.find(p.team_id), "Head Coach", "Suspension over",
+                             "#{p.name} is no longer suspended, and is eligible to play", Time.now)
       end
     end
   end

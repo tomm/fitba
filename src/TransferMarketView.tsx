@@ -241,6 +241,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
                 <td>
                   <Uitk.PlayerPositionBadge player={l.player} />
                   <Uitk.PlayerInjuryBadge player={l.player} />
+                  <Uitk.PlayerSuspensionBadge player={l.player} />
                 </td>
                 <td>{ l.player.age }</td>
                 <td>{ logic.playerAvgSkill(l.player).toFixed(1) }</td>
@@ -302,6 +303,7 @@ export function TransferMarketView(props: { ownTeam: model.Team }) {
               <td>
                 <Uitk.PlayerPositionBadge player={l.player} />
                 <Uitk.PlayerInjuryBadge player={l.player} />
+                <Uitk.PlayerSuspensionBadge player={l.player} />
               </td>
               { altView
                 ? <>

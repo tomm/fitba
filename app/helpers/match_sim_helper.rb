@@ -87,6 +87,7 @@ module MatchSimHelper
       @game = game
       @last_event = GameEvent.where(game_id: game.id)
                              .order(:time).reverse_order.first
+      @yellow_cards = GameEvent.where(game_id: game.id, kind: 'YellowCard').all.to_a
 
       if @last_event == nil then
         # start of match. copy starting formation from teams
@@ -236,6 +237,7 @@ module MatchSimHelper
 
         if @last_event.kind == 'Boring' then
           spawn_injury()
+          spawn_redyellowcard()
         end
 
         period, ended = period_we_are_in(@last_event.time)
@@ -277,9 +279,9 @@ module MatchSimHelper
         side = RngHelper.int_range(0,1)
         victim = @squad[side][RngHelper.int_range(0,10)]
 
-        if victim != nil and
-          # <- don't injure the on-the-ball player. game engine can't deal with that yet
-          victim.player.id != @last_event.player_id then
+        if victim != nil and victim.player.id != @last_event.player_id then
+          #                  ^^
+          # don't injure the on-the-ball player. game engine can't deal with that yet
 
           PlayerHelper.spawn_injury_on_player(victim.player, how: "during our match against #{@teams[1-side].name}")
           exclude_ineligible_players()
@@ -288,10 +290,41 @@ module MatchSimHelper
       end
     end
 
+    # maybe spawn red or yellow card
+    def spawn_redyellowcard
+      if rand < 0.2 then
+        side = RngHelper.int_range(0,1)
+        criminal = @squad[side][RngHelper.int_range(1,10)]
+        # XXX not GK, since we aren't shuffling the formation in response (yet)
+        
+        if criminal != nil && 
+           RngHelper.int_range(1,20) <= criminal.player.aggression &&
+            criminal.player.id != @last_event.player_id then
+          # ^^
+          # don't send off the on-the-ball player. game engine can't deal with that yet
+          num_cards = @yellow_cards.select {|c|
+            c.player_id == criminal.player.id && c.kind == 'YellowCard'
+          }.count
+
+          is_red = rand < 0.2
+
+          if is_red || num_cards > 0 then
+            emit_event('RedCard', side, ball_pos, "#{criminal.player.name} has been sent off!", criminal.player.id)
+            criminal.player.update(suspension: RngHelper.int_range(1,3))
+            exclude_ineligible_players()
+          else
+            emit_event('YellowCard', side, ball_pos, "#{criminal.player.name} has been shown a yellow card!", criminal.player.id)
+          end
+          emit_event('FreeKick', 1 - side, ball_pos, "#{@teams[1 - side].name} have a free kick", criminal.player.id)
+          #puts "#{is_red ? 'red' : num_cards > 0 ? '2nd yellow' : 'yellow'} #{criminal.player.name} agg #{criminal.player.aggression} XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        end
+      end
+    end
+
     def ai_substitutions
       # Currently only does subs when there is an injured player
-      team0_players_injured = @game.home_formation.formation_pos.order(:position_num).limit(11).all.select{|p| not p.player.can_play?}
-      team1_players_injured = @game.away_formation.formation_pos.order(:position_num).limit(11).all.select{|p| not p.player.can_play?}
+      team0_players_injured = @game.home_formation.formation_pos.order(:position_num).limit(11).all.select{|p| p.player.injury > 0}
+      team1_players_injured = @game.away_formation.formation_pos.order(:position_num).limit(11).all.select{|p| p.player.injury > 0}
 
       team0_players_injured.each{|formation_pos|
         try_substitute_player(0, formation_pos)
@@ -477,6 +510,9 @@ module MatchSimHelper
         elsif @last_event.kind == 'GoalKick'
           ai_substitutions()
           goal_kick(side)
+        elsif @last_event.kind == 'FreeKick'
+          ai_substitutions()
+          free_kick(side)
         elsif @last_event.kind == 'ShotSaved'
           ai_substitutions()
           # goalkeeper controls it
@@ -675,6 +711,8 @@ module MatchSimHelper
         ball_pos_y: pos.y,
         player_id: player_id
       )
+      
+      @yellow_cards << @last_event if kind == 'YellowCard'
     end
 
     def msg_clearance(kicker)
@@ -853,6 +891,7 @@ module MatchSimHelper
 
       # pass to anyone upfield
       @squad[side].drop(1).select{|p|
+        p != nil && 
         p.player.id != on_ball.id &&
         (
           (side == 0 && p.pos.y <= ball_pos.y) ||
@@ -934,6 +973,13 @@ module MatchSimHelper
       pos = PitchPos.new((0..4).to_a.sample, 3)
       emit_event("Boring", side, pos, "Goal kick by #{goalkeeper.name}", goalkeeper.id)
       anyone_grab_ball(pos)
+    end
+
+    def free_kick(side)
+      free_kicker = random_player(side).player
+      emit_event("Boring", side, ball_pos, "Free kick by #{free_kicker.name}", free_kicker.id)
+      pass_to = ai_pass_target(free_kicker)
+      action_pass(free_kicker, pass_to)
     end
   end
 end

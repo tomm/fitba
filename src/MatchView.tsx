@@ -26,6 +26,14 @@ const eventsUpToTimepoint = (game: model.Game, time: Date): model.GameEvent[] =>
     .filter(e => e.timestamp <= time)
     .sort((a, b) => a.timestamp > b.timestamp ? -1 : 1);
 
+const allInterestingEvents = (game: model.Game, time: Date): model.GameEvent[] =>
+  eventsUpToTimepoint(game, time).filter(e =>
+    e.kind == model.GameEventKind.Goal ||
+    e.kind == model.GameEventKind.Injury ||
+    e.kind == model.GameEventKind.YellowCard ||
+    e.kind == model.GameEventKind.RedCard
+  );
+
 const allGoals = (game: model.Game, time: Date): model.GameEvent[] =>
   eventsUpToTimepoint(game, time).filter(e => e.kind == model.GameEventKind.Goal);
 
@@ -312,11 +320,28 @@ function goalSummary(game: model.Game, time: Date) {
 
   function summarizeEvent(e: model.GameEvent) {
     const when = secondsToMatchMinute(false, 0.001 * (e.timestamp.getTime() - game.start.getTime()));
+    let kind;
+    switch (e.kind) {
+      case model.GameEventKind.Goal:
+        kind = null;
+        break;
+      case model.GameEventKind.Injury:
+        kind = <span className={'injury-icon'}></span>;
+        break;
+      case model.GameEventKind.YellowCard:
+        kind = <span className={'yellowcard-icon'}></span>
+        break;
+      case model.GameEventKind.RedCard:
+        kind = <span className={'redcard-icon'}></span>
+        break;
+      default:
+        return;
+    }
     return <div>
       {
         e.side == model.GameEventSide.Home
-        ? `${e.playerName} ${when}`
-        : `${when} ${e.playerName}`
+        ? <> {`${e.playerName} ${when}`} {kind}</>
+        : <> {kind} {`${when} ${e.playerName}`}</>
       }
     </div>
   }
@@ -326,7 +351,7 @@ function goalSummary(game: model.Game, time: Date) {
     <Grid container>
       <Grid xs={6} spacing={2}>
         <div className="game-summary home-team game-summary-home">
-          { allGoals(game, time)
+          { allInterestingEvents(game, time)
               .filter(e => e.side == model.GameEventSide.Home)
               .map(summarizeEvent)
           }
@@ -334,7 +359,7 @@ function goalSummary(game: model.Game, time: Date) {
       </Grid>
       <Grid xs={6} spacing={2}>
         <div className="game-summary away-team game-summary-away">
-          { allGoals(game, time)
+          { allInterestingEvents(game, time)
               .filter(e => e.side == model.GameEventSide.Away)
               .map(summarizeEvent)
           }

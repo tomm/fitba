@@ -2,7 +2,7 @@ require 'fcm'
 
 module PushNotificationHelper
   def self.test_config
-    raise 'Missing FIREBASE_SERVER_KEY variable' unless ENV['FIREBASE_SERVER_KEY']
+    raise 'Missing FIREBASE_SERVER_KEY variable' unless ENV['FIREBASE_SERVER_KEY'] || ENV['RAILS_ENV'] == 'development'
   end
 
   def self.get_firebase
@@ -10,7 +10,8 @@ module PushNotificationHelper
     if server_key != nil
       FCM.new(server_key)
     else
-      raise 'Missing FIREBASE_SERVER_KEY variable'
+      puts 'WARNING: Missing FIREBASE_SERVER_KEY variable. No push notifications'
+      nil
     end
   end
 
@@ -29,7 +30,7 @@ module PushNotificationHelper
       }
     }
 
-    get_firebase.send(token, options)
+    get_firebase&.send(token, options)
   end
 
   def self.send_result_notifications(game)

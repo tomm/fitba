@@ -20,5 +20,8 @@ export const ButtonBar = (props: { children: any }) =>
 export const PlayerInjuryBadge = (props: { player: model.Player }) =>
   <span className={props.player.injury ? 'injury-icon' : ''}></span>
 
+export const PlayerSuspensionBadge = (props: { player: model.Player }) =>
+  <span className={props.player.suspension ? 'redcard-icon' : ''}></span>
+
 export const PlayerForSaleBadge = (props: { player: model.Player }) =>
   <span className={props.player.is_transfer_listed ? 'forsale-icon' : ''}></span>

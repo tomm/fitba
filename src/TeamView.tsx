@@ -51,7 +51,7 @@ function PlayerOnPitch(props: { team: model.Team,
     : [ player.name,
         props.selected == props.playerIdx
         ? '#8080ff'
-        : (includes(props.pos, player.positions) && player.injury == 0)
+        : (includes(props.pos, player.positions) && player.injury == 0 && player.suspension == 0)
         ? 'white'
         : '#f77'
       ];
@@ -138,6 +138,12 @@ function PlayerDetailsDialog(props: {
             Recovery in { props.player.injury } days
           </Typography>
         }
+        { !!props.player.suspension &&
+          <Typography variant="body1">
+            <Uitk.PlayerSuspensionBadge player={props.player} />
+            Suspended for { props.player.suspension } days
+          </Typography>
+        }
         { !!props.player.is_transfer_listed &&
           <Typography variant="body1">
             This player listed on the transfer market
@@ -176,6 +182,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
   const rowStyle = (idx: number): string => {
     if (idx == selected) return 'active-table-row-style';
     else if (props.team.players[idx].injury > 0) return 'player-row-injury';
+    else if (props.team.players[idx].suspension > 0) return 'player-row-suspension';
     else if (selected != undefined) return 'roster-row-move-target';
     else return '';
   };
@@ -265,6 +272,7 @@ function RosterView(props: { team: model.Team, commands: Commands }) {
               <td onClick={click}>
                 <Uitk.PlayerPositionBadge player={p} />
                 <Uitk.PlayerInjuryBadge player={p} />
+                <Uitk.PlayerSuspensionBadge player={p} />
                 <Uitk.PlayerForSaleBadge player={p} />
               </td>
               <td onClick={click}>{ p.name }</td>

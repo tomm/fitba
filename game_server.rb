@@ -28,6 +28,7 @@ def daily_task
   }
   PlayerHelper.daily_develop_youth_players
   PlayerHelper.daily_cure_injury
+  PlayerHelper.daily_reduce_suspension
   PlayerHelper.daily_maybe_change_player_form
 
   # AI update

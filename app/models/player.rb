@@ -21,6 +21,7 @@ class Player < ApplicationRecord
       injury: self.injury,
       form: self.form,
       wage: self.wage,
+      suspension: self.suspension,
       season_stats: self.get_season_stats,
       positions: self.get_positions,
       is_transfer_listed: TransferListing.where(player_id: self.id, status: 'Active').where('deadline >= now()').count > 0
@@ -83,7 +84,7 @@ class Player < ApplicationRecord
   end
 
   def can_play?
-    self.injury == 0
+    self.injury == 0 && self.suspension == 0
   end
 
   def skill
