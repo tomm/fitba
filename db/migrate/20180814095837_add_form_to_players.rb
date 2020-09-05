@@ -1,3 +1,4 @@
+# typed: true
 class AddFormToPlayers < ActiveRecord::Migration[4.2]
   def change
     add_column :players, :form, :integer, null: false, default: 0

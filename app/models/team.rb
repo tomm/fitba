@@ -1,3 +1,4 @@
+# typed: false
 class Team < ApplicationRecord
   belongs_to :formation
   has_many :team_leagues

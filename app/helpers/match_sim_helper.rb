@@ -1,3 +1,4 @@
+# typed: false
 require_relative './push_notification_helper'
 
 module MatchSimHelper

@@ -1,3 +1,4 @@
+# typed: true
 class CreateFormationPos < ActiveRecord::Migration[4.2]
   def change
     create_table :formation_pos do |t|

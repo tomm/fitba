@@ -1,3 +1,4 @@
+# typed: true
 class AddStatusToTransferBids < ActiveRecord::Migration[4.2]
   def change
     execute "DELETE FROM transfer_bids"

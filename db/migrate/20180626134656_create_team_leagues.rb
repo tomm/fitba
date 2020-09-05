@@ -1,3 +1,4 @@
+# typed: true
 class CreateTeamLeagues < ActiveRecord::Migration[4.2]
   def change
     create_table :team_leagues do |t|

@@ -1,3 +1,4 @@
+# typed: true
 module DbHelper
   def self.league_table(league_id, season)
     teams = Team.in_league_season(league_id, season).all

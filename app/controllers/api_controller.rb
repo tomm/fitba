@@ -1,3 +1,4 @@
+# typed: false
 class ApiController < ApplicationController
   before_action :require_login
 

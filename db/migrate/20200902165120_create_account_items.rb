@@ -1,3 +1,4 @@
+# typed: true
 class CreateAccountItems < ActiveRecord::Migration[5.2]
   def change
     create_table :account_items do |t|

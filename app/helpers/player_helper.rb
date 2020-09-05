@@ -1,7 +1,10 @@
+# typed: strict
 module PlayerHelper
-  SILLY_WORDS = ["shocker", "nightmare", "tragedy", "debacle", "crisis"]
-  INJURY_TYPE = ["knee injury", "sprained ankle", "hamstring injury", "concussion", "calf injury", "head injury", "dislocated shoulder"]
+  extend T::Sig
+  SILLY_WORDS = T.let(["shocker", "nightmare", "tragedy", "debacle", "crisis"], T::Array[String])
+  INJURY_TYPE = T.let(["knee injury", "sprained ankle", "hamstring injury", "concussion", "calf injury", "head injury", "dislocated shoulder"], T::Array[String])
 
+  sig {returns(Integer)}
   def self.pick_aggression
     a = 1
     8.times do
@@ -14,12 +17,14 @@ module PlayerHelper
     return a
   end
 
+  sig {params(p: T.untyped).returns(Integer)}
   def self.pick_daily_wage(p)
     # / (season len * max skill * num skills)
     v = 1500000 * p.skill / (28*9*5)
     return (rand()*0.2*v + v).to_i
   end
 
+  sig {void}
   def self.spawn_injuries
     # expected to be run every 5 minutes
     Team.pluck(:id).each{|team_id|
@@ -32,6 +37,7 @@ module PlayerHelper
     }
   end
 
+  sig {params(team_id: Integer).void}
   def self.spawn_injury_on_team(team_id)
     injure_player_id = Player.where(team_id: team_id).pluck(:id).sample
     player = Player.find(injure_player_id)
@@ -39,14 +45,15 @@ module PlayerHelper
     spawn_injury_on_player(player)
   end
 
+  sig {params(player: Player, how: String).void}
   def self.spawn_injury_on_player(player, how: 'during training')
     if player.injury == 0 then
       # light injuries are common
       duration = if RngHelper.int_range(0,1) == 0 then RngHelper.dice(1,2) else RngHelper.dice(1,15) end
       player.update(injury: duration, form: 0)
 
-      if player.team != nil then
-        team = player.team
+      team = player.team
+      if team != nil then
         type = INJURY_TYPE.sample
         Rails.logger.info "Player #{player.name} on team #{team.name} has been injured for #{player.injury} days."
         Message.send_message(team, "Head Coach", "Player injury", "#{player.name} has suffered a #{type} #{how}, and will need #{player.injury} days to recover.", Time.now)
@@ -61,6 +68,7 @@ module PlayerHelper
     end
   end
 
+  sig {void}
   def self.daily_cure_injury
     #ActiveRecord::Base.connection.execute("update players set injury=injury-1 where injury > 0")
     Player.where.not(injury: 0).all.each do |p|
@@ -72,6 +80,7 @@ module PlayerHelper
     end
   end
 
+  sig {void}
   def self.daily_reduce_suspension
     Player.where.not(suspension: 0).all.each do |p|
       p.update(suspension: p.suspension-1)
@@ -82,6 +91,7 @@ module PlayerHelper
     end
   end
 
+  sig {void}
   def self.daily_maybe_change_player_form
     Player.pluck(:id).each{|player_id|
       # change player form roughly once every 5 days
@@ -89,44 +99,9 @@ module PlayerHelper
         Player.where(id: player_id).update_all(form: [0,0,1,1,2].sample)
       end
     }
-
-    # generate training form reports for non-AI managers
-    User.all.each {|user|
-      _generate_form_report_message_for_team(user.team)
-    }
   end
 
-  def self._generate_form_report_message_for_team(team)
-=begin
-    player_evaluations = Player
-      .joins(:formation_pos)
-      .where(team_id: team.id, formation_pos: {formation_id: team.formation_id})
-      .order("formation_pos.position_num")
-      .pluck(:forename, :name, :form, :injury)
-      .map{|forename,name,form,injury|
-        form_evaluation = injury > 0 ? "Injured" :
-                          ["Poor", "Good", "Very Good", "Excellent"][form + RngHelper.int_range(0,1)]
-        "<tr><td>#{forename} #{name}</td><td>#{form_evaluation}</td></tr>"
-    }
-
-    subject = "Training performance assessments"
-    # delete old training performance messages, otherwise the inbox gets a bit
-    # stuffed...
-    Message.where(team_id: team.id, subject: subject).delete_all
-    team.send_message("Head Coach", subject,
-        "<p>This is my assessment of the players&#8217; training performance today.</p>
-        <p>&#8505; <em>Excellent player form can mean up to two bonus points for
-        all player skills.</em></p>
-        <table>
-        <thead>
-          <tr><th>Player</th><th>Performance</th></tr>
-        </thead>
-        <tbody>#{player_evaluations.join}</tbody>
-        </table>",
-      Time.now)
-=end
-  end
-
+  sig {void}
   def self.daily_develop_youth_players
     players = Player.where("age < 18").where.not(team_id: nil).all
     players.each {|player|

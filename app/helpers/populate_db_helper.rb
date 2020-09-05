@@ -1,3 +1,4 @@
+# typed: false
 require 'digest/md5'
 require 'readline'
 require "./app/name_gen.rb"

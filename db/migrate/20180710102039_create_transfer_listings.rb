@@ -1,3 +1,4 @@
+# typed: true
 class CreateTransferListings < ActiveRecord::Migration[4.2]
   def change
     create_table :transfer_listings do |t|

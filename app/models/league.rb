@@ -1,3 +1,4 @@
+# typed: false
 class League < ApplicationRecord
   # kind = League | Cup
   #

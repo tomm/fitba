@@ -1,3 +1,4 @@
+# typed: true
 class AddAggressionAndSuspensionToPlayers < ActiveRecord::Migration[5.2]
   def change
     add_column :players, :aggression, :integer, null: false, default: 1

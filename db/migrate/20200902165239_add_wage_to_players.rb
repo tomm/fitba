@@ -1,3 +1,4 @@
+# typed: true
 class AddWageToPlayers < ActiveRecord::Migration[5.2]
   def change
     add_column :players, :wage, :integer, null: false, default: 0

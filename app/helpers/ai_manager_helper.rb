@@ -1,3 +1,4 @@
+# typed: false
 module AiManagerHelper
   SQUAD_MIN_SIZE = 22
   SQUAD_MAX_SIZE = 33
