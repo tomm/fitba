@@ -890,14 +890,16 @@ module MatchSimHelper
       side = @last_event.side
 
       # pass to anyone upfield
-      @squad[side].drop(1).select{|p|
-        p != nil && 
+      target = @squad[side].drop(1).select{|p|
         p.player.id != on_ball.id &&
         (
           (side == 0 && p.pos.y <= ball_pos.y) ||
           (side == 1 && p.pos.y >= ball_pos.y)
         )
       }.sample
+
+      # or if no upfield target, just anyone
+      target ? target : @squad[side].drop(1).select{|p| p.player.id != on_ball.id }.sample
     end
 
     def action_run(on_ball)
