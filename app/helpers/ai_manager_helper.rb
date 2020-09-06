@@ -276,7 +276,7 @@ module AiManagerHelper
       return
     end
 
-    _players = Player.where(team_id: team.id, injury: 0).all.to_a
+    _players = Player.where(team_id: team.id, injury: 0, suspension: 0).all.to_a
 
     formation_viability = (FORMATIONS.map do |formation|
       players = _players.dup
