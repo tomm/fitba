@@ -1,3 +1,4 @@
+# typed: true
 class Formation < ApplicationRecord
   has_many :formation_pos
 

@@ -1,3 +1,4 @@
+# typed: false
 require 'test_helper'
 #ActiveRecord::Base.logger = Logger.new(STDOUT)
 

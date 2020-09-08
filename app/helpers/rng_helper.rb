@@ -1,3 +1,4 @@
+# typed: true
 module RngHelper
   def self.int_range(min, max)
     min + (rand*(1+max-min)).to_i

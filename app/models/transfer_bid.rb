@@ -1,3 +1,4 @@
+# typed: strict
 class TransferBid < ApplicationRecord
   belongs_to :team
   belongs_to :transfer_listing

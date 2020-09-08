@@ -1,3 +1,4 @@
+# typed: false
 module SeasonHelper
   TEAMS_PROMOTED = 3  # and same number relegated, obviously
 

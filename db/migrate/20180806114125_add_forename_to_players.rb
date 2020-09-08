@@ -1,3 +1,4 @@
+# typed: true
 require "./app/name_gen.rb"
 class AddForenameToPlayers < ActiveRecord::Migration[4.2]
   def change

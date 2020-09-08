@@ -1,3 +1,4 @@
+# typed: true
 require 'digest/md5'
 
 class InviteController < ApplicationController

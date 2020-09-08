@@ -1,3 +1,4 @@
+# typed: false
 require 'singleton'
 
 class NameGen

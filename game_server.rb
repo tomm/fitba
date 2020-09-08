@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# typed: false
 # Try running with:
 # $ RAILS_ENV=development ruby game_server.rb
 require 'date'

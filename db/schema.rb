@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_04_155344) do
+ActiveRecord::Schema.define(version: 2020_09_06_091605) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -54,7 +54,7 @@ ActiveRecord::Schema.define(version: 2020_09_04_155344) do
 
   create_table "game_events", id: :serial, force: :cascade do |t|
     t.integer "game_id"
-    t.datetime "time"
+    t.datetime "time", null: false
     t.text "message"
     t.integer "ball_pos_x"
     t.integer "ball_pos_y"
@@ -68,13 +68,13 @@ ActiveRecord::Schema.define(version: 2020_09_04_155344) do
   end
 
   create_table "games", id: :serial, force: :cascade do |t|
-    t.integer "league_id"
-    t.integer "home_team_id"
-    t.integer "away_team_id"
+    t.integer "league_id", null: false
+    t.integer "home_team_id", null: false
+    t.integer "away_team_id", null: false
     t.string "status"
     t.datetime "start"
-    t.integer "home_goals"
-    t.integer "away_goals"
+    t.integer "home_goals", null: false
+    t.integer "away_goals", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "season"
@@ -133,7 +133,7 @@ ActiveRecord::Schema.define(version: 2020_09_04_155344) do
     t.integer "age", null: false
     t.integer "injury", default: 0, null: false
     t.integer "form", default: 0, null: false
-    t.integer "wage", default: 0, null: false
+    t.integer "wage", null: false
     t.integer "aggression", default: 1, null: false
     t.integer "suspension", default: 0, null: false
     t.index ["team_id"], name: "index_players_on_team_id"
@@ -176,7 +176,7 @@ ActiveRecord::Schema.define(version: 2020_09_04_155344) do
   end
 
   create_table "teams", id: :serial, force: :cascade do |t|
-    t.string "name"
+    t.string "name", null: false
     t.integer "formation_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

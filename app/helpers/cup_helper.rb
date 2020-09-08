@@ -1,3 +1,4 @@
+# typed: false
 module CupHelper
   def self.update_cup(cup, season)
     if not is_end_of_round(cup, season) then

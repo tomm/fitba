@@ -1,3 +1,4 @@
+# typed: strict
 # Be sure to restart your server when you modify this file.
 
 # expire after 1 day so that app reload is forced, and people get new features ;)

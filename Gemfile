@@ -13,6 +13,10 @@ gem 'pg'
 # firebase
 gem 'fcm'
 
+gem 'sorbet', :group => :development
+gem 'sorbet-runtime'
+gem 'sorbet-rails'
+
 gem 'simplecov', require: false, group: :test
 
 group :development, :test do

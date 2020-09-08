@@ -1,3 +1,4 @@
+# typed: strict
 class TransferListing < ApplicationRecord
   belongs_to :player
   belongs_to :team

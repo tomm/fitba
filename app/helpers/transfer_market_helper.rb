@@ -1,3 +1,4 @@
+# typed: false
 TRANSFER_LISTING_DURATION = 60*60*24
 
 module TransferMarketHelper

@@ -1,3 +1,4 @@
+# typed: true
 class CreateNewsArticles < ActiveRecord::Migration[5.2]
   def change
     create_table :news_articles do |t|

@@ -1,3 +1,4 @@
+# typed: false
 require 'json'
 require './app/name_gen.rb'
 
