@@ -1,5 +1,7 @@
-# typed: false
+# typed: strict
 class Team < ApplicationRecord
+  extend T::Sig
+
   belongs_to :formation
   has_many :team_leagues
   has_many :players
@@ -16,26 +18,34 @@ class Team < ApplicationRecord
 
   # Used when players are sold. Removes them from the team formation,
   # but not from formations linked from games (because that's active or historic data)
+  sig {params(player: Player).void}
   def remove_player_from_squad(player)
     FormationPo.where(formation_id: self.formation_id, player_id: player.id).delete_all
   end
 
+  sig {returns(String)}
   def to_s
     self.name
   end
 
+  sig {params(from: String, subject: String, body: String, date: Date).void}
   def send_message(from, subject, body, date)
     Message.send_message(self, from, subject, body, date)
   end
 
+  sig {returns(T::Boolean)}
   def is_actively_managed_by_human?
     !!Session.where(
       user_id: User.where(team_id: self.id).first&.id
     ).order(:updated_at).reverse_order.first&.updated_at&.method(:>)&.call(Time.now - 30.day)
   end
 
+  sig {returns(T::Array[FormationPo])}
   def player_positions
-    self.formation.positions_ordered
+    f = self.formation
+    raise "Bug" if f.nil?
+
+    f.positions_ordered
   end
 
   def squad

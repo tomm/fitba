@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_05_195410) do
+ActiveRecord::Schema.define(version: 2020_09_06_091605) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -133,7 +133,7 @@ ActiveRecord::Schema.define(version: 2020_09_05_195410) do
     t.integer "age", null: false
     t.integer "injury", default: 0, null: false
     t.integer "form", default: 0, null: false
-    t.integer "wage", default: 0, null: false
+    t.integer "wage", null: false
     t.integer "aggression", default: 1, null: false
     t.integer "suspension", default: 0, null: false
     t.index ["team_id"], name: "index_players_on_team_id"
@@ -176,7 +176,7 @@ ActiveRecord::Schema.define(version: 2020_09_05_195410) do
   end
 
   create_table "teams", id: :serial, force: :cascade do |t|
-    t.string "name"
+    t.string "name", null: false
     t.integer "formation_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
