@@ -17,10 +17,10 @@ module TransferListing::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def created_at?; end
 
-  sig { returns(T.nilable(ActiveSupport::TimeWithZone)) }
+  sig { returns(ActiveSupport::TimeWithZone) }
   def deadline; end
 
-  sig { params(value: T.nilable(T.any(Date, Time, ActiveSupport::TimeWithZone))).void }
+  sig { params(value: T.any(Date, Time, ActiveSupport::TimeWithZone)).void }
   def deadline=(value); end
 
   sig { returns(T::Boolean) }
@@ -35,28 +35,28 @@ module TransferListing::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def id?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def min_price; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def min_price=(value); end
 
   sig { returns(T::Boolean) }
   def min_price?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def player_id; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def player_id=(value); end
 
   sig { returns(T::Boolean) }
   def player_id?; end
 
-  sig { returns(T.nilable(String)) }
+  sig { returns(String) }
   def status; end
 
-  sig { params(value: T.nilable(T.any(String, Symbol))).void }
+  sig { params(value: T.any(String, Symbol)).void }
   def status=(value); end
 
   sig { returns(T::Boolean) }
@@ -82,7 +82,7 @@ module TransferListing::GeneratedAttributeMethods
 end
 
 module TransferListing::GeneratedAssociationMethods
-  sig { returns(T.nilable(::Player)) }
+  sig { returns(::Player) }
   def player; end
 
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Player).void)).returns(::Player) }
@@ -94,7 +94,7 @@ module TransferListing::GeneratedAssociationMethods
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Player).void)).returns(::Player) }
   def create_player!(*args, &block); end
 
-  sig { params(value: T.nilable(::Player)).void }
+  sig { params(value: ::Player).void }
   def player=(value); end
 
   sig { returns(T.nilable(::Team)) }

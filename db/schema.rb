@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_06_091605) do
+ActiveRecord::Schema.define(version: 2020_09_10_143113) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -36,11 +36,11 @@ ActiveRecord::Schema.define(version: 2020_09_06_091605) do
   end
 
   create_table "formation_pos", id: :serial, force: :cascade do |t|
-    t.integer "formation_id"
-    t.integer "player_id"
-    t.integer "position_num"
-    t.integer "position_x"
-    t.integer "position_y"
+    t.integer "formation_id", null: false
+    t.integer "player_id", null: false
+    t.integer "position_num", null: false
+    t.integer "position_x", null: false
+    t.integer "position_y", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["formation_id"], name: "index_formation_pos_on_formation_id"
@@ -197,13 +197,13 @@ ActiveRecord::Schema.define(version: 2020_09_06_091605) do
   end
 
   create_table "transfer_listings", id: :serial, force: :cascade do |t|
-    t.integer "player_id"
-    t.integer "min_price"
-    t.datetime "deadline"
+    t.integer "player_id", null: false
+    t.integer "min_price", null: false
+    t.datetime "deadline", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "team_id"
-    t.string "status"
+    t.string "status", null: false
     t.index ["player_id"], name: "index_transfer_listings_on_player_id"
     t.index ["team_id"], name: "index_transfer_listings_on_team_id"
   end

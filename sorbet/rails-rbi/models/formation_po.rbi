@@ -17,10 +17,10 @@ module FormationPo::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def created_at?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def formation_id; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def formation_id=(value); end
 
   sig { returns(T::Boolean) }
@@ -35,37 +35,37 @@ module FormationPo::GeneratedAttributeMethods
   sig { returns(T::Boolean) }
   def id?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def player_id; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def player_id=(value); end
 
   sig { returns(T::Boolean) }
   def player_id?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def position_num; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def position_num=(value); end
 
   sig { returns(T::Boolean) }
   def position_num?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def position_x; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def position_x=(value); end
 
   sig { returns(T::Boolean) }
   def position_x?; end
 
-  sig { returns(T.nilable(Integer)) }
+  sig { returns(Integer) }
   def position_y; end
 
-  sig { params(value: T.nilable(T.any(Numeric, ActiveSupport::Duration))).void }
+  sig { params(value: T.any(Numeric, ActiveSupport::Duration)).void }
   def position_y=(value); end
 
   sig { returns(T::Boolean) }
@@ -82,7 +82,7 @@ module FormationPo::GeneratedAttributeMethods
 end
 
 module FormationPo::GeneratedAssociationMethods
-  sig { returns(T.nilable(::Formation)) }
+  sig { returns(::Formation) }
   def formation; end
 
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Formation).void)).returns(::Formation) }
@@ -94,10 +94,10 @@ module FormationPo::GeneratedAssociationMethods
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Formation).void)).returns(::Formation) }
   def create_formation!(*args, &block); end
 
-  sig { params(value: T.nilable(::Formation)).void }
+  sig { params(value: ::Formation).void }
   def formation=(value); end
 
-  sig { returns(T.nilable(::Player)) }
+  sig { returns(::Player) }
   def player; end
 
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Player).void)).returns(::Player) }
@@ -109,7 +109,7 @@ module FormationPo::GeneratedAssociationMethods
   sig { params(args: T.untyped, block: T.nilable(T.proc.params(object: ::Player).void)).returns(::Player) }
   def create_player!(*args, &block); end
 
-  sig { params(value: T.nilable(::Player)).void }
+  sig { params(value: ::Player).void }
   def player=(value); end
 end
 

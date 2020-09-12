@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 class ApiController < ApplicationController
   before_action :require_login
 
@@ -132,8 +132,8 @@ class ApiController < ApplicationController
                            #.where('time >= ?', params[:from_time])
     # if the game has started then formations for each team exist referenced by the Game table,
     # otherwise use normal team formation
-    home_squad = if game.home_formation != nil then game.home_formation.squad else nil end
-    away_squad = if game.away_formation != nil then game.away_formation.squad else nil end
+    home_squad = game.home_formation&.squad
+    away_squad = game.away_formation&.squad
     render json: {
       id: game.id,
       homeTeam: get_team_json(game.home_team, override_squad: home_squad),

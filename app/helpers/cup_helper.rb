@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 module CupHelper
   def self.update_cup(cup, season)
     if not is_end_of_round(cup, season) then
@@ -21,11 +21,11 @@ module CupHelper
     num_empty = stage_size - num_teams
 
     # when did the last cup match happen?
-    r = Game.where(league_id: cup.id, season: season).select("MAX(start) as t").to_a
-    if r[0]['t'] == nil then
+    r = Game.where(league_id: cup.id, season: season).select("MAX(start) as t").to_a[0]
+    if r.nil? || r['t'].nil? then
       last_start = Time.now
     else
-      last_start = r[0]['t']
+      last_start = r['t']
     end
     next_start = Time.new(last_start.year, last_start.month, last_start.day) + 24*3600 + 22*3600
 

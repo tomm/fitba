@@ -1885,6 +1885,7 @@
 # A copy of FormationPo::ActiveRecord_Relation has been removed from the module tree but is still active!
 # A copy of FormationPo::ActiveRecord_Relation has been removed from the module tree but is still active!
 # A copy of FormationPo::ActiveRecord_Relation has been removed from the module tree but is still active!
+# wrong constant name all
 # wrong constant name reload_formation
 # wrong constant name reload_player
 # wrong constant name <static-init>
@@ -7230,6 +7231,7 @@
 # A copy of TransferBid::ActiveRecord_Relation has been removed from the module tree but is still active!
 # A copy of TransferBid::ActiveRecord_Relation has been removed from the module tree but is still active!
 # A copy of TransferBid::ActiveRecord_Relation has been removed from the module tree but is still active!
+# wrong constant name all
 # wrong constant name reload_team
 # wrong constant name reload_transfer_listing
 # wrong constant name <static-init>

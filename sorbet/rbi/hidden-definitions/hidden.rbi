@@ -4102,6 +4102,8 @@ module Formation::GeneratedRelationMethods
 end
 
 class Formation
+  extend ::T::Private::Methods::MethodHooks
+  extend ::T::Private::Methods::SingletonMethodHooks
   def self.after_add_for_formation_pos(); end
 
   def self.after_add_for_formation_pos=(val); end
@@ -4148,6 +4150,7 @@ end
 class FormationPo::ActiveRecord_Relation
   include ::ActiveRecord::Delegation::ClassSpecificRelation
   include ::FormationPo::GeneratedRelationMethods
+  def all(*args, &block); end
 end
 
 module FormationPo::GeneratedAssociationMethods
@@ -4224,6 +4227,11 @@ module Game::GeneratedRelationMethods
 end
 
 module Game::GeneratedRelationMethods
+end
+
+class Game
+  extend ::T::Private::Methods::MethodHooks
+  extend ::T::Private::Methods::SingletonMethodHooks
 end
 
 class GameEvent
@@ -5341,6 +5349,11 @@ end
 module League::GeneratedRelationMethods
 end
 
+class League
+  extend ::T::Private::Methods::MethodHooks
+  extend ::T::Private::Methods::SingletonMethodHooks
+end
+
 class Logger
   SEV_LABEL = ::T.let(nil, ::T.untyped)
 end
@@ -5988,6 +6001,11 @@ module Message::GeneratedRelationMethods
 end
 
 module Message::GeneratedRelationMethods
+end
+
+class Message
+  extend ::T::Private::Methods::MethodHooks
+  extend ::T::Private::Methods::SingletonMethodHooks
 end
 
 module MethodSource
@@ -8946,6 +8964,8 @@ module Player::GeneratedRelationMethods
 end
 
 class Player
+  extend ::T::Private::Methods::MethodHooks
+  extend ::T::Private::Methods::SingletonMethodHooks
   def self.after_add_for_formation_pos(); end
 
   def self.after_add_for_formation_pos=(val); end
@@ -8971,44 +8991,49 @@ class Player
   def self.before_remove_for_formation_pos?(); end
 end
 
+module PlayerHelper
+  extend ::T::Private::Methods::MethodHooks
+  extend ::T::Private::Methods::SingletonMethodHooks
+end
+
 module Polyfill
   VERSION = ::T.let(nil, ::T.untyped)
 end
 
-module Polyfill::Module::M47180988155880
+module Polyfill::Module::M46920826429860
 end
 
-module Polyfill::Module::M47180988155880
+module Polyfill::Module::M46920826429860
 end
 
-module Polyfill::Module::M47180988161060
+module Polyfill::Module::M46920829675540
 end
 
-module Polyfill::Module::M47180988161060
+module Polyfill::Module::M46920829675540
 end
 
-module Polyfill::Module::M47180988192500
+module Polyfill::Module::M46920829713660
 end
 
-module Polyfill::Module::M47180988192500
+module Polyfill::Module::M46920829713660
 end
 
-module Polyfill::Module::M47180988448720
+module Polyfill::Module::M46920831876340
 end
 
-module Polyfill::Module::M47180988448720
+module Polyfill::Module::M46920831876340
 end
 
-module Polyfill::Module::M47180988552520
+module Polyfill::Module::M46920831965740
 end
 
-module Polyfill::Module::M47180988552520
+module Polyfill::Module::M46920831965740
 end
 
-module Polyfill::Module::M47180988733900
+module Polyfill::Module::M46920832138060
 end
 
-module Polyfill::Module::M47180988733900
+module Polyfill::Module::M46920832138060
 end
 
 class Proc
@@ -11863,6 +11888,8 @@ module Team::GeneratedRelationMethods
 end
 
 class Team
+  extend ::T::Private::Methods::MethodHooks
+  extend ::T::Private::Methods::SingletonMethodHooks
   def self.after_add_for_messages(); end
 
   def self.after_add_for_messages=(val); end
@@ -12477,6 +12504,7 @@ end
 class TransferBid::ActiveRecord_Relation
   include ::ActiveRecord::Delegation::ClassSpecificRelation
   include ::TransferBid::GeneratedRelationMethods
+  def all(*args, &block); end
 end
 
 module TransferBid::GeneratedAssociationMethods

@@ -1,13 +1,16 @@
-# typed: false
+# typed: strict
 require 'json'
 require './app/name_gen.rb'
 
 class Player < ApplicationRecord
+  extend T::Sig
+
   belongs_to :team, optional: true
   has_many :formation_pos, dependent: :delete_all
       
-  ALL_SKILLS = [:shooting, :passing, :tackling, :handling, :speed]
+  ALL_SKILLS = T.let([:shooting, :passing, :tackling, :handling, :speed], T::Array[Symbol])
 
+  sig {returns(T.untyped)}
   def to_api
     {
       id: self.id,
@@ -29,6 +32,7 @@ class Player < ApplicationRecord
     }
   end
 
+  sig {returns(T.untyped)}
   def get_season_stats
     season = SeasonHelper.current_season
 
@@ -53,18 +57,7 @@ class Player < ApplicationRecord
     }
   end
 
-  def get_goals_this_season
-    ActiveRecord::Base.connection.execute("
-      select count(*) from game_events
-      join games on games.id=game_events.game_id
-      where game_events.kind='Goal'
-        and games.season=#{SeasonHelper.current_season}
-        and game_events.player_id=#{self.id.to_i}
-      "
-    ).column_values(0).first
-  end
-
-  AGE_PRICE_MULTIPLIER = [
+  AGE_PRICE_MULTIPLIER = T.let([
     # age 0-9 ;)
     0.0, 0.0, 0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0, 0.0,
     # age 10-19
@@ -73,37 +66,43 @@ class Player < ApplicationRecord
     2.0, 1.9, 1.8, 1.7, 1.6,  1.5, 1.4, 1.3, 1.2, 1.1,
     # age 30-39
     1.0, 0.9, 0.8, 0.7, 0.6,  0.5, 0.4, 0.3, 0.2, 0.1
-  ]
+  ], T::Array[Float])
 
+  sig {returns(Integer)}
   def valuation
     age_mult = AGE_PRICE_MULTIPLIER[self.age] || 0.0
-    return self.skill * 200000 * age_mult
+    return (self.skill * 200000 * age_mult).to_i
   end
 
+  sig {returns(String)}
   def to_s
     "#{self.forename} #{self.name} of #{self.team}: Sh #{self.shooting}, Pa #{self.passing}, Ta #{self.tackling}, Ha #{self.handling}, Sp #{self.speed}"
   end
 
+  sig {returns(T::Boolean)}
   def can_play?
     self.injury == 0 && self.suspension == 0
   end
 
+  sig {returns(Integer)}
   def skill
     shooting + passing + tackling + handling + speed
   end
 
+  sig {returns(T::Array[[Integer,Integer]])}
   def get_positions
     JSON.parse(positions)
   end
 
+  sig {void}
   def happy_birthday
     self.age = self.age + 1
     # reduce skills on old players!
     (self.age - 30).times do
       which_skill = ALL_SKILLS.sample.to_s
-      v = self.method(which_skill).call()
+      v = self.method(which_skill.to_sym).call()
       if v > 1 then
-        self.method(which_skill + "=").call(v-1)
+        self.method((which_skill + "=").to_sym).call(v-1)
       end
     end
     # wage changes for youth teamers
@@ -112,6 +111,7 @@ class Player < ApplicationRecord
     self.save
   end
 
+  sig {params(player_spawn_quality: Integer).returns(Player)}
   def self.random(player_spawn_quality)
     player_spawn_quality = player_spawn_quality > 0 ? player_spawn_quality : 0
     skill_range = (
@@ -162,22 +162,25 @@ class Player < ApplicationRecord
     player
   end
 
+  sig {returns(String)}
   def pick_position
     # the kind of crack-smoking shit you code in a garbage-collected language
-    pos =
+    pos = T.cast(
       (["A"]*shooting +
       ["AM"]*((shooting + passing)/2) +
       ["M"]*passing +
       ["DM"]*((passing + tackling)/2) +
       ["D"]*tackling +
-      ["G"]*(handling/2)).sample
+      ["G"]*(handling/2)).sample, String
+    )
     if pos != 'G' and pos != 'A'
-      pos + ['L', 'R', 'C', 'C', 'C'].sample
+      pos + T.cast(['L', 'R', 'C', 'C', 'C'].sample, String)
     else
       pos
     end
   end
 
+  sig {params(force_position: T.any(NilClass, String)).returns(T::Array[[Integer,Integer]])}
   def pick_positions(force_position)
     if force_position then pos = force_position else pos = pick_position end
     case pos

@@ -1,3 +1,4 @@
+# typed: true
 class FixGameColumnsNullability < ActiveRecord::Migration[5.2]
   def change
     ActiveRecord::Base.connection.execute(

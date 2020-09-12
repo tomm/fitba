@@ -28,7 +28,7 @@ class Team < ApplicationRecord
     self.name
   end
 
-  sig {params(from: String, subject: String, body: String, date: Date).void}
+  sig {params(from: String, subject: String, body: String, date: Time).void}
   def send_message(from, subject, body, date)
     Message.send_message(self, from, subject, body, date)
   end
@@ -40,7 +40,7 @@ class Team < ApplicationRecord
     ).order(:updated_at).reverse_order.first&.updated_at&.method(:>)&.call(Time.now - 30.day)
   end
 
-  sig {returns(T::Array[FormationPo])}
+  sig {returns(FormationPo::ActiveRecord_Relation)}
   def player_positions
     f = self.formation
     raise "Bug" if f.nil?
@@ -48,6 +48,7 @@ class Team < ApplicationRecord
     f.positions_ordered
   end
 
+  sig {returns(T.untyped)}
   def squad
     positions = player_positions.all
     players = Player.where(team_id: self.id).all
@@ -78,6 +79,7 @@ class Team < ApplicationRecord
     }
   end
 
+  sig {params(positions: T::Array[[Integer, [Integer, Integer]]]).void}
   def update_player_positions(positions) # [[playerId, [positionX, positionY]]]
     # positions are in order, ie [0] is goal keeper, [10] is centre forward
     #players = Player.find_by(team_id: self.id)
