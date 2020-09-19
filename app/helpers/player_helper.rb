@@ -96,7 +96,7 @@ module PlayerHelper
     Player.pluck(:id).each{|player_id|
       # change player form roughly once every 5 days
       if rand < 0.2 then
-        Player.where(id: player_id).update_all(form: [0,0,1,1,2].sample)
+        Player.where(id: player_id).update_all(form: [0,0,0, 0,0,0, 0,0,0, 1,1,1, 2].sample)
       end
     }
   end
