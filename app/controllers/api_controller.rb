@@ -291,7 +291,7 @@ class ApiController < ApplicationController
         (select (case ge2.side when 0 then gm2.home_team_id else gm2.away_team_id end) as team_id
         from games gm2
         join game_events ge2 on ge2.game_id=gm2.id
-        where ge2.player_id=p.id and 
+        where ge2.player_id=p.id and ge2.kind = 'Goal' and
           gm2.season=#{conn.quote(season)} and gm2.league_id=#{conn.quote(l.id)}
       )) as teamname,
 
