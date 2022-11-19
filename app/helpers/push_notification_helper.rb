@@ -3,7 +3,7 @@ require 'fcm'
 
 module PushNotificationHelper
   def self.test_config
-    raise 'Missing FIREBASE_SERVER_KEY variable' unless ENV['FIREBASE_SERVER_KEY'] || ENV['RAILS_ENV'] == 'development'
+    #raise 'Missing FIREBASE_SERVER_KEY variable' unless ENV['FIREBASE_SERVER_KEY'] || ENV['RAILS_ENV'] == 'development'
   end
 
   def self.get_firebase
