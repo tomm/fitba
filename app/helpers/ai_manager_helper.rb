@@ -237,7 +237,7 @@ module AiManagerHelper
 
   private_class_method
   def self._sell_player_in_position(team, pos)
-    matching = team.players.select {|p| p.get_positions.include? pos}
+    matching = team.players.select {|p| p.age >= 18 && p.get_positions.include? pos}
     to_sell = matching.sort_by!(&:skill).first
     Rails.logger.info "Team #{team.name} has listed #{to_sell.name} on the transfer market."
     TransferMarketHelper.list_player(to_sell)
