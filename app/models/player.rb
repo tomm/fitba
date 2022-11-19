@@ -153,6 +153,7 @@ class Player < ApplicationRecord
       handling: rand_skill.call(),
       speed: rand_skill.call(),
       form: RngHelper.dice(1,3) - 1,
+      aggression: PlayerHelper.pick_aggression(),
       positions: "[]"
     )
 
