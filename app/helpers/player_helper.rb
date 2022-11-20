@@ -5,7 +5,7 @@ module PlayerHelper
   INJURY_TYPE = T.let(["knee injury", "sprained ankle", "hamstring injury", "concussion", "calf injury", "head injury", "dislocated shoulder"], T::Array[String])
 
   sig {returns(Integer)}
-  def pick_aggression
+  def self.pick_aggression
     a = [1]
     8.times do
       if rand < 0.5
